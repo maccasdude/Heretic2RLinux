@@ -13,7 +13,7 @@
 
 extern snd_import_t si;
 
-#pragma region ========================== Sound structures ==========================
+
 
 // Holds one sample with 2 channels.
 typedef struct
@@ -105,4 +105,3 @@ typedef struct
 	int dataofs; // Chunk starts this many bytes from file start.
 } wavinfo_t;
 
-#pragma endregion

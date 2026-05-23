@@ -36,7 +36,7 @@ static vec3_t modelorg; // Relative to viewpoint.
 
 static msurface_t* r_alpha_surfaces;
 
-#pragma region ========================== ALPHA SURFACES RENDERING ==========================
+
 
 static int AlphaSurfComp(const AlphaSurfaceSortInfo_t* info1, const AlphaSurfaceSortInfo_t* info2) // H2
 {
@@ -218,9 +218,9 @@ void R_SortAndDrawAlphaSurfaces(void)
 	r_alpha_surfaces = NULL;
 }
 
-#pragma endregion
 
-#pragma region ========================== BRUSH MODELS RENDERING ==========================
+
+
 
 // Returns the proper texture for a given time and base texture.
 static image_t* R_TextureAnimation(const entity_t* ent, const mtexinfo_t* tex) //mxd. Original logic uses 'currententity' global var.
@@ -928,9 +928,9 @@ void R_DrawBrushModel(entity_t* ent)
 	glPopMatrix();
 }
 
-#pragma endregion
 
-#pragma region ========================== WORLD MODEL RENDERING ==========================
+
+
 
 static void R_RecursiveWorldNode(const entity_t* ent, mnode_t* node) //mxd. Added 'ent' arg.
 {
@@ -1153,4 +1153,3 @@ void R_MarkLeaves(void)
 	}
 }
 
-#pragma endregion

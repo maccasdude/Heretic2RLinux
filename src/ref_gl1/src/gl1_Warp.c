@@ -11,7 +11,7 @@
 
 #define SUBDIVIDE_SIZE	64.0f
 
-#pragma region ========================== POLYGON GENERATION ==========================
+
 
 // Does a water warp on the pre-fragmented glpoly_t chain.
 void R_EmitWaterPolys(const msurface_t* fa, const qboolean undulate) // H2: extra 'undulate' arg.
@@ -107,7 +107,7 @@ void R_EmitQuakeFloorPolys(const msurface_t* fa) // H2
 	}
 }
 
-#pragma endregion
+
 
 // Q2 counterpart
 static void R_BoundPoly(const int numverts, const float* verts, vec3_t mins, vec3_t maxs)

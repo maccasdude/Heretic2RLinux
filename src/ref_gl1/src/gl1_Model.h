@@ -8,7 +8,7 @@
 
 #include "qfiles.h"
 
-#pragma region ========================== BRUSH MODELS ==========================
+
 
 // Q2 counterpart
 typedef struct
@@ -142,9 +142,9 @@ typedef struct mleaf_s
 	int nummarksurfaces;
 } mleaf_t;
 
-#pragma endregion
 
-#pragma region ========================== WHOLE MODEL ==========================
+
+
 
 typedef enum
 {
@@ -213,7 +213,7 @@ typedef struct model_s
 	void* extradata;
 } model_t;
 
-#pragma endregion
+
 
 extern int registration_sequence;
 

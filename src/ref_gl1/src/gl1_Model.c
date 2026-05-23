@@ -184,7 +184,7 @@ static void Mod_LoadSpriteModel(model_t* mod, const void* buffer, const int leng
 	mod->type = mod_sprite;
 }
 
-#pragma region ========================== BRUSHMODEL LOADING ==========================
+
 
 // Q2 counterpart
 static void Mod_LoadVertexes(model_t* loadmodel, const byte* mod_base, const lump_t* l)
@@ -706,7 +706,7 @@ static void Mod_LoadBrushModel(model_t* mod, void* buffer)
 	}
 }
 
-#pragma endregion
+
 
 static model_t* Mod_ForName(const char* name, const qboolean crash)
 {

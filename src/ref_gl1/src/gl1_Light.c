@@ -27,7 +27,7 @@ typedef struct BmodelTransform_s //mxd
 
 static BmodelTransform_t r_bmodel_transforms[MAX_ENTITIES]; //mxd
 
-#pragma region ========================== DYNAMIC LIGHTS RENDERING ==========================
+
 
 // Q2 counterpart (except for dlight color handling).
 static void R_RenderDlight(const dlight_t* light)
@@ -82,9 +82,9 @@ void R_RenderDlights(void)
 	glDepthMask(GL_TRUE);
 }
 
-#pragma endregion
 
-#pragma region ========================== DYNAMIC LIGHTS MANAGEMENT ==========================
+
+
 
 // Q2 counterpart
 void R_MarkLights(dlight_t* light, const int bit, const mnode_t* node)
@@ -375,7 +375,7 @@ void R_LightPoint(const vec3_t p, vec3_t color, const qboolean check_bmodels)
 	Vec3AddAssign(dl_color, color);
 }
 
-#pragma endregion
+
 
 // Q2 counterpart (except for dlight color handling).
 static void R_AddDynamicLights(const msurface_t* surf)

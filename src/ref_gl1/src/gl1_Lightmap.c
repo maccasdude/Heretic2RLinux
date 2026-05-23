@@ -12,7 +12,7 @@
 
 gllightmapstate_t gl_lms;
 
-#pragma region ========================== LIGHTMAP ALLOCATION ==========================
+
 
 // Q2 counterpart
 void LM_InitBlock(void)
@@ -83,9 +83,9 @@ qboolean LM_AllocBlock(const int w, const int h, int* x, int* y)
 	return true;
 }
 
-#pragma endregion
 
-#pragma region ========================== LIGHTMAP BUILDING ==========================
+
+
 
 // Q2 counterpart
 void LM_BuildPolygonFromSurface(const model_t* mdl, msurface_t* fa) //mxd. Original logic uses 'currentmodel' global var here.
@@ -216,4 +216,3 @@ void LM_EndBuildingLightmaps(void)
 	R_EnableMultitexture(false);
 }
 
-#pragma endregion

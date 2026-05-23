@@ -23,7 +23,11 @@
 #include "Vector.h"
 #include "client/vid.h"
 
-#define REF_DECLSPEC	__declspec(dllexport)
+#if defined(_WIN32) || defined(WIN32)
+#define REF_DECLSPEC __declspec(dllexport)
+#else
+#define REF_DECLSPEC __attribute__((visibility("default")))
+#endif
 
 viddef_t viddef; // H2: renamed from vid, defined in vid.h?
 refimport_t ri;
@@ -61,7 +65,7 @@ int c_alias_polys;
 static float v_blend[4]; // Final blending color. //mxd. Made static.
 static GLint fog_modes[] = { GL_LINEAR, GL_EXP, GL_EXP2 };
 
-#pragma region ========================== CVARS  ==========================
+
 
 cvar_t* r_norefresh;
 cvar_t* r_fullbright;
@@ -135,7 +139,7 @@ cvar_t* menus_active;
 cvar_t* cl_camera_under_surface;
 cvar_t* quake_amount;
 
-#pragma endregion
+
 
 // H2: simplified: no separate non-transparent/transparent drawing chains.
 static void R_DrawEntitiesOnList(void)

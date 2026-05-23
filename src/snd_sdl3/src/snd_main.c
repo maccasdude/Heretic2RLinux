@@ -10,7 +10,11 @@
 #include "snd_wav.h"
 #include "Vector.h"
 
+#if defined(_WIN32) || defined(WIN32)
 #define SNDLIB_DECLSPEC __declspec(dllexport)
+#else
+#define SNDLIB_DECLSPEC __attribute__((visibility("default")))
+#endif
 #define SNDLIB_NAME	"SDL3"
 
 snd_import_t si;
@@ -70,7 +74,7 @@ static cvar_t* s_attn_static;
 cvar_t* s_underwater_gain_hf; // YQ2
 cvar_t* s_camera_under_surface; // H2
 
-#pragma region ========================== Console commands ==========================
+
 
 // Q2 counterpart.
 static void S_Play_f(void) //mxd. Named 'S_Play' in original logic.
@@ -157,7 +161,7 @@ static void S_SoundInfo_f(void)
 	}
 }
 
-#pragma endregion
+
 
 // Activate or deactivate sound backend.
 static void S_Activate(const qboolean active)

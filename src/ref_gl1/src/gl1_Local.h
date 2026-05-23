@@ -24,7 +24,7 @@
 #define GL_TEX_SOLID_FORMAT 3 //mxd. gl_tex_solid_format var in Q2
 #define GL_TEX_ALPHA_FORMAT 4 //mxd. gl_tex_alpha_format var in Q2
 
-#pragma region ========================== CVARS ==========================
+
 
 extern cvar_t* r_norefresh;
 extern cvar_t* r_fullbright;
@@ -79,7 +79,7 @@ extern cvar_t* menus_active;
 extern cvar_t* cl_camera_under_surface;
 extern cvar_t* quake_amount;
 
-#pragma endregion
+
 
 typedef enum //mxd. Changed in H2
 {
@@ -129,7 +129,7 @@ extern image_t* r_font2;
 
 extern model_t* r_worldmodel;
 
-#pragma region ========================== GL config stuff  ==========================
+
 
 typedef struct
 {
@@ -176,10 +176,9 @@ extern int r_oldviewcluster2;
 extern int c_brush_polys;
 extern int c_alias_polys;
 
-#pragma endregion
 
-#pragma region ========================== IMPORTED FUNCTIONS ==========================
+
+
 
 extern refimport_t ri;
 
-#pragma endregion

@@ -337,7 +337,7 @@ void R_ImageList_f(void) // Q2: GL_ImageList_f()
 	ri.Con_Printf(PRINT_ALL, "-------------------------------\n");
 }
 
-#pragma region ========================== .M8 LOADING ==========================
+
 
 //mxd. Somewhat similar to Q2's GL_Upload8()
 void R_UploadPaletted(const int level, const byte* data, const paletteRGB_t* palette, const int width, const int height) // H2: GL_UploadPaletted().
@@ -476,9 +476,9 @@ static image_t* R_LoadM8(const char* name, const imagetype_t type) // H2: GL_Loa
 	return image;
 }
 
-#pragma endregion
 
-#pragma region ========================== .M32 LOADING ==========================
+
+
 
 static void R_ApplyGamma32(miptex32_t* mt) // H2: GL_ApplyGamma32().
 {
@@ -555,7 +555,7 @@ static image_t* R_LoadM32(const char* name, const imagetype_t type) // H2: GL_Lo
 	return image;
 }
 
-#pragma endregion
+
 
 // Now with name hashing. When no texture found, returns r_notexture instead of NULL.
 image_t* R_FindImage(const char* name, const imagetype_t type) // H2: GL_FindImage()
