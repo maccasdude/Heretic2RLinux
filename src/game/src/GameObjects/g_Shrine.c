@@ -312,7 +312,7 @@ static void PlayerShrineStartUseAnimation(edict_t* player, const ShrineType_t sh
 	player->client->shrine_framenum = level.time + INVUNERABILITY_TIME; // Make us invulnerable for a couple of seconds.
 }
 
-#pragma region ========================== HEALTH SHRINE ==========================
+
 
 // Fire off the health shrine effect.
 static void PlayerShrineHealthEffect(edict_t* self) //mxd. Named 'player_shrine_health_effect' in original version.
@@ -383,9 +383,9 @@ void SP_shrine_heal_trigger(edict_t* ent) //mxd. Named 'shrine_heal' in original
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== SILVER ARMOR SHRINE ==========================
+
+
 
 // Fire off the armor shrine effect.
 static void PlayerShrineArmorSilverEffect(edict_t* self) //mxd. Named 'player_shrine_armor_silver_effect' in original version.
@@ -473,9 +473,9 @@ void SP_shrine_armor_silver_trigger(edict_t* ent) //mxd. Named 'shrine_armor' in
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== GOLD ARMOR SHRINE ==========================
+
+
 
 // Fire off the gold armor shrine effect.
 static void PlayerShrineArmorGoldEffect(edict_t* self) //mxd. Named 'player_shrine_armor_gold_effect' in original version.
@@ -549,9 +549,9 @@ void SP_shrine_armor_gold_trigger(edict_t* ent) //mxd. Named 'shrine_armor_gold'
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== STAFF POWERUP SHRINE ==========================
+
+
 
 // Fire off the staff shrine effect.
 static void PlayerShrineStaffEffect(edict_t* self) //mxd. Named 'player_shrine_staff_effect' in original version.
@@ -641,9 +641,9 @@ void SP_shrine_staff_trigger(edict_t* ent) //mxd. Named 'shrine_staff' in origin
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== LUNGS SHRINE ==========================
+
+
 
 // Fire off the lungs shrine effect.
 static void PlayerShrineLungsEffect(edict_t* self) //mxd. Named 'player_shrine_lungs_effect' in original version.
@@ -713,9 +713,9 @@ void SP_shrine_lungs_trigger(edict_t* ent) //mxd. Named 'shrine_lung' in origina
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== LIGHT SHRINE ==========================
+
+
 
 // Fire off the shrine light effect.
 static void PlayerShrineLightEffect(edict_t* self) //mxd. Named 'player_shrine_light_effect' in original version.
@@ -797,9 +797,9 @@ void SP_shrine_light_trigger(edict_t* ent) //mxd. Named 'shrine_light' in origin
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== MANA SHRINE ==========================
+
+
 
 // Fire off the shrine mana effect.
 static void PlayerShrineManaEffect(edict_t* self) //mxd. Named 'player_shrine_mana_effect' in original version.
@@ -870,9 +870,9 @@ void SP_shrine_mana_trigger(edict_t* ent) //mxd. Named 'shrine_mana' in original
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== GHOST (INVISIBILITY) SHRINE ==========================
+
+
 
 // Fire off the ghost shrine effect.
 static void PlayerShrineGhostEffect(edict_t* self) //mxd. Named 'player_shrine_ghost_effect' in original version.
@@ -947,9 +947,9 @@ void SP_shrine_ghost_trigger(edict_t* ent) //mxd. Named 'shrine_ghost' in origin
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== SPELL REFLECTING SHRINE ==========================
+
+
 
 // Fire off the reflect shrine effect.
 static void PlayerShrineReflectEffect(edict_t* self) //mxd. Named 'player_shrine_reflect_effect' in original version.
@@ -1024,9 +1024,9 @@ void SP_shrine_reflect_trigger(edict_t* ent) //mxd. Named 'shrine_reflect' in or
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== SPELL POWERUP SHRINE ==========================
+
+
 
 // Fire off the powerup shrine effect.
 static void PlayerShrinePowerupEffect(edict_t* self) //mxd. Named 'player_shrine_powerup_effect' in original version.
@@ -1108,9 +1108,9 @@ void SP_shrine_powerup_trigger(edict_t* ent) //mxd. Named 'shrine_powerup' in or
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== SPEED SHRINE ==========================
+
+
 
 // Fire off the powerup shrine effect.
 static void PlayerShrineSpeedEffect(edict_t* self) //mxd. Named 'player_shrine_speed_effect' in original version.
@@ -1192,9 +1192,9 @@ void SP_shrine_speed_trigger(edict_t* ent) //mxd. Named 'shrine_speed' in origin
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== RANDOM SHRINE ==========================
+
+
 
 // Fire off an effect and give us a powerup for a while powerup.
 void ShrineRandomTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'shrine_random_touch' in original version.
@@ -1363,9 +1363,9 @@ void SP_shrine_random_trigger(edict_t* ent) //mxd. Named 'shrine_random' in orig
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_shrine ==========================
+
+
 //mxd. Defined in g_obj.c in original logic.
 
 // QUAKED obj_shrine (1 .5 0) ( -26 -38 -38) (26 38 38)
@@ -1422,4 +1422,3 @@ void SP_obj_shrine(edict_t* self)
 	self->PersistantCFX = gi.CreatePersistantEffect(&self->s, FX_SHRINE_BALL, CEF_BROADCAST, self->s.origin, "db", dir, (byte)(self->style - 1));
 }
 
-#pragma endregion

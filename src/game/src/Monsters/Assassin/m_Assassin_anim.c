@@ -11,7 +11,7 @@
 #include "NavSys/mg_AI.h" //mxd
 #include "g_Local.h"
 
-#pragma region ========================== ATTACKS ==========================
+
 
 // Assassin daggerL - assassin attacking left hand.
 static const animframe_t assassin_frames_daggerl[] =
@@ -135,9 +135,9 @@ static const animframe_t assassin_frames_newdaggerb[] =
 };
 const animmove_t assassin_move_newdaggerb = ANIMMOVE(assassin_frames_newdaggerb, assassin_pause);
 
-#pragma endregion
 
-#pragma region ========================== ASSASSIN EVASION	 ==========================
+
+
 
 // Assassin crouch.
 static const animframe_t assassin_frames_crouch[] =
@@ -241,9 +241,9 @@ static const animframe_t assassin_frames_dodge_left[] =
 };
 const animmove_t assassin_move_dodge_left = ANIMMOVE(assassin_frames_dodge_left, assassin_pause);
 
-#pragma endregion
 
-#pragma region ========================== ASSASSIN DEATHS ==========================
+
+
 
 // Assassin DeathA
 static const animframe_t assassin_frames_deatha[] =
@@ -286,9 +286,9 @@ static const animframe_t assassin_frames_deathb[] =
 };
 const animmove_t assassin_move_deathb = ANIMMOVE(assassin_frames_deathb, assassin_dead);
 
-#pragma endregion
 
-#pragma region ========================== ASSASSIN PURSUING ==========================
+
+
 
 // Assassin jump.
 static const animframe_t assassin_frames_jump[] =
@@ -473,9 +473,9 @@ static const animframe_t assassin_frames_walk_loop[] =
 };
 const animmove_t assassin_move_walk_loop = ANIMMOVE(assassin_frames_walk_loop, assassin_pause);
 
-#pragma endregion
 
-#pragma region ========================== ASSASSIN PAINS ==========================
+
+
 
 // Assassin Pain - assassin gets hit.
 static const animframe_t assassin_frames_pain1[] =
@@ -495,9 +495,9 @@ static const animframe_t assassin_frames_pain2[] =
 };
 const animmove_t assassin_move_pain2 = ANIMMOVE(assassin_frames_pain2, assassin_post_pain);
 
-#pragma endregion
 
-#pragma region ========================== ASSASSIN WAITING ==========================
+
+
 
 // Assassin chillin out.
 static const animframe_t assassin_frames_stand[] =
@@ -773,9 +773,9 @@ static const animframe_t assassin_frames_cloak[] =
 };
 const animmove_t assassin_move_cloak = ANIMMOVE(assassin_frames_cloak, assassin_uncrouch);
 
-#pragma endregion
 
-#pragma region ========================== CINEMATIC ANIMATIONS ==========================
+
+
 
 // Assassin idling.
 static const animframe_t assassin_frames_c_idle1[] =
@@ -847,4 +847,3 @@ static const animframe_t assassin_frames_c_attack2[] =
 };
 const animmove_t assassin_move_c_attack2 = ANIMMOVE(assassin_frames_c_attack2, ai_c_cycleend);
 
-#pragma endregion

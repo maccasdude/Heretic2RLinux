@@ -16,7 +16,7 @@
 #include "Random.h"
 #include "Vector.h"
 
-#pragma region ========================== Tcheckrik Mother Base Info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -26,9 +26,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void MotherPainMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'mother_pain' in original logic.
 {
@@ -59,9 +59,9 @@ static void MotherDeathMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 
 	self->nextthink = level.time + FRAMETIME; //mxd. Use define.
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void mother_growl(edict_t* self)
 {
@@ -74,7 +74,7 @@ void mother_pause(edict_t* self)
 	G_PostMessage(self, MSG_STAND, PRI_DIRECTIVE, NULL);
 }
 
-#pragma endregion
+
 
 void MotherStaticsInit(void)
 {

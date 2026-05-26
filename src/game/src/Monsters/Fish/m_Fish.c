@@ -32,7 +32,7 @@
 #define FISH_SKIN1				0
 #define FISH_SKIN2				2
 
-#pragma region ========================== Fish base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -51,9 +51,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 // Bring all our movedir angles up positive again.
 static void FishResetMovedir(edict_t* self) //mxd. Named 'reset_fish_movedir' in original logic.
@@ -181,9 +181,9 @@ static void FishMoveToTarget(edict_t* self) //mxd. Named 'fish_hunt' in original
 	fish_run(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void FishDeadPainMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'fish_dead_pain' in original logic.
 {
@@ -234,9 +234,9 @@ static void FishPainMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'fi
 	gi.sound(self, CHAN_WEAPON, sounds[irand(SND_PAIN1, SND_PAIN2)], 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void FishThink(edict_t* self) //mxd. Named 'fish_think' in original logic.
 {
@@ -403,9 +403,9 @@ void FishIsBlocked(edict_t* self, trace_t* trace) //mxd. Named 'fish_blocked' in
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 // Choose a run animation to use.
 void fish_run(edict_t* self)
@@ -690,7 +690,7 @@ void fish_chase(edict_t* self)
 		FishMoveToTarget(self);
 }
 
-#pragma endregion
+
 
 void FishStaticsInit(void)
 {

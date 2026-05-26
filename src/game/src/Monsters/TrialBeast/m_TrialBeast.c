@@ -13,7 +13,7 @@
 #include "g_Utilities.h"
 #include "GameObjects/g_Debris.h" //mxd
 #include "Monsters/g_Monster.h"
-#include "Monsters/m_stats.h"
+#include "Monsters/m_Stats.h"
 #include "NavSys/mg_AI.h" //mxd
 #include "NavSys/mg_Guide.h" //mxd
 #include "Physics/g_Physics.h"
@@ -21,7 +21,7 @@
 #include "Random.h"
 #include "Vector.h"
 
-#pragma region ========================== Trial Beast base info ==========================
+
 
 #define TB_MAX_CHOMP_DIST	64.0f //mxd
 #define TB_MELEE_RANGE		128.0f //mxd. Named 'TBEAST_STD_MELEE_RNG' in original logic.
@@ -91,9 +91,9 @@ static const vec3_t tb_body_maxs = VEC3_SET( 50.0f,  50.0f,  70.0f);
 static const vec3_t tb_foot_mins = VEC3_SET(-32.0f, -32.0f, 0.0f); //mxd. [-8, -8, 0] in original logic. Increased to increase player/leg collision chance.
 static const vec3_t tb_foot_maxs = VEC3_SET( 32.0f,  32.0f, 64.0f); //mxd. [8, 8, 1] in original logic. Increased to increase player/leg collision chance.
 
-#pragma endregion
 
-#pragma region ========================== Public utility functions ==========================
+
+
 
 qboolean TBeastCheckBottom(edict_t* self) //mxd. Named 'TB_CheckBottom' in original logic.
 {
@@ -255,9 +255,9 @@ edict_t* TBeastCheckHit(const vec3_t start, vec3_t end) //mxd. Named 'check_hit_
 	return NULL;
 }
 
-#pragma endregion
 
-#pragma region ========================== Utility functions ==========================
+
+
 
 static qboolean IsVisibleToClient(const edict_t* self) //mxd. Named 'visible_to_client' in original logic.
 {
@@ -899,9 +899,9 @@ static void TBeastFakeTouch(edict_t* self) //mxd. Named 'tbeast_fake_touch' in o
 			touch[i]->svflags &= ~SVF_TOUCHED_BEAST;
 }
 
-#pragma endregion
 
-#pragma region ========================== Callback functions ==========================
+
+
 
 // Assigned to 'isBlocked' and 'bounce' callbacks.
 void TBeastBlocked(edict_t* self, trace_t* trace) //mxd. Named 'tbeast_blocked' in original logic.
@@ -1098,9 +1098,9 @@ void TBeastPostThink(edict_t* self) //mxd. Named 'tbeast_post_think' in original
 	self->next_post_think = level.time + FRAMETIME; //mxd. Use define.
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 // Decide which standing animations to use.
 static void TBeastStandMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'tbeast_stand' in original logic.
@@ -1314,9 +1314,9 @@ static void TBeastDeathMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 
 	SetAnim(self, ANIM_DIE_NORM);
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void tbeast_charge(edict_t* self, float force)
 {
@@ -2067,7 +2067,7 @@ void tbeast_leap(edict_t* self, float forward_offset, float right_offset, float 
 	VectorMA(self->velocity, up_offset, up, self->velocity);
 }
 
-#pragma endregion
+
 
 void TBeastStaticsInit(void)
 {

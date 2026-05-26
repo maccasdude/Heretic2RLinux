@@ -7,7 +7,7 @@
 #include "p_anim_branch.h"
 #include "p_actions.h"
 #include "p_anims.h"
-#include "g_items.h"
+#include "g_Items.h"
 #include "p_main.h"
 #include "p_weapon.h"
 #include "Vector.h"
@@ -168,7 +168,7 @@ PLAYER_API qboolean BranchCheckDismemberAction(const playerinfo_t* info, const i
 	}
 }
 
-#pragma region ========================== CHICKEN ANIMATION LOGIC ==========================
+
 
 // Decide if we have just fallen off something, or we are falling down.
 int ChickenBranchLwrStanding(playerinfo_t* info)
@@ -296,7 +296,7 @@ void ChickenBranchIdle(playerinfo_t* info)
 	}
 }
 
-#pragma endregion
+
 
 int BranchLwrStanding(playerinfo_t* info)
 {

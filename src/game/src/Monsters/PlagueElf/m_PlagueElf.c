@@ -15,7 +15,7 @@
 #include "Monsters/g_Monster.h"
 #include "Monsters/m_Stats.h"
 #include "NavSys/mg_AI.h" //mxd
-#include "NavSys/mg_guide.h" //mxd
+#include "NavSys/mg_Guide.h" //mxd
 #include "Random.h"
 #include "Vector.h"
 #include "g_Local.h"
@@ -35,7 +35,7 @@
 
 #define PALACE_ELF_SKIN	4
 
-#pragma region ========================== Plague Elf Base Info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -143,9 +143,9 @@ static const float plague_elf_voice_times[] = //mxd. Named 'pelf_VoiceTimes' in 
 	0.9f, // VOICE_MISC_DONT_HURT
 };
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 void PlagueElfDyingSound(const edict_t* self, const int type) //mxd. Named 'dying_elf_sounds' in original logic. Originally defined in g_obj.c.
 {
@@ -474,9 +474,9 @@ static void PlagueElfPhaseInInit(edict_t* self) //mxd. Named 'pelf_init_phase_in
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void PlagueElfCinematicActionMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'plagueElf_c_anims' in original logic.
 {
@@ -837,9 +837,9 @@ static void PlagueElfVoicePuppetMsgHandler(edict_t* self, G_Message_t* msg) //mx
 	gi.sound(self, CHAN_VOICE, sounds[sound], 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void PlagueElfSpellTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surface) //mxd. Named 'plagueElfSpellTouch' in original logic.
 {
@@ -1213,9 +1213,9 @@ void PlagueElfPhaseInPreThink(edict_t* self) //mxd. Named 'pelf_phase_in' in ori
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void plagueelf_knockback_death_loop(edict_t* self) //mxd. Named 'plagueelf_death_loop' in original logic.
 {
@@ -1596,7 +1596,7 @@ void plagueelf_check_distance(edict_t* self) //mxd. Named 'pelf_check_too_close'
 		SetAnim(self, irand(ANIM_CRAZY_A, ANIM_CRAZY_B));
 }
 
-#pragma endregion
+
 
 void PlagueElfStaticsInit(void)
 {

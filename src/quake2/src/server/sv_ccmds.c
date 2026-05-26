@@ -10,7 +10,7 @@
 #include "client/screen.h"
 #include "sv_effects.h"
 
-#pragma region ========================== SAVEGAME FILES ==========================
+
 
 typedef enum SavegameType_e //mxd
 {
@@ -292,9 +292,9 @@ static void SV_ReadServerFile(void)
 	ge->ReadGame(name);
 }
 
-#pragma endregion
 
-#pragma region ========================== OPERATOR CONSOLE ONLY COMMANDS ==========================
+
+
 // These commands can only be entered from stdin or by a remote operator datagram
 
 // Q2 counterpart
@@ -861,7 +861,7 @@ static void SV_ServerCommand_f(void)
 		Com_Printf("No game loaded.\n");
 }
 
-#pragma endregion
+
 
 void SV_InitOperatorCommands(void)
 {

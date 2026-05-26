@@ -99,6 +99,12 @@ static void LoadGame_MenuInit(void)
 	menu_saveload_action_t* item = &s_loadgame_actions[0];
 	for (int i = 0; i < MAX_SAVEGAMES; i++, item++)
 	{
+		// Skip the empty quicksave slot - it's load-only, and an empty
+		// row at the top of the menu just looks like a bug to the user.
+		// Once a quicksave exists this entry will be valid and shown again.
+		if (i == 0 && !item->is_valid)
+			continue;
+
 		item->generic.name = item->save_name;
 		item->generic.type = MTYPE_ACTION;
 		item->generic.x = 0;

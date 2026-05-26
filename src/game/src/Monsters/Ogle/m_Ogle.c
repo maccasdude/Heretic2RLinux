@@ -20,7 +20,7 @@
 #include "Vector.h"
 #include "g_Local.h"
 
-#pragma region ========================== Ogle base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -109,9 +109,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== obj_corpse_ogle ==========================
+
+
 
 //mxd
 #define SF_OGLE_CORPSE_PICK		16
@@ -164,9 +164,9 @@ void SP_obj_corpse_ogle(edict_t* self)
 	ObjectInit(self, 40, 80, MAT_FLESH, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 // Cast off the tools which have oppressed the ogle people for centuries... or something.
 static void OgleDropTools(edict_t* self) //mxd. Named 'ogle_cast_off_tools_of_oppression' in original logic.
@@ -328,9 +328,9 @@ static void OgleTrySetAsSongLeader(edict_t* self) //mxd. Named 'ogle_check_leads
 	self->monsterinfo.ogleflags |= OF_SONG_LEADER;
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void OgleCinematicActionMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'ogle_c_anims' in original logic.
 {
@@ -698,9 +698,9 @@ static void OgleRunMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'ogl
 	G_PostMessage(self, MSG_STAND, PRI_DIRECTIVE, NULL);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void OgleMoodThink(edict_t* self) //mxd. Named 'ogle_mood_think' in original logic.
 {
@@ -1022,9 +1022,9 @@ void OgleStartPushUse(edict_t* self, edict_t* other, edict_t* activator) //mxd. 
 	SetAnim(self, irand(ANIM_PUSH1, ANIM_PUSH3));
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 // High level AI interface.
 void ogle_pause(edict_t* self)
@@ -1354,7 +1354,7 @@ void ogle_push(edict_t* self, float distance)
 	self->mood_think = OgleMoodThink;
 }
 
-#pragma endregion
+
 
 void OgleStaticsInit(void)
 {

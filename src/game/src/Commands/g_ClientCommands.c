@@ -178,7 +178,7 @@ void ValidateSelectedItem(const edict_t* ent)
 		SelectNextItem(ent, -1);
 }
 
-#pragma region ========================== Command handlers ==========================
+
 
 // Give items to a client.
 static void Cmd_Give_f(edict_t* ent)
@@ -971,7 +971,7 @@ static void Cmd_ShowCoords_f(const edict_t* ent)
 	Com_Printf("       pitch:    %2.2f\n", -ent->client->aimangles[PITCH]);
 }
 
-#pragma endregion
+
 
 void ClientCommand(edict_t* ent)
 {

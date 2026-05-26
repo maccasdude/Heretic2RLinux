@@ -260,7 +260,7 @@ static void Menu_Keys_f(const m_drawfunc_t draw, const int category_offset, cons
 	M_PushMenu(draw, Keys_MenuKey);
 }
 
-#pragma region ========================== KEY SECTION MENUS ==========================
+
 
 // Action keys.
 static void ActionKeys_MenuDraw(void) // H2
@@ -317,4 +317,3 @@ void M_Menu_SystemKeys_f(void)
 	Menu_Keys_f(SystemKeys_MenuDraw, 50, 9, false);
 }
 
-#pragma endregion

@@ -21,7 +21,7 @@ void PreCacheWall(void)
 	wall_models[2] = fxi.RegisterModel("sprites/fx/halo.sp2");
 }
 
-#pragma region =========================== FIRE WALL (POWERED) ===========================
+
 
 #define FIREWORM_LIFETIME			1.0f
 #define FIREWORM_LIFETIME_MS		(FIREWORM_LIFETIME * 1000.0f)
@@ -527,9 +527,9 @@ void FXFireWaveWorm(centity_t* owner, int type, const int flags, vec3_t origin)
 	FireWormUpdate(worm, NULL);
 }
 
-#pragma endregion
 
-#pragma region ========================== FIRE BLAST (UNPOWERED) ==========================
+
+
 
 static void FireBurstImpact(const client_entity_t* wall)
 {
@@ -717,4 +717,3 @@ void FXFireBurst(centity_t* owner, const int type, const int flags, vec3_t origi
 	}
 }
 
-#pragma endregion

@@ -75,7 +75,7 @@ qboolean SV_FilterPacket(const char* from)
 	return !FILTERBAN;
 }
 
-#pragma region ========================== Server commands ==========================
+
 
 static void SVCmd_Test_f(void) //mxd. Named 'Svcmd_Test_f' in original version.
 {
@@ -199,7 +199,7 @@ static void SVCmd_WriteIP_f(void)
 	fclose(f);
 }
 
-#pragma endregion
+
 
 // ServerCommand will be called when an "sv" command is issued.
 // The game can issue gi.argc() / gi.argv() commands to get the rest of the parameters.

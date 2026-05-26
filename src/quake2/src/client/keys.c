@@ -144,7 +144,7 @@ keyname_t keynames[] =
 	{ NULL,	0 }
 };
 
-#pragma region ========================== LINE TYPING INTO THE CONSOLE ==========================
+
 
 static void CompleteCommand(void)
 {
@@ -447,7 +447,7 @@ static void Key_Console(int key)
 	}
 }
 
-#pragma endregion
+
 
 // Q2 counterpart
 static void Key_Message(const int key)

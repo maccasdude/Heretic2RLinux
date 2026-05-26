@@ -9,7 +9,19 @@
 #include "H2Common.h"
 #include "GenericUnions.h"
 
-#define SLL_NODE_SIZE			8 //mxd. == sizeof(SinglyLinkedListNode_t)
+// The SLL node struct - moved out of SinglyLinkedList.c so callers can use
+// sizeof() to allocate correct space. On 32-bit MSVC this was 8 bytes
+// (4-byte GenericUnion4 + 4-byte pointer); on 64-bit GCC pointer types in
+// GenericUnion4 make it 8 bytes wide and the struct becomes 16 bytes.
+typedef struct SinglyLinkedListNode_s
+{
+	union GenericUnion4_u data;
+	struct SinglyLinkedListNode_s* next;
+} SinglyLinkedListNode_t;
+
+// SLL_NODE_SIZE was a literal `8` (sizeof on 32-bit Windows). On 64-bit it's
+// `16`. Use sizeof() so it's correct on every platform.
+#define SLL_NODE_SIZE			(sizeof(SinglyLinkedListNode_t))
 #define SLL_NODE_BLOCK_SIZE		256 //mxd
 
 typedef struct SinglyLinkedList_s

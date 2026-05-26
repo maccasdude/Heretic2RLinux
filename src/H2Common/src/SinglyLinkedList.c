@@ -7,11 +7,8 @@
 #include "SinglyLinkedList.h"
 #include "ResourceManager.h"
 
-typedef struct SinglyLinkedListNode_s
-{
-	union GenericUnion4_u data;
-	struct SinglyLinkedListNode_s* next;
-} SinglyLinkedListNode_t;
+// SinglyLinkedListNode_t is now defined in SinglyLinkedList.h so the
+// SLL_NODE_SIZE macro can use sizeof() and stay correct on 64-bit.
 
 ResourceManager_t sllist_nodes_mgr;
 

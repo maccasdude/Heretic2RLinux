@@ -147,6 +147,10 @@ typedef enum G_MsgPriority_e
 	NUM_MSG_PRIORITIES
 } G_MsgPriority_t;
 
+// File-scope forward decl so the function-pointer typedefs below give a TU-level
+// tag for `struct G_Message_s` rather than parameter-scoped ones (GCC strict).
+struct G_Message_s;
+
 typedef struct G_Message_s
 {
 	G_MsgID_t ID;

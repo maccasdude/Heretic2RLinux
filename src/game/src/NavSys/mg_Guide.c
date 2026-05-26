@@ -27,7 +27,7 @@
 // If a buoy is found after a pass, we know we've got the closest buoy, and further passes can be skipped.
 #define BUOY_SEARCH_PASSES	6
 
-#pragma region ========================== Helper functions ==========================
+
 
 qboolean MG_ReachedBuoy(const edict_t* self, const vec3_t p_spot)
 {
@@ -1200,9 +1200,9 @@ void MG_Pathfind(edict_t* self, const qboolean check_clear_path)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Guide functions ==========================
+
+
 
 // Only handles buoy selection, some mood changing.
 void MG_BuoyNavigate(edict_t* self)
@@ -1777,4 +1777,3 @@ void MG_InitMoods(edict_t* self)
 	self->lastbuoy = NULL_BUOY;
 }
 
-#pragma endregion

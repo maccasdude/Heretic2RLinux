@@ -27,12 +27,16 @@ size_t MSG_SetParms(SinglyLinkedList_t* parms, const char* format, va_list marke
 		switch (format[count])
 		{
 			case 'b':
-				parm.t_byte = va_arg(marker, byte);
+				// va_arg with types narrower than int is undefined behaviour
+				// (C standard 7.16.1.1). On 64-bit System V this misreads
+				// the variadic register state. Read as int and truncate.
+				parm.t_byte = (byte)va_arg(marker, int);
 				bytesParsed += sizeof(parm.t_byte);
 				break;
 
 			case 's':
-				parm.t_short = va_arg(marker, short);
+				// Same as 'b' - short is promoted to int in varargs.
+				parm.t_short = (short)va_arg(marker, int);
 				bytesParsed += sizeof(parm.t_short);
 				break;
 

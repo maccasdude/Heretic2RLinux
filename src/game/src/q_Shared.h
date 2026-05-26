@@ -6,7 +6,9 @@
 
 #pragma once
 
-#include <direct.h>
+#if defined(_WIN32) || defined(WIN32)
+    #include <direct.h>
+#endif
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -15,12 +17,27 @@
 #include <stdlib.h>
 #include <time.h>
 
+#if !(defined(_WIN32) || defined(WIN32))
+    // Pull in MSVC/Win32 compatibility shims (HINSTANCE/DWORD typedefs,
+    // _findfirst, sprintf_s, etc). Must come BEFORE H2R_NORETURN below
+    // because the shim header defines a portable H2R_NORETURN itself.
+    #include "compat/win_compat.h"
+#endif
+
 #include "H2Common.h"
 #include "Heretic2.h"
 #include "q_Typedef.h"
 #include "Debug.h" //mxd
 
-#define H2R_NORETURN	__declspec(noreturn) //mxd
+#ifndef H2R_NORETURN
+    #if defined(_WIN32) || defined(WIN32)
+        #define H2R_NORETURN __declspec(noreturn) //mxd
+    #elif defined(__GNUC__) || defined(__clang__)
+        #define H2R_NORETURN __attribute__((noreturn))
+    #else
+        #define H2R_NORETURN
+    #endif
+#endif
 
 #define ARRAY_SIZE(a)	(sizeof((a))/sizeof((a)[0])) //mxd. Because it's strange to depend on windows header for this.
 
@@ -171,7 +188,7 @@ H2COMMON_API extern void Info_SetValueForKey(char* s, const char* key, const cha
 H2COMMON_API extern qboolean Info_Validate(const char* s);
 H2COMMON_API extern void Set_Com_Printf(void (*toSet)(const char* fmt, ...));
 
-#pragma region ========================== SYSTEM SPECIFIC ==========================
+
 
 struct cplane_s;
 
@@ -223,9 +240,9 @@ Q2DLL_DECLSPEC extern void Com_Printf(const char* fmt, ...);
 
 Q2DLL_DECLSPEC extern void Com_ColourPrintf(PalIdx_t colour, const char* fmt, ...);
 
-#pragma endregion
 
-#pragma region ========================== CVARS (console variables) ==========================
+
+
 
 #define CVAR_ARCHIVE	1	// Set to cause it to be saved to vars.rc.
 #define CVAR_USERINFO	2	// Added to userinfo  when changed.
@@ -249,9 +266,9 @@ typedef struct cvar_s
 // The value will not be changed, but flags will be ORed in that allows variables to be unarchived without needing bitflags.
 Q2DLL_DECLSPEC extern cvar_t* Cvar_Get(const char* var_name, const char* var_value, int flags);
 
-#pragma endregion
 
-#pragma region ========================== Palette info ==========================
+
+
 
 typedef struct paletteRGB_s
 {
@@ -260,9 +277,9 @@ typedef struct paletteRGB_s
 	byte b;
 } paletteRGB_t;
 
-#pragma endregion
 
-#pragma region ========================== Additional info for flex models with mesh nodes ==========================
+
+
 
 #define MAX_FM_MESH_NODES	16
 
@@ -282,9 +299,9 @@ typedef struct
 #define FMNI_NO_DRAW			0x10
 #define FMNI_USE_REFLECT		0x20	//TODO: checked, but never set?
 
-#pragma endregion
 
-#pragma region ========================== Contents flags ==========================
+
+
 
 // Contents flags are separate bits.
 // A given brush can contribute multiple content bits.
@@ -338,9 +355,9 @@ typedef struct
 // Only do the trace against the world, not entities within it. Not stored in the .bsp and passed only as an argument to trace functions.
 #define CONTENTS_WORLD_ONLY		0x80000000
 
-#pragma endregion
 
-#pragma region ========================== Contents masks ==========================
+
+
 
 #define MASK_ALL			0x7fffffff
 #define MASK_SOLID			(CONTENTS_SOLID | CONTENTS_WINDOW)
@@ -353,9 +370,9 @@ typedef struct
 #define MASK_CURRENT		(CONTENTS_CURRENT_0 | CONTENTS_CURRENT_90 | CONTENTS_CURRENT_180 | CONTENTS_CURRENT_270 | CONTENTS_CURRENT_UP | CONTENTS_CURRENT_DOWN)
 #define MASK_DRIP			(CONTENTS_SOLID | CONTENTS_WATER | CONTENTS_LAVA | CONTENTS_SLIME | CONTENTS_WINDOW)
 
-#pragma endregion
 
-#pragma region ========================== Surface flags ==========================
+
+
 
 #define SURF_LIGHT			0x1			// Value will hold the light strength.
 #define SURF_SLICK			0x2			// Affects game physics. //TODO: requires very special conditions to trigger, doesn't seem to do anything.
@@ -374,7 +391,7 @@ typedef struct
 //mxd. Helper define to check for non-lightmapped surfaces.
 #define SURF_FULLBRIGHT		(SURF_SKY | SURF_TRANS33 | SURF_TRANS66 | SURF_WARP | SURF_TALL_WALL) // H2: extra SURF_TALL_WALL flag.
 
-#pragma endregion
+
 
 // gi.BoxEdicts() can return a list of either solid or trigger entities.
 // FIXME: eliminate AREA_ distinction?
@@ -671,7 +688,7 @@ typedef struct
 
 #define DF_DEATHMATCH_SET		0x80000000	// High bit indicates deathmatch, so that it can be transmitted in playerinfo.
 
-#pragma region ========================== ELEMENTS COMMUNICATED ACROSS THE NET ==========================
+
 
 #define ANGLE2SHORT(x)	((int)((x) * 65536.0f / 360.0f) & 65535)
 #define SHORT2ANGLE(x)	((float)(x) * 360.0f / 65536.0f)
@@ -705,9 +722,9 @@ typedef struct
 #define CS_WELCOME			(CS_PLAYERSKINS + MAX_CLIENTS)  // Give us 4 welcome string messages so we can have a total of 256 characters per message.
 #define MAX_CONFIGSTRINGS	(CS_WELCOME + 4)
 
-#pragma endregion
 
-#pragma region ========================== EffectsBuffer_t ==========================
+
+
 
 #define ENTITY_FX_BUF_SIZE			192
 #define ENTITY_FX_BUF_BLOCK_SIZE	256
@@ -735,9 +752,9 @@ typedef struct PerEffectsBuffer_s
 	int fx_num;
 } PerEffectsBuffer_t;
 
-#pragma endregion
 
-#pragma region ========================== entity_state_t ==========================
+
+
 
 // This is the information conveyed from the server to clients in an update message, about entities that the client will need to render.
 typedef struct entity_state_s
@@ -786,9 +803,9 @@ typedef struct entity_state_s
 	byte usageCount;		// Used by the client to verify is this still the same entity it last had.
 } entity_state_t;
 
-#pragma endregion
 
-#pragma region ========================== player_state_t ==========================
+
+
 
 // This is the information needed in addition to the 'pmove_state_t' to render a view.
 // There will only be 10 'player_state_t's sent each second, but the number of pmove_state_t changes will be relative to client frame rates.
@@ -899,12 +916,12 @@ typedef struct
 	int dmflags;
 } player_state_t;
 
-#pragma endregion
+
 
 // The only q_shared.c function...
 extern int BoxOnPlaneSide(const vec3_t emins, const vec3_t emaxs, const cplane_t* plane);
 
-#pragma region ========================== Inlines ==========================
+
 
 //mxd
 _inline int Q_atoi(const char* s)
@@ -931,9 +948,9 @@ _inline int Q_strcasecmp(const char* s1, const char* s2) //mxd. Unused.
 	return Q_stricmp(s1, s2);
 }
 
-#pragma endregion
 
-#pragma region ========================== Sound flags ==========================
+
+
 
 // For ambient sounds.
 typedef enum AmbientSoundID_e
@@ -1059,9 +1076,9 @@ enum
 	EAX_PSYCHOTIC,
 };
 
-#pragma endregion
 
-#pragma region ========================== Skin defines ==========================
+
+
 
 // Indicates what skin Corvus has.
 // When indicated on the model, each odd-numbered skin is the damaged version of the previous skin.
@@ -1076,4 +1093,3 @@ enum
 #define SKIN_REFLECTION	(DAMAGE_NUM_LEVELS)	// We don't maintain a skin for every plague level anymore.
 #define SKIN_MAX		(SKIN_REFLECTION + 1)
 
-#pragma endregion

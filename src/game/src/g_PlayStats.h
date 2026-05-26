@@ -6,7 +6,7 @@
 
 #pragma once
 
-#pragma region ========================== WEAPON STATS ==========================
+
 
 #define MAX_REFLECT						8
 
@@ -143,9 +143,9 @@
 #define FIRE_LINGER_DMG_MIN				2
 #define FIRE_LINGER_DMG_MAX				3
 
-#pragma endregion
 
-#pragma region ========================== DEFENSIVE SPELL STATS ==========================
+
+
 
 // Delay before you can use a defensive spell again.
 #define DEFENSE_DEBOUNCE		0.5f
@@ -175,9 +175,9 @@
 #define SHIELD_LIGHTNING_WIDTH	8
 #define SHIELD_ATTACK_CHANCE	3	// This is the chance of searching at all, and the chance of being zapped if found.
 
-#pragma endregion
 
-#pragma region ========================== OTHER EFFECT STATS ==========================
+
+
 
 // Item stuff.
 #define BARREL_EXPLODE_DMG_MIN	10
@@ -215,4 +215,3 @@
 #define HOLD_BREATH_TIME	20.0f
 #define M_HOLD_BREATH_TIME	12.0f
 
-#pragma endregion

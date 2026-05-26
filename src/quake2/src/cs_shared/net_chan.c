@@ -4,7 +4,7 @@
 // Copyright 1998 Raven Software
 //
 
-#pragma region ========================== NETWORK PACKET INFO ==========================
+
 
 /*
 packet header
@@ -45,7 +45,7 @@ If there is no information that needs to be transferred on a given frame, such a
 then a packet only needs to be delivered if there is something in the unacknowledged reliable.
 */
 
-#pragma endregion
+
 
 #include "qcommon.h"
 

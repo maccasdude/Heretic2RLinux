@@ -6,7 +6,7 @@
 
 #pragma once
 
-#pragma region ========================== Model definitions ==========================
+
 
 #define FRAME_Minions1        	0
 #define FRAME_Minions2        	1
@@ -148,7 +148,7 @@
 #define MESH__LEFTARM99			4
 #define MESH__RIGHTARM99		5
 
-#pragma endregion
+
 
 typedef enum AnimID_e
 {

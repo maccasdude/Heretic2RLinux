@@ -50,7 +50,7 @@ void PreCachePhoenixExplodeSFX(void) //mxd
 	phoenix_explode_sounds[1] = fxi.S_RegisterSound("weapons/PhoenixPowerHit.wav");
 }
 
-#pragma region ========================== PHOENIX EXPLOSION ==========================
+
 
 static qboolean PhoenixExplosionBallUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXPhoenixExplosionBallThink' in original logic.
 {
@@ -206,9 +206,9 @@ static void PhoenixExplode(const int type, int flags, const vec3_t origin, const
 	fxi.S_StartSound(origin, -1, CHAN_AUTO, phoenix_explode_sounds[0], 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== POWERED PHOENIX EXPLOSION ==========================
+
+
 
 static qboolean PhoenixExplosionPowerBirdUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXPhoenixExplosionBirdThink' in original logic.
 {
@@ -396,7 +396,7 @@ static void PhoenixExplodePower(const int type, int flags, const vec3_t origin, 
 	fxi.S_StartSound(origin, -1, CHAN_AUTO, phoenix_explode_sounds[1], 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion
+
 
 void FXPhoenixExplode(centity_t* owner, const int type, int flags, vec3_t origin)
 {

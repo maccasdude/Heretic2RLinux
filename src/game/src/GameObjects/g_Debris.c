@@ -13,7 +13,7 @@
 #include "Vector.h"
 #include "g_Local.h"
 
-#pragma region ========================== Spawn debris logic ==========================
+
 
 //mxd. Scale sent debris bbox radius down a bit (because of imprecise direction sending logic, we may end up with bigger bbox on CLFX side
 // (for example, [20, 20, 36] becomes [13.9, 22.5, 36.4]), which may result in gibs/debris stuck in floor/ceiling (observed the latter (on obj_cocoon), but not the former)).
@@ -195,9 +195,9 @@ void SprayDebris(const edict_t* self, const vec3_t spot, int num_chunks) //mxd. 
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Body part / weapon throw logic ==========================
+
+
 
 void ThrowBodyPart(edict_t* self, const vec3_t spot, const int body_part, const int damage, const int frame) //mxd. Changed 'spot' arg type (from vec3_t*), changed 'damage' arg type (from float).
 {
@@ -237,4 +237,3 @@ void ThrowWeapon(const edict_t* self, const vec3_t spot, const int body_part, co
 	gi.CreateEffect(NULL, FX_THROWWEAPON, 0, origin, "ssbbb", (short)frame, (short)body_part, b_damage, self->s.modelindex, self->s.number);
 }
 
-#pragma endregion

@@ -16,11 +16,11 @@
 #include "Monsters/m_Stats.h"
 #include "Monsters/g_Monster.h"
 #include "NavSys/mg_AI.h" //mxd
-#include "NavSys/mg_guide.h" //mxd
+#include "NavSys/mg_Guide.h" //mxd
 #include "Random.h"
 #include "Vector.h"
 
-#pragma region ========================== Tcheckrik Base Info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -66,9 +66,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 static qboolean TcheckrikCanThrowNode(edict_t* self, const int node_id, int* throw_nodes) //mxd. Named 'canthrownode_tc' in original logic.
 {
@@ -153,9 +153,9 @@ static void TcheckrikDropWeapon(edict_t* self, const int weapon_id) //mxd. Named
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void TcheckrikDeathPain(edict_t* self, G_Message_t* msg) //mxd. Named 'insect_dead_pain' in original logic.
 {
@@ -463,9 +463,9 @@ static void TcheckrikCinematicActionMsgHandler(edict_t* self, G_Message_t* msg) 
 	SetAnim(self, curr_anim);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 static qboolean TcheckrikThrowHead(edict_t* self, float damage, const qboolean dismember_ok, int* throw_nodes) //mxd. Added to simplify logic.
 {
@@ -782,9 +782,9 @@ void TcheckrikDismember(edict_t* self, int damage, HitLocation_t hl) //mxd. Name
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void tcheckrik_c_dead(edict_t* self) //mxd. Named 'insect_c_reallydead' in original logic.
 {
@@ -1225,7 +1225,7 @@ void tcheckrik_check_loop(edict_t* self, float frame) //mxd. Named 'insectCheckL
 	self->monsterinfo.currframeindex = (int)frame;
 }
 
-#pragma endregion
+
 
 void TcheckrikStaticsInit(void)
 {

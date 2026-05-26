@@ -12,7 +12,7 @@
 #include "Random.h"
 #include "Vector.h"
 
-#pragma region ========================== CID to classname ==========================
+
 
 typedef enum MonsterSpawnerID_e
 {
@@ -115,9 +115,9 @@ static int cid_for_spawner_style[] =
 	CID_PLAGUEELF,
 };
 
-#pragma endregion
 
-#pragma region ========================== func_monsterspawner ==========================
+
+
 
 #define SF_ONDEATH		1 //mxd
 #define SF_RANDOMBUOY	2 //mxd
@@ -342,7 +342,7 @@ void SP_func_monsterspawner(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
+
 
 // QUAKED monster_chkroktk (1 .5 0) (-16 -16 -26) (16 16 26) AMBUSH ASLEEP
 // Temp entity until the actual code is written for monster.

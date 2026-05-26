@@ -16,7 +16,7 @@
 #define INSECT_GLOBE_MAX_SCALE			1.8f //mxd. Named 'GLOBE_MAX_SCALE' in original logic.
 #define INSECT_SPEAR_PROJECTILE_SPEED	600.0f //mxd. Named 'SPEARPROJ_SPEED' in original logic.
 
-#pragma region ========================== Insect staff bolt spell ==========================
+
 
 void InsectStaffBoltThink(edict_t* self) //mxd. Named 'InsectStaffThink' in original logic.
 {
@@ -155,9 +155,9 @@ void SpellCastInsectStaff(edict_t* caster, const vec3_t start_pos, const vec3_t 
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Insect globe of ouchiness spell ==========================
+
+
 
 void InsectGlobeOfOuchinessGrowThink(edict_t* self) //mxd. Named 'GlobeOfOuchinessGrowThink' in original logic.
 {
@@ -238,9 +238,9 @@ void SpellCastGlobeOfOuchiness(edict_t* caster, const vec3_t start_pos, const ve
 	gi.CreateEffect(&globe->s, FX_I_EFFECTS, CEF_OWNERS_ORIGIN, vec3_origin, "bv", FX_I_GLOW, temp_vec);
 }
 
-#pragma endregion
 
-#pragma region ========================== Insect spear projectile spell ==========================
+
+
 
 // Guts of creating a spear projectile.
 static void InsectSpearProjectileInit(edict_t* proj) //mxd. Named 'create_spearproj' in original logic.
@@ -519,4 +519,3 @@ void SpellCastInsectSpear(edict_t* caster, const vec3_t start_pos, const vec3_t 
 	}
 }
 
-#pragma endregion

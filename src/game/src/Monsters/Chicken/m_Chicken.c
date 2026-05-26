@@ -11,7 +11,7 @@
 #include "g_DefaultMessageHandler.h"
 #include "g_Utilities.h"
 #include "GameObjects/g_Debris.h" //mxd
-#include "Monsters/g_monster.h"
+#include "Monsters/g_Monster.h"
 #include "Monsters/m_Stats.h"
 #include "NavSys/mg_Guide.h" //mxd
 #include "Physics/g_Physics.h"
@@ -20,7 +20,7 @@
 #include "Vector.h"
 #include "g_Local.h"
 
-#pragma region ========================== Chicken base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -35,9 +35,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Utility functions ==========================
+
+
 
 // Fade the original monster back in again.
 void MorphOriginalIn(edict_t* self)
@@ -94,9 +94,9 @@ void MorphChickenOut(edict_t* self)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 // Decide which standing animations to use.
 static void ChickenStandMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'chicken_stand' in original logic.
@@ -151,9 +151,9 @@ static void ChickenJumpMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 
 	SetAnim(self, ANIM_JUMP);
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 // Check if its time to return to our original shape.
 void chicken_check_unmorph(edict_t* self)
@@ -285,7 +285,7 @@ void chicken_sound(edict_t* self, float channel, float sound_index, float attenu
 	gi.sound(self, (int)channel, sounds[(int)sound_index], 1.0f, attenuation, 0.0f);
 }
 
-#pragma endregion
+
 
 void ChickenStaticsInit(void)
 {

@@ -38,7 +38,7 @@ void CleanUpPlayerMorph(edict_t* self) //mxd. Named 'CleanUpMorph' in original v
 	self->s.color.a = 255;
 }
 
-#pragma region ========================== Chicken -> Corvus morph ==========================
+
 
 // We are done being a chicken, let's be Corvus again - switch models from chicken back to Corvus and do teleport fade in - for PLAYER only.
 void MorphChickenToPlayerEnd(edict_t* self) //mxd. Named 'reset_morph_to_elf' in original version.
@@ -136,9 +136,9 @@ static void MorphChickenToPlayerStart(edict_t* self) //mxd. Named 'MorphChickenT
 	gi.sound(self, CHAN_WEAPON, gi.soundindex("weapons/teleport.wav"), 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== Corvus -> Chicken morph ==========================
+
+
 
 // Watch the chicken to see if we should become the elf again. For PLAYER only.
 void ChickenPlayerThink(edict_t* self) //mxd. Named 'watch_chicken' in original version.
@@ -282,4 +282,3 @@ void MorphPlayerToChickenStart(edict_t* self) //mxd. Named 'MorphPlayerToChicken
 	gi.sound(self, CHAN_WEAPON, gi.soundindex("weapons/teleport.wav"), 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion

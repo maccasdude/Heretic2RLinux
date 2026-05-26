@@ -4,7 +4,11 @@
 // Copyright 1998 Raven Software
 //
 
+#if defined(_WIN32) || defined(WIN32)
 #include <windows.h>
+#else
+#include "compat/win_compat.h"
+#endif
 #include "p_dll.h" //mxd
 #ifdef GAME_DLL
 	#include "g_Local.h" //mxd

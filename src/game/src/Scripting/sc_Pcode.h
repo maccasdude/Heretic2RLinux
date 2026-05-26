@@ -128,7 +128,7 @@ enum FeatureTypes
 	FEATURE_PLAGUE_SKINS,
 };
 
-#pragma region ========================== Command Flags ==========================
+
 
 // Move.
 #define MOVE_DURATION	0x01
@@ -174,4 +174,3 @@ enum FeatureTypes
 #define DEBUG_TIME			0x08
 #define DEBUG_MOVEROTATE	0x10 //TODO: unused.
 
-#pragma endregion

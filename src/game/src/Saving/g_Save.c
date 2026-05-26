@@ -16,7 +16,7 @@
 #include "Message.h"
 #include "g_Local.h"
 
-#pragma region ========================== SAVE FIELDS ==========================
+
 
 #define SAVE_FUNCNAME_MAX_LENGTH	64 //mxd
 
@@ -234,9 +234,9 @@ static field_t clientfields[] =
 	{ NULL, 0, F_INT, FFL_NONE, NULL }
 };
 
-#pragma endregion
 
-#pragma region ========================== FIELDS IO ==========================
+
+
 
 // Helper function to get the human-readable function definition by an address.
 static const func_map_t* GetFunctionByAddress(const byte* address) // YQ2
@@ -446,7 +446,12 @@ static void ReadField(FILE* f, const field_t* field, byte* base)
 			break;
 
 		case F_CLEAR: //mxd. Some fields should not be restored...
-			*(int*)p = 0;
+			// Original code wrote only 4 bytes (*(int*)p = 0). On 32-bit this
+			// cleared the whole pointer; on 64-bit it left the upper 4 bytes
+			// of the 8-byte pointer field intact - typically a stale heap-half
+			// like 0x73b7'00000000 that passes NULL checks but crashes on
+			// dereference. Clear the full pointer-sized slot.
+			*(void**)p = NULL;
 			break;
 
 		case F_LSTRING:
@@ -554,9 +559,9 @@ static void ReadField(FILE* f, const field_t* field, byte* base)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== CLIENT IO ==========================
+
+
 
 // All pointer variables (except function pointers) must be handled specially.
 static void WriteClient(FILE* f, gclient_t* client)
@@ -585,9 +590,9 @@ static void ReadClient(FILE* f, gclient_t* client)
 		ReadField(f, field, (byte*)client);
 }
 
-#pragma endregion
 
-#pragma region ========================== GAME IO ==========================
+
+
 
 #define H2R_SAVE_VERSION	"H2RSG1" //mxd
 
@@ -689,9 +694,9 @@ void ReadGame(const char* filename)
 	fclose(f);
 }
 
-#pragma endregion
 
-#pragma region ========================== EDICT IO ==========================
+
+
 
 // All pointer variables (except function pointers) must be handled specially.
 static void WriteEdict(FILE* f, edict_t* ent)
@@ -726,9 +731,9 @@ static void ReadEdict(FILE* f, edict_t* ent)
 		ReadField(f, field, (byte*)ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== LEVEL LOCALS IO ==========================
+
+
 
 // All pointer variables (except function pointers) must be handled specially.
 static void WriteLevelLocals(FILE* f)
@@ -820,9 +825,9 @@ static void ReadLevelLocals(FILE* f)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== LEVEL IO ==========================
+
+
 
 void WriteLevel(const char* filename)
 {
@@ -1012,4 +1017,3 @@ void ReadLevel(const char* filename)
 	}
 }
 
-#pragma endregion

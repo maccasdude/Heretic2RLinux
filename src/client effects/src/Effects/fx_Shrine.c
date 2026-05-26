@@ -73,7 +73,7 @@ void PreCacheShrine(void)
 // No longer used - causes really hard to find crashes.
 void FXShrinePlayerEffect(centity_t* owner, int type, int flags, vec3_t origin) { } //TODO: remove?
 
-#pragma region ========================== MANA EFFECT ROUTINES ==========================
+
 
 static qboolean ShrineManaUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXShrineManaThink' in original logic.
 {
@@ -126,9 +126,9 @@ void FXShrineManaEffect(centity_t* owner, const int type, const int flags, vec3_
 	AddEffect(owner, fx_spawner);
 }
 
-#pragma endregion
 
-#pragma region ========================== ARMOR EFFECT ROUTINES ==========================
+
+
 
 static qboolean ShrineArmorUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXShrineArmorThink' in original logic.
 {
@@ -180,9 +180,9 @@ void FXShrineArmorEffect(centity_t* owner, const int type, const int flags, vec3
 	AddEffect(owner, fx_spawner);
 }
 
-#pragma endregion
 
-#pragma region ========================== LUNGS EFFECT ROUTINES ==========================
+
+
 
 static qboolean ShrineLungsUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXShrineLungsThink' in original logic.
 {
@@ -228,9 +228,9 @@ void FXShrineLungsEffect(centity_t* owner, const int type, const int flags, vec3
 	AddEffect(owner, fx_spawner);
 }
 
-#pragma endregion
 
-#pragma region ========================== LIGHT EFFECT ROUTINES ==========================
+
+
 
 // Create the light effect - a big old halo that fades away.
 void FXShrineLightEffect(centity_t* owner, const int type, const int flags, vec3_t origin)
@@ -247,9 +247,9 @@ void FXShrineLightEffect(centity_t* owner, const int type, const int flags, vec3
 	AddEffect(owner, glow);
 }
 
-#pragma endregion
 
-#pragma region ========================== STAFF POWERUP EFFECT ROUTINES ==========================
+
+
 
 // Create the two circles that ring the player.
 static qboolean ShrineStaffUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXShrineStaffThink' in original logic.
@@ -335,9 +335,9 @@ void FXShrineStaffEffect(centity_t* owner, const int type, const int flags, vec3
 	AddEffect(owner, fx_spawner);
 }
 
-#pragma endregion
 
-#pragma region ========================== HEALTH LIGHTNING ROUTINES ==========================
+
+
 
 // Recursively called to create the lightning effect.
 static void LightningSplit(client_entity_t* self, const vec3_t org, vec3_t dir, int rand_chance, const float stop_height)
@@ -477,9 +477,9 @@ void FXShrineHealthEffect(centity_t* owner, const int type, const int flags, vec
 	CreateLightning(glow, owner);
 }
 
-#pragma endregion
 
-#pragma region ========================== REFLECT EFFECT ROUTINES ==========================
+
+
 
 // Create the two circles that ring the player.
 static qboolean ShrineReflectUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXShrineReflectThink' in original logic.
@@ -550,9 +550,9 @@ void FXShrineReflectEffect(centity_t* owner, const int type, const int flags, ve
 	AddEffect(owner, fx_spawner);
 }
 
-#pragma endregion
 
-#pragma region ========================== GHOSTING EFFECT ROUTINES ==========================
+
+
 
 // Make the glow go away.
 static qboolean ShrineGhostGlowUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXShrineGlowThink' in original logic.
@@ -604,9 +604,9 @@ void FXShrineGhostEffect(centity_t* owner, const int type, const int flags, vec3
 	AddEffect(owner, glow);
 }
 
-#pragma endregion
 
-#pragma region ========================== SPEED EFFECT ROUTINES ==========================
+
+
 
 // Create the two circles that ring the player.
 static qboolean ShrineSpeedUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXShrineSpeedThink' in original logic.
@@ -672,9 +672,9 @@ void FXShrineSpeedEffect(centity_t* owner, const int type, const int flags, vec3
 	AddEffect(owner, fx_spawner);
 }
 
-#pragma endregion
 
-#pragma region ========================== WEAPONS POWER UP EFFECT ROUTINES ==========================
+
+
 
 // Create the two circles that ring the player.
 static qboolean ShrinePowerupUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXShrinePowerupThink' in original logic.
@@ -741,9 +741,9 @@ void FXShrinePowerupEffect(centity_t* owner, const int type, const int flags, ve
 	AddEffect(owner, glow);
 }
 
-#pragma endregion
 
-#pragma region ========================== PERSISTENT SHRINE BALL EFFECT ==========================
+
+
 
 enum
 {
@@ -843,9 +843,9 @@ void FXShrineBall(centity_t* owner, const int type, const int flags, vec3_t orig
 	AddEffect(owner, glow);
 }
 
-#pragma endregion
 
-#pragma region ========================== EXPLODING SHRINE BALL EFFECT ==========================
+
+
 
 // Explode the ball in the middle of the shrine.
 void FXShrineBallExplode(centity_t* owner, const int type, const int flags, vec3_t origin)
@@ -910,4 +910,3 @@ void FXShrineBallExplode(centity_t* owner, const int type, const int flags, vec3
 	AddEffect(NULL, flash);
 }
 
-#pragma endregion

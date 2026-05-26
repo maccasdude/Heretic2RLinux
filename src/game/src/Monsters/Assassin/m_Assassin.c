@@ -24,7 +24,7 @@
 #include "Random.h"
 #include "Vector.h"
 
-#pragma region ========================== Assassin base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -89,9 +89,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Dagger utility functions ==========================
+
+
 
 edict_t* AssassinDaggerReflect(edict_t* self, edict_t* other, const vec3_t vel) //mxd. Named 'AssassinArrowReflect' in original logic.
 {
@@ -252,9 +252,9 @@ static void AssassinThrowDagger(edict_t* self, const float right_ofs) //mxd. Nam
 	G_LinkMissile(dagger);
 }
 
-#pragma endregion
 
-#pragma region ========================== Cloaking utility functions ==========================
+
+
 
 static qboolean AssassinCheckCloak(const edict_t* self) //mxd. Named 'assassinCheckCloak' in original logic.
 {
@@ -515,7 +515,7 @@ static void AssassinInitDeCloak(edict_t* self) //mxd. Named 'assassinInitDeCloak
 	self->next_pre_think = level.time + FRAMETIME;
 }
 
-#pragma endregion
+
 
 static void AssassinSmoke(const edict_t* self) //mxd. Named 'assassinSmoke' in original logic.
 {
@@ -523,7 +523,7 @@ static void AssassinSmoke(const edict_t* self) //mxd. Named 'assassinSmoke' in o
 	gi.CreateEffect(NULL, FX_TPORTSMOKE, 0, pos, "");
 }
 
-#pragma region ========================== Teleport utility functions ==========================
+
 
 void AssassinPrepareTeleportDestination(edict_t* self, const vec3_t spot, const qboolean instant) //mxd. Named 'assassinPrepareTeleportDest' in original logic.
 {
@@ -653,9 +653,9 @@ static qboolean AssassinCheckTeleport(edict_t* self, const int type) //mxd. Name
 	return AssassinChooseTeleportDestination(self, type, false, false);
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 // Do melee or ranged attack.
 void assassin_attack(edict_t* self, const float flags) //mxd. Named 'assassindagger' in original logic.
@@ -1096,9 +1096,9 @@ void assassin_init_cloak(edict_t* self) //mxd. Named 'assassinInitCloak' in orig
 	self->next_pre_think = level.time + FRAMETIME;
 }
 
-#pragma endregion
 
-#pragma region ========================== AssassinDismember logic ==========================
+
+
 
 static qboolean AssassinCanThrowNode(edict_t* self, const int node_id, int* throw_nodes) //mxd. Named 'canthrownode_as' in original logic.
 {
@@ -1524,9 +1524,9 @@ void AssassinDismember(edict_t* self, const int damage, HitLocation_t hl) //mxd.
 		self->monsterinfo.aiflags |= (AI_COWARD | AI_NO_MELEE | AI_NO_MISSILE);
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handler utility functions ==========================
+
+
 
 static void AssassinSetRandomAttackAnim(edict_t* self) //mxd. Named 'assassin_random_attack' in original logic.
 {
@@ -1606,9 +1606,9 @@ static qboolean AssassinChooseSideJumpAmbush(edict_t* self) //mxd. Named 'assass
 	return true;
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void AssassinStandMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'assassin_stand' in original logic.
 {
@@ -2028,9 +2028,9 @@ static void AssassinCinematicActionMsgHandler(edict_t* self, G_Message_t* msg) /
 	SetAnim(self, curr_anim);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ==========================
+
+
 
 // Assigned to 'isBlocked' and 'bounce' callbacks.
 void AssassinBlocked(edict_t* self, trace_t* trace) //mxd. Named 'assassin_Touch' in original logic.
@@ -2083,7 +2083,7 @@ void AssassinCheckDefenseThink(edict_t* self, float enemy_dist, qboolean enemy_v
 	}
 }
 
-#pragma endregion
+
 
 void AssassinStaticsInit(void)
 {

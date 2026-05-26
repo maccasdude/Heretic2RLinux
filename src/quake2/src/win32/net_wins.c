@@ -349,7 +349,7 @@ qboolean NET_IsLocalAddress(const netadr_t* a)
 	return a->type == NA_LOOPBACK;
 }
 
-#pragma region ========================== LOOPBACK BUFFERS FOR LOCAL PLAYER ==========================
+
 
 static qboolean NET_GetLoopPacket(const netsrc_t sock, netadr_t* n_from, sizebuf_t* n_message)
 {
@@ -431,7 +431,7 @@ static void NET_SendLoopPacket(const netsrc_t sock, const int length, const void
 	loop->msgs[index].datalen = length;
 }
 
-#pragma endregion
+
 
 qboolean NET_GetPacket(const netsrc_t sock, netadr_t* n_from, sizebuf_t* n_message)
 {

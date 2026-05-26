@@ -6,7 +6,7 @@
 
 #include "ce_Effects.h"
 
-#pragma region ========================== CLIENT EFFECT SPAWNERS ==========================
+
 
 // NB. The assassin tport go is not precached.
 ClientEffect_t clientEffectSpawners[NUM_FX] =
@@ -1020,7 +1020,7 @@ ClientEffect_t clientEffectSpawners[NUM_FX] =
 	},
 };
 
-#pragma endregion
+
 
 const paletteRGBA_t color_white =	{ .c = 0xffffffff }; //mxd
 const paletteRGBA_t color_red =		{ .c = 0xff0000ff }; //mxd

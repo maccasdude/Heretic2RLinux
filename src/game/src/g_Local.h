@@ -531,11 +531,15 @@ typedef struct
 } monsterinfo_t;
 
 // The structure for each monster class.
-#define FOFS(x)		((int)&(((edict_t*)0)->x))
-#define STOFS(x)	((int)&(((spawn_temp_t*)0)->x))
-#define LLOFS(x)	((int)&(((level_locals_t*)0)->x))
-#define CLOFS(x)	((int)&(((gclient_t*)0)->x))
-#define BYOFS(x)	((int)&(((buoy_t*)0)->x))
+// Use offsetof() for the field-offset macros. The original Q2 code casts
+// &((T*)0)->field to int, which is undefined behaviour and also truncates
+// on 64-bit platforms. offsetof gives the same value safely.
+#include <stddef.h>
+#define FOFS(x)		((int)offsetof(edict_t, x))
+#define STOFS(x)	((int)offsetof(spawn_temp_t, x))
+#define LLOFS(x)	((int)offsetof(level_locals_t, x))
+#define CLOFS(x)	((int)offsetof(gclient_t, x))
+#define BYOFS(x)	((int)offsetof(buoy_t, x))
 
 extern game_locals_t game;
 

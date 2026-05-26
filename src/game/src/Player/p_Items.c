@@ -4,7 +4,7 @@
 // Copyright 1998 Raven Software
 //
 
-#include "p_Items.h" //mxd
+#include "p_items.h" //mxd
 #include "SpellsDefensive/spl_RingOfRepulsion.h" //mxd
 #include "SpellsDefensive/spl_MeteorBarrier.h" //mxd
 #include "SpellsDefensive/spl_MorphOvum.h" //mxd

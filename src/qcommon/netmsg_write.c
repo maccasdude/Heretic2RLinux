@@ -215,7 +215,12 @@ void ParseEffectToSizeBuf(sizebuf_t* sb, const char* format, va_list marker) // 
 		switch (*format)
 		{
 			case 'b':
-				MSG_WriteByte(sb, va_arg(marker, byte));
+				// C standard 7.16.1.1: types narrower than int are promoted
+				// to int by the default argument promotions, so va_arg MUST
+				// read int, not byte. On 32-bit x86 this happened to work
+				// because both are 4 bytes; on 64-bit System V it corrupts
+				// the variadic state and leads to crashes downstream.
+				MSG_WriteByte(sb, (byte)va_arg(marker, int));
 				break;
 
 			case 'd':
@@ -236,7 +241,8 @@ void ParseEffectToSizeBuf(sizebuf_t* sb, const char* format, va_list marker) // 
 				break;
 
 			case 's':
-				MSG_WriteShort(sb, va_arg(marker, short));
+				// short is also promoted to int in varargs (see 'b' above).
+				MSG_WriteShort(sb, (short)va_arg(marker, int));
 				break;
 
 			case 't':

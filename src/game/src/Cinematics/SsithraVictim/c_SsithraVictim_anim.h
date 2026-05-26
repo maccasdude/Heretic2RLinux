@@ -6,7 +6,7 @@
 
 #pragma once
 
-#pragma region ========================== Model definitions ==========================
+
 
 #define FRAME_rackpain1       	0
 #define FRAME_rackpain2       	1
@@ -486,7 +486,7 @@
 #define MESH__RIGHT2SPIKE			14
 #define MESH__CAPHEAD				15
 
-#pragma endregion
+
 
 typedef enum AnimID_e
 {

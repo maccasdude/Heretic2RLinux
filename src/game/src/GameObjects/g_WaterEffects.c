@@ -10,7 +10,7 @@
 #include "Random.h"
 #include "g_Local.h"
 
-#pragma region ========================== env_water_drip ==========================
+
 
 #define SF_YELLOW	1 //mxd
 
@@ -55,9 +55,9 @@ void SP_env_water_drip(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== env_water_fountain ==========================
+
+
 
 #define SF_START_OFF	32
 
@@ -110,9 +110,9 @@ void SP_env_water_fountain(edict_t* self)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== env_waterfall_base ==========================
+
+
 
 // QUAKED env_waterfall_base (1 1 0) (-8 -8 -8) (8 8 8)
 // Variables:
@@ -129,9 +129,9 @@ void SP_env_waterfall_base(edict_t* self)
 	gi.CreatePersistantEffect(&self->s, FX_WATERFALLBASE, CEF_BROADCAST, self->s.origin, "bbb", xrad, yrad, b_yaw);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_fishhead1, obj_fishhead2 ==========================
+
+
 
 #define SF_NODRIP	1 //mxd
 
@@ -215,9 +215,9 @@ void SP_obj_fishhead2(edict_t* self)
 	ObjectInit(self, 100, 500, MAT_GREYSTONE, SOLID_BBOX); //mxd
 }
 
-#pragma endregion
 
-#pragma region ========================== env_mist ==========================
+
+
 
 // QUAKED env_mist (1 .5 0) (-64 -1 -32) (64 1 32)
 // Variables:
@@ -234,9 +234,9 @@ void SP_env_mist(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== env_bubbler ==========================
+
+
 
 // QUAKED env_bubbler (1 .5 0) (-4 -4 0) (4 4 4)
 // Makes bubbles.
@@ -256,4 +256,3 @@ void SP_env_bubbler(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion

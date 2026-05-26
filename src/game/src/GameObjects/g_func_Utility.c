@@ -7,7 +7,7 @@
 #include "g_func_Utility.h"
 #include "Vector.h"
 
-#pragma region ====================== Support routines for movement (changes in origin using velocity) ======================
+
 
 void MoveDone(edict_t* ent) //mxd. Named 'Move_Done' in original logic.
 {
@@ -71,9 +71,9 @@ void MoveCalc(edict_t* ent, const vec3_t dest, void (*func)(edict_t*)) //mxd. Na
 	}
 }
 
-#pragma endregion
 
-#pragma region ================== Support routines for angular movement of trains (changes in angle using avelocity) ==================
+
+
 
 void FuncTrainAngleMoveCalc(edict_t* self, const edict_t* ent, const vec3_t dest) //mxd. Named 'TrainAngleMove_Calc' in original logic.
 {
@@ -172,9 +172,9 @@ void AngleMoveCalc(edict_t* ent, void (*func)(edict_t*)) //mxd. Named 'AngleMove
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== AccelMoveThink ==========================
+
+
 
 static float AccelerationDistance(const float target, const float rate) //mxd. #define in original logic.
 {
@@ -289,9 +289,9 @@ void AccelMoveThink(edict_t* ent) //mxd. Named 'Think_AccelMove' in original log
 	}
 }
 
-#pragma endregion
 
-#pragma region ====================== Movement sounds ======================
+
+
 
 void FuncPlayMoveStartSound(edict_t* ent) //mxd. Added to reduce code duplication.
 {
@@ -330,4 +330,3 @@ void FuncHandleCrushingSounds(const edict_t* ent, const edict_t* other) //mxd
 	}
 }
 
-#pragma endregion

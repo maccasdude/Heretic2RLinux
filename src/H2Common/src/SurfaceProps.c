@@ -8,10 +8,11 @@
 #include "p_types.h"
 
 //TODO: mxd. Seems to be used in Player.dll only. Move there?
-H2COMMON_API char* GetClientGroundSurfaceMaterialName(const playerinfo_t* info)
+H2COMMON_API char* GetClientGroundSurfaceMaterialName(const void* info_)
 {
 #define NUM_MATERIALS (sizeof(material_names) / sizeof(material_names[0]))
 	static char* material_names[] = { "gravel", "metal", "stone", "wood" };
+	const playerinfo_t* info = (const playerinfo_t*)info_;
 
 	if (info->GroundSurface != NULL)
 	{

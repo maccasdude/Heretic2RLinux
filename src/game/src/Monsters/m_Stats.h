@@ -35,7 +35,7 @@ typedef struct EvadeChance_s //mxd
 #define ITEM_REWARD_CHANCE		1
 #define MAX_SIGHT_PLAYER_DIST	1000.0f
 
-#pragma region ========================== GENERIC MONSTER SPAWNFLAGS ==========================
+
 
 #define MSF_NONE			0x000000
 #define MSF_AMBUSH			0x000001
@@ -69,9 +69,9 @@ typedef struct EvadeChance_s //mxd
 #define MSF_EXTRA3			0x080000 //TODO: unused.
 #define MSF_EXTRA4			0x100000
 
-#pragma endregion
 
-#pragma region ========================== MONSTER-SPECIFIC SPAWNFLAGS ==========================
+
+
 
 // SSITHRA
 #define MSF_SSITHRA_NAMOR		8	// Ssithra will jump out of water when woken up or used.
@@ -115,9 +115,9 @@ typedef struct EvadeChance_s //mxd
 #define OF_SONG_LEADER			256
 #define OF_CINEMATIC			8448
 
-#pragma endregion
 
-#pragma region ========================== MONSTER STATS ==========================
+
+
 
 #define MAX_BLOCKING_THING_HEALTH	100 // Highest health some blocking ent can be and let a monster still hack away at it to clear its path //TODO: unused.
 
@@ -328,4 +328,3 @@ typedef struct EvadeChance_s //mxd
 #define INSECT_STAFF_SPEED			100.0f
 #define INSECT_STAFF_AIMED_SPEED	750.0f
 
-#pragma endregion

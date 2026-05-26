@@ -14,7 +14,7 @@
 #include "qcommon.h"
 #include "g_Local.h"
 
-#pragma region ========================== Statusbar layouts ==========================
+
 
 /*
 Cursor positioning:
@@ -141,9 +141,9 @@ char* dm_statusbar =
 " bar 23 60 16 " // Powerup time left.
 "endif ";
 
-#pragma endregion
 
-#pragma region ========================== INTERMISSION ==========================
+
+
 
 void MoveClientToIntermission(edict_t* client, const qboolean log_file)
 {
@@ -237,9 +237,9 @@ void BeginIntermission(const edict_t* target_changelevel)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== DM SCOREBOARD ==========================
+
+
 
 typedef struct
 {
@@ -567,9 +567,9 @@ void Cmd_Score_f(const edict_t* ent)
 	ent->client->playerinfo.showscores = !ent->client->playerinfo.showscores;
 }
 
-#pragma endregion
 
-#pragma region ========================== STATUSBAR LAYOUT LOGIC ==========================
+
+
 
 static short GetShrineTime(const float time)
 {
@@ -723,4 +723,3 @@ void G_SetStats(const edict_t* ent)
 		ps->stats[STAT_LAYOUTS] |= 1;
 }
 
-#pragma endregion

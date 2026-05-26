@@ -239,7 +239,7 @@ enum
 	MAX_REMOVE
 };
 
-#pragma region ========================== CLFX.DLL / GAME.DLL shared effect types ==========================
+
 
 //mxd. Defined in fx_cwatcher.c / m_elflord.c in original logic.
 enum cwatcher_fxid_e
@@ -354,4 +354,3 @@ enum trial_beast_fxid_e
 	FX_TB_SNORT //TODO: unused.
 };
 
-#pragma endregion

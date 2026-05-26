@@ -21,7 +21,7 @@ static qboolean cmd_wait;
 #define ALIAS_LOOP_COUNT	16
 static int alias_count; // For detecting runaway loops
 
-#pragma region ========================== COMMAND BUFFER ==========================
+
 
 static sizebuf_t cmd_text;
 static byte cmd_text_buf[8192];
@@ -225,9 +225,9 @@ qboolean Cbuf_AddLateCommands(void)
 	return ret;
 }
 
-#pragma endregion
 
-#pragma region ========================== SCRIPT COMMANDS =========================
+
+
 
 // Part of Cmd_Exec_f in Q2
 static void AddTextToCommandBuffer(const char* f, const int len)
@@ -385,9 +385,9 @@ static void Cmd_Wait_f(void)
 	cmd_wait = true;
 }
 
-#pragma endregion
 
-#pragma region ========================== COMMAND EXECUTION =======================
+
+
 
 typedef struct cmd_function_s
 {
@@ -766,4 +766,3 @@ void Cmd_Init(void)
 	//Cmd_AddCommand("cpuid", Cmd_CpuID_f); // H2
 }
 
-#pragma endregion

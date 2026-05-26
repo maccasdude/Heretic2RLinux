@@ -11,7 +11,7 @@
 G_SkeletalJoint_t skeletalJoints[MAX_ARRAYED_SKELETAL_JOINTS];
 ArrayedListNode_t jointNodes[MAX_ARRAYED_JOINT_NODES];
 
-#pragma region ========================== Skeleton management stuff ==========================
+
 
 static int GetRootIndex(const int max, const int num_joints)
 {
@@ -111,9 +111,9 @@ void UpdateSkeletons(void)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Skeletal manipulation stuff ==========================
+
+
 
 // Mirrored in cl_Skeletons.c
 
@@ -147,4 +147,3 @@ qboolean SetJointAngVel(const int joint_index, const int angle_index, const floa
 	return false;
 }
 
-#pragma endregion

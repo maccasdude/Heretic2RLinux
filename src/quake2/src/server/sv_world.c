@@ -11,7 +11,10 @@
 #define AREA_DEPTH	4
 #define AREA_NODES	32
 
-#define STRUCT_FROM_LINK(l,t,m)		((t*)((byte*)(l) - (int)&(((t*)0)->m)))
+#include <stddef.h>
+// Pointer-derived offset: use offsetof for portability. The original Q2
+// macro cast `&((T*)0)->m` to int which is UB and 32-bit-truncating.
+#define STRUCT_FROM_LINK(l,t,m)		((t*)((byte*)(l) - offsetof(t, m)))
 #define EDICT_FROM_AREA(l)			STRUCT_FROM_LINK(l,edict_t,area)
 
 typedef struct areanode_s

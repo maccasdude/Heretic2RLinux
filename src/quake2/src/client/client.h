@@ -311,7 +311,7 @@ typedef struct
 
 Q2DLL_DECLSPEC extern client_static_t cls;
 
-#pragma region ========================== FX API IO ==========================
+
 
 #define FX_API_VERSION	3 //H2: 1
 
@@ -411,9 +411,9 @@ typedef struct
 // This is the only function actually exported at the linker level.
 typedef client_fx_export_t (*GetfxAPI_t)(client_fx_import_t);
 
-#pragma endregion
 
-#pragma region ========================== SOUND API IO ==========================
+
+
 
 #define SND_API_VERSION	2 //mxd
 
@@ -505,9 +505,9 @@ typedef struct
 //mxd. This is the only function actually exported at the linker level.
 typedef snd_export_t (*GetSoundAPI_t)(snd_import_t);
 
-#pragma endregion
 
-#pragma region ========================== CVARS ==========================
+
+
 
 #define CL_FREEZEWORLD	((qboolean)cl_freezeworld->value) //mxd
 #define CL_PAUSED		((qboolean)cl_paused->value) //mxd
@@ -595,7 +595,7 @@ extern cvar_t* cl_no_middle_text;
 
 extern cvar_t* vid_maxfps; // YQ2
 
-#pragma endregion
+
 
 Q2DLL_DECLSPEC extern centity_t cl_entities[MAX_NETWORKABLE_EDICTS];
 

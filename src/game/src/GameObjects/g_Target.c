@@ -13,7 +13,7 @@
 
 #define CROSSLEVEL_TRIGGER_SF_MASK	0x000000ff //mxd. Originally defined in g_local.h. Mask for TRIGGER1 - TRIGGER8 spawnflags.
 
-#pragma region ========================== target_temp_entity ==========================
+
 
 void TargetTempEntityUse(edict_t* ent, edict_t* other, edict_t* activator) //mxd. Named 'Use_Target_Tent' in original logic.
 {
@@ -36,9 +36,9 @@ void SP_target_temp_entity(edict_t* ent) //mxd. Unused in original logic.
 	ent->use = TargetTempEntityUse;
 }
 
-#pragma endregion
 
-#pragma region ========================== target_explosion ==========================
+
+
 
 void TargetExplosionExplodeThink(edict_t* self) //mxd. Named 'target_explosion_explode' in original logic.
 {
@@ -84,9 +84,9 @@ void SP_target_explosion(edict_t* ent)
 	ent->svflags = SVF_NOCLIENT;
 }
 
-#pragma endregion
 
-#pragma region ========================== target_changelevel ==========================
+
+
 
 void TargetChangelevelUse(edict_t* self, edict_t* other, edict_t* activator) //mxd. Named 'use_target_changelevel' in original logic.
 {
@@ -142,9 +142,9 @@ void SP_target_changelevel(edict_t* ent)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== target_crosslevel_trigger ==========================
+
+
 
 void TargetCrosslevelTriggerUse(edict_t* self, edict_t* other, edict_t* activator) //mxd. Named 'trigger_crosslevel_trigger_use' in original logic.
 {
@@ -161,9 +161,9 @@ void SP_target_crosslevel_trigger(edict_t* self)
 	self->use = TargetCrosslevelTriggerUse;
 }
 
-#pragma endregion
 
-#pragma region ========================== target_crosslevel_target ==========================
+
+
 
 void TargetCrosslevelTargetThink(edict_t* self) //mxd. Named 'target_crosslevel_target_think' in original logic.
 {
@@ -192,9 +192,9 @@ void SP_target_crosslevel_target(edict_t* self)
 	self->nextthink = level.time + self->delay;
 }
 
-#pragma endregion
 
-#pragma region ========================== target_lightramp ==========================
+
+
 
 #define SF_TOGGLE 1 //mxd
 
@@ -287,9 +287,9 @@ void SP_target_lightramp(edict_t* self)
 	self->movedir[2] = (self->movedir[1] - self->movedir[0]) / (self->speed / FRAMETIME);
 }
 
-#pragma endregion
 
-#pragma region ========================== target_earthquake ==========================
+
+
 
 void TargetEarthquakeThink(edict_t* self) //mxd. Named 'target_earthquake_think' in original logic.
 {
@@ -356,4 +356,3 @@ void SP_target_earthquake(edict_t* self) //TODO: non-functional. Also, there's t
 	self->use = TargetEarthquakeUse;
 }
 
-#pragma endregion

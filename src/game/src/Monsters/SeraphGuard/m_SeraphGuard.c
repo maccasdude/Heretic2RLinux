@@ -13,7 +13,7 @@
 #include "g_Utilities.h"
 #include "GameObjects/g_Debris.h" //mxd
 #include "NavSys/mg_AI.h" //mxd
-#include "NavSys/mg_guide.h" //mxd
+#include "NavSys/mg_Guide.h" //mxd
 #include "Monsters/g_Monster.h"
 #include "Monsters/m_Stats.h"
 #include "p_anims.h"
@@ -23,7 +23,7 @@
 #define SGUARD_NUM_PREDICTED_FRAMES	5.0f //mxd. Named 'NUM_PREDFRAMES' in original logic.
 #define SF_SGUARD_GOLEM				4 //mxd. Named 'SERAPH_FLAG_GOLEM' in original logic.
 
-#pragma region ========================== Seraph Guard Base Info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -47,9 +47,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 // Create the guts of seraph guard's projectile.
 static void SeraphGuardProjectileInit(const edict_t* self, edict_t* proj) //mxd. Named 'create_guard_proj' in original logic.
@@ -171,9 +171,9 @@ static void SeraphGuardDropWeapon(edict_t* self) //mxd. Named 'seraph_guard_drop
 	self->s.fmnodeinfo[MESH__AXE].flags |= FMNI_NO_DRAW;
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void SeraphGuardCheckMoodMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'seraph_guard_check_mood' in original logic.
 {
@@ -383,9 +383,9 @@ static void SeraphGuardVoiceSightMsgHandler(edict_t* self, G_Message_t* msg) //m
 	gi.sound(self, CHAN_VOICE, sounds[irand(SND_SIGHT1, SND_SIGHT4)], 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void SeraphGuardProjectileBlocked(edict_t* self, trace_t* trace) //mxd. Named 'guard_beam_blocked' in original logic.
 {
@@ -614,9 +614,9 @@ void SeraphGuardDismember(edict_t* self, int damage, HitLocation_t hl) //mxd. Na
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void seraph_guard_check_poke(edict_t* self) //mxd. Named 'seraph_guard_checkpoke' in original logic.
 {
@@ -880,7 +880,7 @@ void seraph_guard_back(edict_t* self, float distance)
 	}
 }
 
-#pragma endregion
+
 
 void SeraphGuardStaticsInit(void)
 {

@@ -40,7 +40,7 @@
 edict_t* harpy_head_carrier = NULL; // Harpy, which carries the head. //mxd. Named 'give_head_to_harpy' in original logic. Not SUS at all :)
 edict_t* harpy_head_source = NULL; // Player or monster, who's head harpy is carrying. //mxd. Named 'take_head_from' in original logic.
 
-#pragma region ========================== Harpy base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -76,9 +76,9 @@ static int sounds[NUM_SOUNDS];
 static const vec3_t dead_harpy_mins = { -8.0f, -8.0f, 0.0f }; //mxd. { -16.0f, -16.0f, 0.0f } in original logic. Reduced XY size to avoid dead harpies hanging on wing tips (or empty space) on world geometry.
 static const vec3_t dead_harpy_maxs = {  8.0f,  8.0f, 12.0f }; //mxd. { 16.0f, 16.0f, 12.0f } in original logic.
 
-#pragma endregion
 
-#pragma region ========================== Head grabbing functions =========================
+
+
 
 void HarpyHeadDie(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, const vec3_t point) //mxd. Named 'head_die' in original logic.
 {
@@ -169,9 +169,9 @@ void HarpyTakeHead(edict_t* self, edict_t* victim, const int bodypart_node_id, c
 	G_PostMessage(self, MSG_STAND, PRI_DIRECTIVE, NULL); //FIXME: go into a circle?
 }
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 static qboolean HarpyCanMove(const edict_t* self, const float distance) //mxd. Named 'harpy_check_move' in original logic.
 {
@@ -261,9 +261,9 @@ static qboolean HarpyCheckSwoop(const edict_t* self, const vec3_t goal_pos) //mx
 	return (trace.ent == self->enemy);
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void HarpyDeathPainMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'harpy_dead_pain' in original logic.
 {
@@ -365,9 +365,9 @@ static void HarpyWatchMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named '
 	SetAnim(self, ANIM_PERCH5);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void HarpyIsBlocked(edict_t* self, trace_t* trace) //mxd. Named 'harpy_blocked' in original logic.
 {
@@ -574,9 +574,9 @@ void HarpyDismember(edict_t* self, int damage, HitLocation_t hl) //mxd. Named 'h
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void harpy_flap_noise(edict_t* self)
 {
@@ -1181,7 +1181,7 @@ void harpy_hover_move(edict_t* self) //mxd. Named 'move_harpy_hover' in original
 	}
 }
 
-#pragma endregion
+
 
 void HarpyStaticsInit(void)
 {

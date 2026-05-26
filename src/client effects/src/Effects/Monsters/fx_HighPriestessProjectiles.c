@@ -428,7 +428,7 @@ static qboolean PriestessLinkedEntityUpdatePlacement(client_entity_t* self, cent
 	return true;
 }
 
-#pragma region ========================== Missile spawner functions (mxd -- split into separate functions from FXHPMissile()) ==========================
+
 
 static void SpawnHPMissile1(centity_t* owner, const int type, const vec3_t origin, const vec3_t velocity, const paletteRGBA_t light_color) //mxd
 {
@@ -762,7 +762,7 @@ static void SpawnHPTeleportEnd(const int type, const vec3_t origin) //mxd
 	AddEffect(NULL, trail);
 }
 
-#pragma endregion
+
 
 void FXHPMissile(centity_t* owner, const int type, const int flags, vec3_t origin)
 {

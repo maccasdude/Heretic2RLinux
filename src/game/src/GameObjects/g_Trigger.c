@@ -20,7 +20,7 @@
 #define SF_PUZZLE_SHOW_NO_INVENTORY	16
 #define SF_PUZZLE_DONT_REMOVE		32
 
-#pragma region ========================== TriggerStaticsInit ==========================
+
 
 static void TriggerDeactivate(edict_t* self, G_Message_t* msg) //mxd. Named 'Trigger_Deactivate' in original logic.
 {
@@ -41,9 +41,9 @@ void TriggerStaticsInit(void)
 	classStatics[CID_TRIGGER].msgReceivers[G_MSG_UNSUSPEND] = TriggerActivate;
 }
 
-#pragma endregion
 
-#pragma region ========================== Utility functions ==========================
+
+
 
 // The wait time has passed, so set back up for another activation.
 void TriggerMultipleWaitThink(edict_t* self) //mxd. Named 'multi_wait' in original logic.
@@ -169,9 +169,9 @@ static void SetTriggerSound(edict_t* self) //mxd. Named 'Trigger_Sounds' in orig
 		self->noise_index = 0;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_multiple ==========================
+
+
 
 // QUAKED trigger_multiple (.5 .5 .5) ? MONSTER NOT_PLAYER TRIGGERED ANY
 // Variable sized repeatable trigger. Must be targeted at one or more entities.
@@ -196,9 +196,9 @@ void SP_trigger_Multiple(edict_t* self)
 	self->TriggerActivated = G_UseTargets;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_once ==========================
+
+
 
 // QUAKED trigger_once (.5 .5 .5) ? MONSTER NOT_PLAYER TRIGGERED ANY
 // Triggers once, then removes itself.
@@ -224,9 +224,9 @@ void SP_trigger_Once(edict_t* self)
 	self->wait = -1.0f;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_relay ==========================
+
+
 
 void TriggerRelayUse(edict_t* self, edict_t* other, edict_t* activator) //mxd. Named 'trigger_relay_use' in original logic.
 {
@@ -240,9 +240,9 @@ void SP_trigger_Relay(edict_t* self)
 	self->use = TriggerRelayUse;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_puzzle ==========================
+
+
 
 #define SF_NO_TEXT	1 //mxd
 #define SF_NO_TAKE	2 //mxd
@@ -344,9 +344,9 @@ void SP_trigger_puzzle(edict_t* self)
 	self->use = TriggerPuzzleUse;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_counter ==========================
+
+
 
 #define SF_NOMESSAGE	1
 
@@ -384,9 +384,9 @@ void SP_trigger_Counter(edict_t* self)
 	self->TriggerActivated = G_UseTargets;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_always ==========================
+
+
 
 // QUAKED trigger_always (.5 .5 .5) (-8 -8 -8) (8 8 8)
 // This trigger will always fire. It is activated by the world.
@@ -396,9 +396,9 @@ void SP_trigger_Always(edict_t* self)
 	G_UseTargets(self, self);
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_playerusepuzzle ==========================
+
+
 
 void TriggerPlayerUsePuzzleActivated(edict_t* self, edict_t* activator) //mxd. Named 'trigger_playerusepuzzle' in original logic.
 {
@@ -433,9 +433,9 @@ void SP_trigger_PlayerUsePuzzle(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_playerpushbutton ==========================
+
+
 
 void TriggerPlayerPushButtonTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surface) //mxd. Named 'trigger_playerpushbutton' in original logic.
 {
@@ -457,9 +457,9 @@ void SP_trigger_PlayerPushButton(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_elevator ==========================
+
+
 
 void TriggerElevatorUse(edict_t* self, edict_t* other, edict_t* activator) //mxd. Named 'trigger_elevator_use' in original logic.
 {
@@ -525,9 +525,9 @@ void SP_trigger_Elevator(edict_t* self)
 	self->nextthink = level.time + FRAMETIME;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_deactivate ==========================
+
+
 
 void TriggerDeactivateActivated(edict_t* self, edict_t* activator) //mxd. Named 'SuspendTrigger_Activated' in original logic.
 {
@@ -557,9 +557,9 @@ void SP_trigger_Deactivate(edict_t* self)
 	self->TriggerActivated = TriggerDeactivateActivated;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_activate ==========================
+
+
 
 void TriggerActivateActivated(edict_t* self, edict_t* activator) //mxd. Named 'ActivateTrigger_Activated' in original logic.
 {
@@ -589,9 +589,9 @@ void SP_trigger_Activate(edict_t* self)
 	self->TriggerActivated = TriggerActivateActivated;
 }
 
-#pragma endregion
 
-#pragma region ========================== choose_CDTrack ==========================
+
+
 
 #define SF_NO_LOOP	1 //mxd
 
@@ -642,9 +642,9 @@ void SP_choose_CDTrack(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_quit_to_menu ==========================
+
+
 
 void TriggerQuitToMenuTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'trigger_quit_to_menu_touch' in original logic.
 {
@@ -677,9 +677,9 @@ void SP_trigger_quit_to_menu(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_mappercentage ==========================
+
+
 
 void TriggerMappercentageUse(edict_t* self, edict_t* other) //mxd. Named 'mappercentage_use' in original logic.
 {
@@ -707,9 +707,9 @@ void SP_trigger_mappercentage(edict_t* self)
 	self->TriggerActivated = TriggerMappercentageUse;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_lightning ==========================
+
+
 
 void TriggerLightningActivated(edict_t* self, edict_t* other) //mxd. Named 'lightning_use' in original logic.
 {
@@ -765,9 +765,9 @@ void SP_trigger_lightning(edict_t* self)
 	self->use = TriggerLightningUse; // This is so a trigger_relay can use it.
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_quake ==========================
+
+
 
 void KillSoundThink(edict_t* self) //mxd. Named 'quake_quiet' in original logic.
 {
@@ -842,9 +842,9 @@ void SP_trigger_quake(edict_t* self)
 	self->TriggerActivated = TriggerQuakeActivated;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_mission_give ==========================
+
+
 
 void TriggerMissionGiveUse(edict_t* self, edict_t* other) //mxd. Named 'mission_give_use' in original logic.
 {
@@ -893,9 +893,9 @@ void SP_trigger_mission_give(edict_t* self)
 	self->TriggerActivated = TriggerMissionGiveUse;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_mission_take ==========================
+
+
 
 #define SF_MISSION_TAKE1	16
 #define SF_MISSION_TAKE2	32
@@ -942,9 +942,9 @@ void SP_trigger_mission_take(edict_t* self)
 	self->TriggerActivated = TriggerMissionTakeUse;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_farclip ==========================
+
+
 
 void TriggerFarclipTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'ClipDistance_touch' in original logic.
 {
@@ -976,9 +976,9 @@ void SP_trigger_farclip(edict_t* self)
 	self->touch = TriggerFarclipTouch;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_endgame ==========================
+
+
 
 void TriggerEndgameThink(edict_t* self) //mxd. Named 'trigger_endgame_think' in original logic.
 {
@@ -1030,9 +1030,9 @@ void SP_trigger_endgame(edict_t* self)
 	self->use = TriggerEndgameUse;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_playerpushlever ==========================
+
+
 
 void TriggerPlayerPushLeverActivated(edict_t* self, edict_t* other) //mxd. Named 'trigger_playerpushlever' in original logic.
 {
@@ -1048,4 +1048,3 @@ void SP_trigger_PlayerPushLever(edict_t* self)
 	self->TriggerActivated = TriggerPlayerPushLeverActivated;
 }
 
-#pragma endregion

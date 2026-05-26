@@ -17,7 +17,7 @@
 #include "Effects/fx_Smoke.h" //mxd
 #include "Effects/fx_Sparks.h" //mxd
 #include "q_Sprite.h" //mxd
-#include "g_playstats.h"
+#include "g_PlayStats.h"
 
 // Setup for circular list.
 #define MAX_ENTRIES_IN_CIRCULAR_LIST	70
@@ -25,7 +25,7 @@ static client_entity_t* circular_list[MAX_ENTRIES_IN_CIRCULAR_LIST + 1];
 static int circular_list_size;
 static int circular_list_index = 0;
 
-#pragma region ========================== Update functions ==========================
+
 
 qboolean RemoveSelfAI(client_entity_t* self, centity_t* owner)
 {
@@ -50,9 +50,9 @@ qboolean AttemptRemoveSelf(client_entity_t* self, centity_t* owner)
 	return true;
 }
 
-#pragma endregion
 
-#pragma region ========================== AddToView functions ==========================
+
+
 
 qboolean LinkedEntityUpdatePlacement(client_entity_t* self, centity_t* owner)
 {
@@ -119,9 +119,9 @@ qboolean ReferenceLinkedEntityUpdatePlacement(client_entity_t* self, centity_t* 
 	return OffsetLinkedEntityUpdatePlacement(self, owner); //mxd
 }
 
-#pragma endregion
 
-#pragma region ========================== Physics functions ==========================
+
+
 
 // Returns vertical distance to solid world / water surface or max_dist if no solid.
 // If max_dist < 0 returns distance to floor.
@@ -481,9 +481,9 @@ float GetGravity(void)
 	return -clfx_gravity->value;
 }
 
-#pragma endregion
 
-#pragma region ========================== r_entity sprite setup functions ==========================
+
+
 
 //mxd. Expects square texture. Roll is in degrees.
 void RE_SetupRollSprite(entity_t* ent, const float size, const float roll)
@@ -524,7 +524,7 @@ void RE_SetupFlipSprite(entity_t* ent, const float origin_x, const float origin_
 	SVERTEX_SET(ent->verts[3], xr, yt, sr, tb); // Top-right.
 }
 
-#pragma endregion
+
 
 // Tells if we have not rendered this reference point for a while.
 qboolean RefPointsValid(const centity_t* owner)

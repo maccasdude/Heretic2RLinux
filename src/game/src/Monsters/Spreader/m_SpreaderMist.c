@@ -12,7 +12,7 @@
 #include "Random.h"
 #include "Vector.h"
 
-#pragma region ========================== Utility functions =========================
+
 
 static void RadiusDamageEntUpdateAttachPosition(edict_t* self) //mxd. Added to reduce code duplication.
 {
@@ -111,9 +111,9 @@ static void SpreaderMistInit(edict_t* self, const float x, const float y, const 
 	CreateRadiusDamageEnt(self, self, 1, 0, 60.0f, 1.0f, dflags, 2.0f, 0.25f, rotated_offset, velocity, false); //TODO: modify damage by skill?
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void RadiusDamageEntThink(edict_t* self) //mxd. Named 'GenericRadiusDamageEntThink' in original logic.
 {
@@ -207,9 +207,9 @@ void SpreaderGrenadeBounced(edict_t* self, trace_t* trace) //mxd. Named 'spreade
 	SpreaderGrenadeExplode(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void spreader_mist(edict_t* self, float x, float y, float z)
 {
@@ -286,4 +286,3 @@ void spreader_toss_grenade(edict_t* self) // Self is the tosser.
 	self->delay = 5.0f;
 }
 
-#pragma endregion

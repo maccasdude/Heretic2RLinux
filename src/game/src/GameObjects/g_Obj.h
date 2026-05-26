@@ -9,6 +9,7 @@
 #include "FX.h"
 #include "q_Typedef.h"
 #include "q_Shared.h"
+#include "g_Message.h" //mxd. For G_Message_t type. Was implicit on MSVC.
 
 // Spawnflags for object entities.
 #define SF_OBJ_INVULNERABLE		1
@@ -18,7 +19,7 @@
 
 extern void BboxYawAndScale(edict_t* self);
 
-extern void DefaultObjectDieHandler(edict_t* self, struct G_Message_s* msg);
+extern void DefaultObjectDieHandler(edict_t* self, G_Message_t* msg);
 extern void ObjectInit(edict_t* self, int health, int mass, MaterialID_t material_type, int solid);
 extern void ObjectStaticsInit(void);
 extern void LeverStaticsInit(void);

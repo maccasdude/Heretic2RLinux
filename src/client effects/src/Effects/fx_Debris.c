@@ -18,9 +18,9 @@
 #include "Random.h"
 #include "Vector.h"
 #include "q_Physics.h"
-#include "g_playstats.h"
+#include "g_PlayStats.h"
 
-#pragma region ========================== Debris base info ==========================
+
 
 #define DEBRIS_TRAIL_UPDATE_INTERVAL	50 //mxd. 1000 ms. / 50 = 20 FPS.
 
@@ -155,9 +155,9 @@ static float debris_elasticity[NUM_MAT] =
 
 static const paletteRGBA_t fire_dlight_color = { .c = 0xff007fff }; //mxd
 
-#pragma endregion
 
-#pragma region ========================== Debris sounds ==========================
+
+
 
 enum DebrisSoundID_e //mxd
 {
@@ -188,9 +188,9 @@ enum DebrisSoundID_e //mxd
 
 static struct sfx_s* debris_sounds[NUM_SOUNDS]; //mxd
 
-#pragma endregion
 
-#pragma region ========================== Debris utility functions ==========================
+
+
 
 static void DoFireTrail(client_entity_t* spawner)
 {
@@ -343,9 +343,9 @@ static void Debris_CheckInitialContents(client_entity_t* self, const int flags) 
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Body Part spawn functions ==========================
+
+
 
 static qboolean BodyPartAttachedUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXBodyPartAttachedUpdate' in original logic.
 {
@@ -532,9 +532,9 @@ void FXBodyPart(centity_t* owner, const int type, const int flags, vec3_t origin
 	BodyPart_Spawn(realowner, body_part, origin, ke, frame, type, modelindex, flags, owner);
 }
 
-#pragma endregion
 
-#pragma region ========================== Debris update ==========================
+
+
 
 qboolean FXDebris_Vanish(client_entity_t* self, centity_t* owner)
 {
@@ -634,9 +634,9 @@ static qboolean FleshDebris_Update(client_entity_t* self, centity_t* owner)
 	return true;
 }
 
-#pragma endregion
 
-#pragma region ========================== Debris spawn functions ==========================
+
+
 
 // CEF_FLAG6 = on fire.
 // CEF_FLAG7 = male insect skin on mat_insect (CEF_FLAG7 cleared out and set if has dynamic light for fire).
@@ -843,9 +843,9 @@ void FXFleshDebris(centity_t* owner, const int type, int flags, vec3_t origin)
 	Debris_SpawnFleshChunks(type, flags, origin, num, material, vec3_up, 80000.0f, mins, scale, altskin);
 }
 
-#pragma endregion
 
-#pragma region ========================== Debris message receivers ==========================
+
+
 
 static void Debris_Collision(client_entity_t* self, CE_Message_t* msg)
 {
@@ -946,9 +946,9 @@ static void Debris_Collision(client_entity_t* self, CE_Message_t* msg)
 		Physics_MoveEnt(self, d_time, d_time * d_time * 0.5f, trace, false); //mxd. Don't modify velocity.
 }
 
-#pragma endregion
 
-#pragma region ========================== Debris static init/precache ==========================
+
+
 
 void InitDebrisStatics(void)
 {
@@ -986,4 +986,3 @@ void PreCacheDebrisSFX(void) //mxd
 	debris_sounds[SND_GLASS2] = fxi.S_RegisterSound("misc/dropglass2.wav");
 }
 
-#pragma endregion

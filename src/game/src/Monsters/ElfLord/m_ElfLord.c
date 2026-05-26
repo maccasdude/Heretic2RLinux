@@ -18,7 +18,7 @@
 #include "Vector.h"
 #include "g_Local.h"
 
-#pragma region ========================== Elf Lord base info ==========================
+
 
 static const animmove_t* animations[] =
 {
@@ -48,9 +48,9 @@ static int sounds[NUM_SOUNDS];
 static const vec3_t projectile_mins = { -2.0f, -2.0f, -2.0f }; //mxd
 static const vec3_t projectile_maxs = {  2.0f,  2.0f,  2.0f }; //mxd
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 static void FindMoveTarget(edict_t* self) //mxd. Named 'elflord_FindMoveTarget' in original logic.
 {
@@ -209,9 +209,9 @@ static qboolean CheckAttack(edict_t* self) //mxd. Named 'elfLordCheckAttack' in 
 	return false;
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void ElfLordStandMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'elflord_stand' in original logic.
 {
@@ -263,9 +263,9 @@ static void ElfLordSightMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named
 	SetAnim(self, ANIM_COME_TO_LIFE);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ==========================
+
+
 
 void ElfLordProjectileBlocked(edict_t* self, trace_t* trace) //mxd. Named 'elflord_projectile_blocked' in original logic.
 {
@@ -298,9 +298,9 @@ void ElfLordPreThink(edict_t* self) //mxd. Named 'elflord_PreThink' in original 
 	self->next_pre_think = level.time + FRAMETIME; //mxd. Use define.
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void elflord_attack(edict_t* self)
 {
@@ -542,7 +542,7 @@ void elflord_update_charge_meter(edict_t* self)
 	}
 }
 
-#pragma endregion
+
 
 void ElflordStaticsInit(void)
 {

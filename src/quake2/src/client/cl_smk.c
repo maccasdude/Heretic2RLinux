@@ -192,6 +192,17 @@ void SCR_PlayCinematic(const char* name)
 	sprintf_s(smk_filepath, sizeof(smk_filepath), "%s/video/%s", path, name); //mxd. sprintf -> sprintf_s
 	Com_Printf("Opening cinematic file: '%s'...\n", smk_filepath);
 
+#if !(defined(_WIN32) || defined(WIN32))
+	// libsmacker calls fopen() directly - bypasses our FS layer's
+	// case-insensitive fallback. Resolve the path here on Linux.
+	{
+		extern int H2R_ResolvePathCI(const char*, char*, size_t);
+		char resolved[MAX_OSPATH];
+		if (H2R_ResolvePathCI(smk_filepath, resolved, sizeof(resolved)))
+			strcpy_s(smk_filepath, sizeof(smk_filepath), resolved);
+	}
+#endif
+
 	if (!SMK_Open(smk_filepath))
 	{
 		Com_Printf("...Unable to open file\n");

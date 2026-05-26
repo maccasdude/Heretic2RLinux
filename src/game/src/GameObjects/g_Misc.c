@@ -15,7 +15,7 @@
 #include "Random.h"
 #include "Vector.h"
 
-#pragma region ========================== func_areaportal ==========================
+
 
 void FuncAreaportalUse(edict_t* ent, edict_t* other, edict_t* activator) //mxd. Named 'Use_Areaportal' in original logic.
 {
@@ -32,9 +32,9 @@ void SP_func_areaportal(edict_t* ent)
 	ent->count = 0; // Always start closed.
 }
 
-#pragma endregion
 
-#pragma region ========================== path_corner ==========================
+
+
 
 #define SF_TELEPORT	1 //mxd
 
@@ -115,9 +115,9 @@ void SP_path_corner(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== point_combat ==========================
+
+
 
 #define SF_HOLD	1 //mxd
 
@@ -190,9 +190,9 @@ void SP_point_combat(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== info_null, info_notnull  ==========================
+
+
 
 // QUAKED info_null (0 0.5 0) (-4 -4 -4) (4 4 4)
 // Used as a positional target for spotlights, etc.
@@ -212,9 +212,9 @@ void SP_info_notnull(edict_t* self)
 	VectorCopy(self->s.origin, self->absmax);
 }
 
-#pragma endregion
 
-#pragma region ========================== func_wall ==========================
+
+
 
 #define SF_TRIGGER_SPAWN	1 //mxd
 #define SF_TOGGLE			2 //mxd
@@ -293,9 +293,9 @@ void SP_func_wall(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== func_object ==========================
+
+
 
 void FuncObjectTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'func_object_touch' in original logic.
 {
@@ -365,9 +365,9 @@ void SP_func_object(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== item_spitter ==========================
+
+
 
 #define SF_NOFLASH	1 //mxd
 
@@ -440,9 +440,9 @@ void SP_item_spitter(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== misc_update_spawner ==========================
+
+
 
 // Update the spawner so that we will re-materialize in a different position.
 void MiscUpdateSpawnerTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'respawner_touch' in original version,
@@ -495,9 +495,9 @@ void SP_misc_update_spawner(edict_t* ent)
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== misc_teleporter ==========================
+
+
 
 #define SF_NO_MODEL				1
 #define SF_DEATHMATCH_RANDOM	2
@@ -620,9 +620,9 @@ void SP_misc_teleporter_dest(edict_t* self)
 	self->last_org[2] -= player_mins[2];
 }
 
-#pragma endregion
 
-#pragma region ========================== misc_magic_portal ==========================
+
+
 
 void MiscMagicPortalTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'misc_magic_portal_touch' in original logic.
 {
@@ -706,9 +706,9 @@ void SP_misc_magic_portal(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== sound_ambient_xxx ==========================
+
+
 
 #undef SF_START_OFF //mxd. Avoid compiler warnings...
 
@@ -1125,9 +1125,9 @@ void SP_sound_ambient_silverspring(edict_t* self)
 	SoundAmbientInit(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== misc_remote_camera ==========================
+
+
 
 #define SF_ACTIVATING	1 //mxd
 #define SF_SCRIPTED		2 //mxd
@@ -1348,9 +1348,9 @@ void SP_misc_remote_camera(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== misc_fire_sparker ==========================
+
+
 
 #define SF_FIREBALL	1 //mxd
 
@@ -1403,9 +1403,9 @@ void SP_misc_fire_sparker(edict_t* self)
 	self->use = MiscFireSparkerUse;
 }
 
-#pragma endregion
 
-#pragma region ========================== misc_flag ==========================
+
+
 
 void MiscFlagThink(edict_t* self) //mxd. Named 'flag_think' in original logic.
 {
@@ -1432,4 +1432,3 @@ void SP_misc_flag(edict_t* self) //mxd. Defined in m_FMtest.c in original logic.
 	gi.linkentity(self);
 }
 
-#pragma endregion

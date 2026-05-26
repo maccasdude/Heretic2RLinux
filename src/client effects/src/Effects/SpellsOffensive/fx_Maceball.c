@@ -7,7 +7,7 @@
 #include "ce_DLight.h"
 #include "ce_Effects.h"
 #include "ce_Particles.h"
-#include "Effects/fx_debris.h"
+#include "Effects/fx_Debris.h"
 #include "Vector.h"
 #include "Random.h"
 #include "q_Sprite.h"
@@ -45,7 +45,7 @@ void PreCacheRipperSFX(void) //mxd
 	ripper_impact_sound = fxi.S_RegisterSound("weapons/RipperImpact.wav");
 }
 
-#pragma region ========================== MACE BALL ==========================
+
 
 static qboolean MaceballUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXMaceballThink' in original logic.
 {
@@ -204,9 +204,9 @@ void FXMaceballExplode(centity_t* owner, const int type, const int flags, vec3_t
 	FXDebris_SpawnChunks(type, flags & ~(CEF_FLAG6 | CEF_FLAG7 | CEF_FLAG8), origin, 5, MAT_METAL, dir, 80000.0f, mins, 1.5f, false);
 }
 
-#pragma endregion
 
-#pragma region ========================== RIPPER BALL ==========================
+
+
 
 static qboolean RipperExplodeBallUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXRipperExplodeBallThink' in original logic.
 {
@@ -402,4 +402,3 @@ void FXRipperExplode(centity_t* owner, const int type, const int flags, vec3_t o
 	}
 }
 
-#pragma endregion

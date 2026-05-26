@@ -835,7 +835,7 @@ void M_GetSlopePitchRoll(edict_t* ent, vec3_t pass_slope) //mxd. Named 'pitch_ro
 	ent->s.angles[ROLL] = (1.0f - fabsf(dot)) * pitch * mod;
 }
 
-#pragma region ========================== Monster Helper Functions ==========================
+
 
 // Tests to see whether the thing touching it is on its head, and if so, it tries to correct that situation.
 void M_Touch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf)
@@ -1401,4 +1401,3 @@ void M_DeadFloatThink(edict_t* self) //mxd. Named 'fish_deadfloat' (in m_fish.c)
 	self->nextthink = level.time + FRAMETIME; //mxd. Use define.
 }
 
-#pragma endregion

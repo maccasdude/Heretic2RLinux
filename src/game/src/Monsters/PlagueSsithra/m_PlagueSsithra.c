@@ -5,10 +5,10 @@
 //
 
 #include <float.h> //mxd
-#include "m_PlaguesSithra.h"
-#include "m_PlaguesSithra_shared.h"
-#include "m_PlaguesSithra_anim.h"
-#include "m_PlaguesSithra_moves.h"
+#include "m_PlagueSsithra.h"
+#include "m_PlagueSsithra_shared.h"
+#include "m_PlagueSsithra_anim.h"
+#include "m_PlagueSsithra_moves.h"
 #include "g_DefaultMessageHandler.h"
 #include "g_Utilities.h"
 #include "GameObjects/g_Debris.h" //mxd
@@ -21,7 +21,7 @@
 #include "Vector.h"
 #include "g_Local.h"
 
-#pragma region ========================== Plague Ssithra Base Info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -76,9 +76,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 static qboolean SsithraCheckInWater(edict_t* self) //mxd. Named 'ssithraCheckInWater' in original logic.
 {
@@ -826,9 +826,9 @@ qboolean SsithraAlert(edict_t* self, alertent_t* alerter, edict_t* enemy) //mxd.
 	return true;
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void SsithraStandMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'ssithra_stand' in original logic.
 {
@@ -1184,9 +1184,9 @@ static void SsithraVoiceSightMsgHandler(edict_t* self, G_Message_t* msg) //mxd. 
 		gi.sound(self, CHAN_BODY, sounds[irand(SND_SIGHT1, SND_SIGHT6)], 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void SsithraBlocked(edict_t* self, trace_t* trace) //mxd. Named 'ssithra_blocked' in original logic.
 {
@@ -1605,9 +1605,9 @@ void SsithraDuckArrowTouch(edict_t* self, edict_t* other, cplane_t* plane, csurf
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void ssithra_decide_run(edict_t* self) //mxd. Named 'ssithra_decide_gallop' in original logic.
 {
@@ -2326,7 +2326,7 @@ void ssithra_check_mood(edict_t* self) //mxd. Named 'SsithraCheckMood', returned
 	}
 }
 
-#pragma endregion
+
 
 void SsithraStaticsInit(void)
 {

@@ -5,7 +5,7 @@
 //
 
 #include "ce_Effects.h"
-#include "g_playstats.h"
+#include "g_PlayStats.h"
 #include "Vector.h"
 #include "q_Sprite.h"
 
@@ -22,7 +22,7 @@ void PreCacheRope(void)
 	rope_models[3] = fxi.RegisterModel("sprites/fx/segment_tendril.sp2");
 }
 
-#pragma region ========================== ATTACHED ROPE SEGMENTS ==========================
+
 
 static qboolean RopeAttachedUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'RopeCheckToHide' in original logic.
 {
@@ -150,9 +150,9 @@ static qboolean RopeBottomAttachedAddToView(client_entity_t* self, centity_t* ow
 	return true;
 }
 
-#pragma endregion
 
-#pragma region ========================== UNATTACHED ROPE ==========================
+
+
 
 static qboolean RopeUpdate(client_entity_t* self, centity_t* owner) //mxd. Named 'FXRopeTopDraw' in original logic.
 {
@@ -205,7 +205,7 @@ static qboolean RopeUpdate(client_entity_t* self, centity_t* owner) //mxd. Named
 	return true;
 }
 
-#pragma endregion
+
 
 void FXRope(centity_t* owner, int type, const int flags, vec3_t origin)
 {

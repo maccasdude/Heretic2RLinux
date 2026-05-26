@@ -10,6 +10,11 @@
 #include "client/glimp_sdl3.h" // YQ2
 #include "win32/vid_Screenshot.h" //mxd
 
+#if !(defined(_WIN32) || defined(WIN32))
+#include "compat/win_compat.h"
+#include <SDL3/SDL.h>   // for SDL_ShowSimpleMessageBox on Linux
+#endif
+
 #define FALLBACK_REFLIB	"gl1" //mxd. //TODO: change to "soft" if we ever have a software renderer.
 
 // Structure containing functions exported from refresh DLL.
@@ -40,7 +45,7 @@ qboolean vid_restart_required; // H2
 vidmode_t* vid_modes; //mxd. Static array in Q2 / H2. H2 has no mode 10.
 int num_vid_modes = 0; //mxd
 
-#pragma region ========================== DLL GLUE ==========================
+
 
 #define MAXPRINTMSG	4096
 
@@ -66,8 +71,14 @@ void VID_Printf(const int print_level, const char* fmt, ...)
 			break;
 
 		case PRINT_ALERT:
+#if defined(_WIN32) || defined(WIN32)
 			MessageBox(NULL, msg, "PRINT_ALERT", MB_ICONWARNING);
 			OutputDebugString(msg);
+#else
+			// Linux: use SDL's portable message box; no debug-output equivalent.
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "PRINT_ALERT", msg, NULL);
+			fputs(msg, stderr);
+#endif
 			break;
 	}
 }
@@ -85,7 +96,7 @@ H2R_NORETURN void VID_Error(const int err_level, const char* fmt, ...)
 	Com_Error(err_level, "%s", msg);
 }
 
-#pragma endregion
+
 
 // Console command to restart the video mode and refresh DLL.
 static void VID_Restart_f(void)
@@ -318,11 +329,14 @@ static void VID_InitReflibInfos(void) //mxd
 // if any of the video mode parameters have changed, and if they have to update the rendering DLL and/or video mode to match.
 void VID_CheckChanges(void) //TODO: check YQ2 logic.
 {
-	while (vid_restart_required || vid_ref->modified)
+	cvar_t* vid_fs = Cvar_Get("vid_fullscreen", "0", CVAR_ARCHIVE);
+
+	while (vid_restart_required || vid_ref->modified || vid_fs->modified)
 	{
 		// Refresh has changed.
 		vid_restart_required = false; // H2
 		vid_ref->modified = false;
+		vid_fs->modified = false;
 
 		cl.force_refdef = true;
 		cl.refresh_prepped = false;
@@ -366,6 +380,11 @@ void VID_Init(void)
 	vid_brightness = Cvar_Get("vid_brightness", "0.5", CVAR_ARCHIVE); // H2
 	vid_contrast = Cvar_Get("vid_contrast", "0.5", CVAR_ARCHIVE); // H2
 	vid_textures_refresh_required = Cvar_Get("vid_textures_refresh_required", "0", 0); //mxd
+	// vid_fullscreen modes:
+	//   0 = windowed (resizable, with title bar)
+	//   1 = exclusive fullscreen (changes display mode)
+	//   2 = borderless fullscreen window (matches desktop)
+	Cvar_Get("vid_fullscreen", "0", CVAR_ARCHIVE);
 
 	// Add some console commands that we want to handle.
 	Cmd_AddCommand("vid_restart", VID_Restart_f);

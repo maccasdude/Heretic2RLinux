@@ -8,7 +8,7 @@
 #include "client/client.h"
 #include "Angles.h"
 
-#pragma region ========================== THE CREDITS ==========================
+
 
 static char* raven_credits[] =
 {
@@ -832,7 +832,7 @@ static char* raven_credits[] =
 	NULL
 };
 
-#pragma endregion
+
 
 cvar_t* m_banner_credits;
 

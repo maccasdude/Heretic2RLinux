@@ -11,7 +11,7 @@
 
 edict_t* sv_player;
 
-#pragma region ========================== USER STRINGCMD EXECUTION ==========================
+
 
 // Q2 counterpart
 static void SV_BeginDemoserver(void)
@@ -367,7 +367,7 @@ static void SV_BeginDownload_f(void)
 	}
 }
 
-#pragma endregion
+
 
 typedef struct
 {
@@ -414,7 +414,7 @@ static void SV_ExecuteUserCommand(char* s)
 		ge->ClientCommand(sv_player);
 }
 
-#pragma region ========================== USER CMD EXECUTION ==========================
+
 
 static void SV_ClientThink(client_t* client, usercmd_t* cmd)
 {
@@ -571,4 +571,3 @@ void SV_ExecuteClientMessage(client_t* client)
 	}
 }
 
-#pragma endregion

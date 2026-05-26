@@ -40,7 +40,7 @@ typedef struct
 
 void SP_script_runner(edict_t* ent);
 
-#pragma region ========================== spawns array ==========================
+
 
 static const spawn_t spawns[] =
 {
@@ -386,7 +386,7 @@ static const spawn_t spawns[] =
 	{ NULL, NULL, CID_NONE }
 };
 
-#pragma endregion
+
 
 // Finds the spawn function for the entity and calls it.
 void ED_CallSpawn(edict_t* ent)

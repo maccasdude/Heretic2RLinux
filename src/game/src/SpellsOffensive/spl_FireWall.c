@@ -16,7 +16,7 @@
 #define FIREWORM_LIFETIME		1.0f
 #define MAX_FIREWALL_BOUNCES	3 //mxd
 
-#pragma region ========================== Utility functions ==========================
+
 
 static qboolean GetReflectedWallAngle(const edict_t* self, const trace_t* trace, const int contentmask, vec3_t angles) //mxd. Added to reduce code duplication.
 {
@@ -56,9 +56,9 @@ static qboolean GetReflectedWallAngle(const edict_t* self, const trace_t* trace,
 	return false;
 }
 
-#pragma endregion
 
-#pragma region ========================== FireBlast (unpowered) ==========================
+
+
 
 static edict_t* CreateFireBlast(const vec3_t start_pos, const vec3_t angles, edict_t* owner, const int health, const float timestamp)
 {
@@ -195,9 +195,9 @@ static void CastFireBlast(edict_t* caster, const vec3_t start_pos, const vec3_t 
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== FireWall (powered up) ==========================
+
+
 
 static edict_t* CreateFireWall(const vec3_t start_pos, const vec3_t angles, edict_t* owner, const int health, const float timestamp, const float side_speed)
 {
@@ -393,7 +393,7 @@ static void CastFireWall(edict_t* caster, const vec3_t start_pos, const vec3_t a
 	}
 }
 
-#pragma endregion
+
 
 // The Firewall spell is cast.
 void SpellCastFireWall(edict_t* caster, vec3_t start_pos, vec3_t aim_angles)

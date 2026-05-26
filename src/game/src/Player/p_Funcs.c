@@ -4,7 +4,7 @@
 // Copyright 1998 Raven Software
 //
 
-#include "p_funcs.h"
+#include "p_Funcs.h"
 #include "p_anims.h"
 #include "p_Client.h" //mxd
 #include "p_main.h"
@@ -26,7 +26,7 @@ entity_state_t* G_GetEntityStatePtr(edict_t* entity)
 	return &entity->s;
 }
 
-#pragma region ========================== Player rope movement logic ==========================
+
 
 static void PlayerClimbSound(const playerinfo_t* info, const char* snd_name)
 {
@@ -298,9 +298,9 @@ void G_PlayerActionCheckRopeMove(playerinfo_t* info) // Called from PlayerAction
 		ApplyPlayerRopeSwingVelocity(info);
 }
 
-#pragma endregion
 
-#pragma region ========================== Player rope animation logic ==========================
+
+
 
 static int PlayerActionRopeClimbUpAnimation(const playerinfo_t* info) //mxd
 {
@@ -496,9 +496,9 @@ int G_BranchLwrClimbing(playerinfo_t* info) // Called from BranchLwrClimbing() -
 	return PlayerActionRopeIdleAnimation(info);
 }
 
-#pragma endregion
 
-#pragma region ========================== Player rope action functions ==========================
+
+
 
 qboolean G_PlayerActionCheckRopeGrab(playerinfo_t* info, float stomp_org) // Called from PlayerActionCheckRopeGrab() --mxd. //TODO: remove 'stomp_org' arg?
 {
@@ -585,7 +585,7 @@ void G_PlayerClimbingMoveFunc(playerinfo_t* info, const float height, float var2
 	}
 }
 
-#pragma endregion
+
 
 qboolean G_PlayerActionCheckPuzzleGrab(playerinfo_t* info)
 {
@@ -968,7 +968,7 @@ void G_PlayerSpellStopShieldAttack(const playerinfo_t* info)
 	}
 }
 
-#pragma region ========================== Player actions ==========================
+
 
 void G_PlayerActionSwordAttack(const playerinfo_t* info, const int value)
 {
@@ -1037,7 +1037,7 @@ void G_PlayerActionSpellDefensive(playerinfo_t* info)
 		info->G_UseItem(info->self, "ring");
 }
 
-#pragma endregion
+
 
 // This is exceedingly gay that this has to be done this way...
 qboolean G_EntIsAButton(const edict_t* ent)

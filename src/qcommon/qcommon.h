@@ -7,7 +7,7 @@
 #pragma once
 
 #include <setjmp.h>
-#include "q_shared.h"
+#include "q_Shared.h"
 #include "Heretic2.h" //mxd. Moved to separate include, to pull only necessary stuff into launcher...
 #include "Version.h" //mxd
 
@@ -105,7 +105,7 @@ extern int COM_CheckParm(const char* parm);
 extern char* CopyString(const char* in);
 extern void Info_Print(const char* s);
 
-#pragma region ========================== PROTOCOL ==========================
+
 
 // Communications protocols.
 
@@ -347,9 +347,9 @@ enum clc_ops_e
 #define U_FM_FLAGS			(1 << 6)
 #define U_FM_SKIN			(1 << 7)
 
-#pragma endregion
 
-#pragma region ========================== CMD ==========================
+
+
 
 // Command text buffering and command execution.
 
@@ -428,9 +428,9 @@ extern void Cmd_ExecuteString(char* text);
 // so when they are typed in at the console, they will need to be forwarded.
 extern void Cmd_ForwardToServer(void);
 
-#pragma endregion
 
-#pragma region ========================== CVAR ==========================
+
+
 
 // cvar_t variables are used to hold scalar or string variables that can be changed or displayed at the console or prog code
 // as well as accessed directly in C code.
@@ -492,9 +492,9 @@ extern char* Cvar_Serverinfo(void);
 // This is set each time a CVAR_USERINFO variable is changed so that the client knows to send it to the server.
 extern qboolean userinfo_modified;
 
-#pragma endregion
 
-#pragma region ========================== SCREEN EFFECTS ==========================
+
+
 
 // Screen flash set.
 extern void Activate_Screen_Flash(int color);
@@ -514,9 +514,9 @@ extern void Reset_Screen_Shake(void);
 // Called by the camera code to determine our camera offset.
 extern void Perform_Screen_Shake(vec3_t out, float current_time);
 
-#pragma endregion
 
-#pragma region ========================== NET ==========================
+
+
 // Quake's interface to the networking layer.
 
 #define	PORT_ANY		(-1)
@@ -615,16 +615,16 @@ extern int Netchan_Transmit(netchan_t* chan, int length, const byte* data); // Q
 extern void Netchan_OutOfBandPrint(int net_socket, const netadr_t* adr, const char* format, ...); //mxd. Changed 'adr' arg type to netadr_t*.
 extern qboolean Netchan_Process(netchan_t* chan, sizebuf_t* msg);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER MOVEMENT CODE ==========================
+
+
 
 // Common between server and client so prediction matches.
 extern void Pmove(pmove_t* pmove, qboolean server);
 
-#pragma endregion
 
-#pragma region ========================== FILESYSTEM ==========================
+
+
 
 extern cvar_t* fs_configsdir; //mxd
 extern cvar_t * fs_gamedirvar; //mxd
@@ -653,9 +653,9 @@ extern qboolean FS_CopyFile(const char* src, const char* dst); //mxd
 Q2DLL_DECLSPEC extern void FS_FreeFile(void* buffer);
 extern void FS_CreatePath(char* path);
 
-#pragma endregion
 
-#pragma region ========================== MISC ==========================
+
+
 
 #define CFX_CULLING_DIST 1000.0f
 
@@ -696,9 +696,9 @@ extern void Qcommon_Frame(int usec);
 
 extern void CL_MusicGetCurrentTrackInfo(int* track, uint* track_pos, qboolean* looping); //mxd
 
-#pragma endregion
 
-#pragma region ========================== NON-PORTABLE SYSTEM SERVICES ==========================
+
+
 
 extern void Sys_Init(void);
 
@@ -706,9 +706,9 @@ extern char* Sys_ConsoleInput(void);
 extern void Sys_ConsoleOutput(const char* string);
 H2R_NORETURN extern void Sys_Quit(void);
 
-#pragma endregion
 
-#pragma region ========================== CLIENT / SERVER SYSTEMS ==========================
+
+
 
 extern jmp_buf abortframe; //mxd
 
@@ -721,4 +721,3 @@ extern void SV_Init(void);
 extern void SV_Shutdown(const char* finalmsg, qboolean reconnect);
 extern void SV_Frame(int usec);
 
-#pragma endregion

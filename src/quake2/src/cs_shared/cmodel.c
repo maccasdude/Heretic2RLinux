@@ -1464,7 +1464,7 @@ void CM_TransformedBoxTrace(const vec3_t start, const vec3_t end, const vec3_t m
 	VectorLerp(start, return_trace->fraction, end, return_trace->endpos);
 }
 
-#pragma region ========================== AREAPORTALS ==========================
+
 
 // Q2 counterpart
 static void FloodArea_r(carea_t* area, const int floodnum, const int floodvalid) //mxd. Added 'floodvalid' arg.
@@ -1593,4 +1593,3 @@ qboolean CM_HeadnodeVisible(const int headnode, byte* visbits)
 	return CM_HeadnodeVisible(node->children[1], visbits);
 }
 
-#pragma endregion

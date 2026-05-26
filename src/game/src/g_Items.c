@@ -20,7 +20,7 @@
 #define ITEM_COOP_ONLY		1
 #define ITEM_NO_DROP		2
 
-#pragma region ========================== RESPAWN LOGIC ==========================
+
 
 void RespawnedThink(edict_t* ent) //TODO: can't we just clear ent->think in place instead of doing this?
 {
@@ -95,9 +95,9 @@ static void SetRespawn(edict_t* ent)
 	ent->nextthink = level.time + delay;
 }
 
-#pragma endregion
 
-#pragma region ========================== PUZZLE ITEM PICKUP LOGIC ==========================
+
+
 
 static qboolean Pickup_Puzzle(const edict_t* ent, edict_t* other)
 {
@@ -116,9 +116,9 @@ static qboolean Pickup_Puzzle(const edict_t* ent, edict_t* other)
 	return false;
 }
 
-#pragma endregion
 
-#pragma region ========================== WEAPON PICKUP LOGIC ==========================
+
+
 
 qboolean AddWeaponToInventory(gitem_t* weapon, const edict_t* player)
 {
@@ -216,9 +216,9 @@ static qboolean Pickup_Weapon(const edict_t* ent, edict_t* other)
 	return false; // We already have it.
 }
 
-#pragma endregion
 
-#pragma region ========================== DEFENSE PICKUP LOGIC (OR IS IT DEFENCE?..) ==========================
+
+
 
 qboolean AddDefenseToInventory(gitem_t* defence, const edict_t* player)
 {
@@ -253,9 +253,9 @@ static qboolean Pickup_Defense(const edict_t* ent, edict_t* other)
 	return false;
 }
 
-#pragma endregion
 
-#pragma region ========================== AMMO PICKUP LOGIC ==========================
+
+
 
 static qboolean Add_AmmoToInventory(const edict_t* ent, const gitem_t* ammo, const int count, const int max)
 {
@@ -322,9 +322,9 @@ static qboolean Pickup_Ammo(const edict_t* ent, edict_t* other)
 	return false;
 }
 
-#pragma endregion
 
-#pragma region ========================== MANA PICKUP LOGIC ==========================
+
+
 
 // Separate routine so we can distinguish between ammo and mana.
 static qboolean Pickup_Mana(const edict_t* ent, edict_t* other)
@@ -332,9 +332,9 @@ static qboolean Pickup_Mana(const edict_t* ent, edict_t* other)
 	return Pickup_Ammo(ent, other);
 }
 
-#pragma endregion
 
-#pragma region ========================== HEALTH PICKUP LOGIC ==========================
+
+
 
 static qboolean Pickup_Health(const edict_t* ent, edict_t* other)
 {
@@ -369,9 +369,9 @@ static qboolean Pickup_Health(const edict_t* ent, edict_t* other)
 	return true;
 }
 
-#pragma endregion
 
-#pragma region ========================== GENERIC PICKUP LOGIC ==========================
+
+
 
 // Precaches all data needed for a given item.
 // This will be called for each item spawned in a level, and for each item in each client's inventory.
@@ -887,4 +887,3 @@ void SetItemNames(void)
 		gi.configstring(CS_ITEMS + i, item->pickup_name);
 }
 
-#pragma endregion

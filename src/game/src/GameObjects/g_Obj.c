@@ -21,7 +21,7 @@
 #include "Random.h"
 #include "Vector.h"
 
-#pragma region ========================== ObjectStaticsInit ==========================
+
 
 void DefaultObjectDieHandler(edict_t* self, G_Message_t* msg) //mxd. Originally defined in g_misc.c
 {
@@ -41,9 +41,9 @@ void ObjectStaticsInit(void)
 	classStatics[CID_OBJECT].msgReceivers[MSG_DEATH] = DefaultObjectDieHandler;
 }
 
-#pragma endregion
 
-#pragma region ========================== LeverStaticsInit ==========================
+
+
 
 static void ObjLeverUsed(edict_t* self, G_Message_t* msg) //mxd. Named 'lever_used' in original logic.
 {
@@ -55,9 +55,9 @@ void LeverStaticsInit(void)
 	classStatics[CID_LEVER].msgReceivers[MSG_DEATH] = ObjLeverUsed;
 }
 
-#pragma endregion
 
-#pragma region ========================== Utility functions ==========================
+
+
 
 // It is assumed all bounding boxes for objects were initially implemented as if the objects yaw was 0.
 void BboxYawAndScale(edict_t* self)
@@ -159,9 +159,9 @@ void ObjectInit(edict_t* self, const int health, const int mass, const MaterialI
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_banner, obj_banneronpole ==========================
+
+
 
 // QUAKED obj_banner (1 .5 0) (-8 -44 -296) (8 44 0) x ANIMATE
 // A really big banner.
@@ -195,9 +195,9 @@ void SP_obj_banneronpole(edict_t* self)
 	ObjectInit(self, 40, 200, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_barrel ==========================
+
+
 
 void ObjBarrelExplodeThink(edict_t* self) //mxd. Named 'barrel_explode_think' in original logic.
 {
@@ -260,9 +260,9 @@ void SP_obj_barrel(edict_t* self)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_broom, obj_chair1, obj_chair2, obj_chair3 ==========================
+
+
 
 // QUAKED obj_broom (1 .5 0) (-2 -2 -25) (2 2 25) INVULNERABLE
 // A broom.
@@ -325,9 +325,9 @@ void SP_obj_chair3(edict_t* self)
 	ObjectInit(self, 20, 50, MAT_GREYSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_chest1, obj_chest2, obj_chest3 ==========================
+
+
 
 void ObjChest1AnimThink(edict_t* self) //mxd. Named 'chest1_anim' in original logic.
 {
@@ -395,9 +395,9 @@ void SP_obj_chest3(edict_t* self)
 	ObjectInit(self, 60, 150, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_cog1 ==========================
+
+
 
 void ObjCog1AnimThink(edict_t* self) //mxd. Named 'cog1_anim' in original logic.
 {
@@ -440,9 +440,9 @@ void SP_obj_cog1(edict_t* self)
 	ObjectInit(self, 40, 20, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_corpse1, obj_corpse2 ==========================
+
+
 
 static void ObjCorpseInit(edict_t* self) //mxd. Named 'SpawnCorpse' in original logic.
 {
@@ -540,9 +540,9 @@ void SP_obj_corpse2(edict_t* self)
 	self->s.skinnum = irand(0, 1) * 2 + 1; //H2: 1. //mxd. Randomly select !skindmg.m8 or !skin1dmg.m8.
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_dying_elf ==========================
+
+
 
 void ObjDyingElfIdleThink(edict_t* self) //mxd. Named 'dying_elf_idle' in original logic.
 {
@@ -675,9 +675,9 @@ void SP_obj_dying_elf(edict_t* self)
 	self->nextthink = level.time + FRAMETIME;
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_sign1, obj_sign4 ==========================
+
+
 
 // QUAKED obj_sign1 (1 .5 0) (-29 -4 -16) (29 4 16) INVULNERABLE
 // A square sign coming out of a wall.
@@ -721,9 +721,9 @@ void SP_obj_sign4(edict_t* self)
 	ObjectInit(self, 40, 150, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_stalactite1, obj_stalactite2, obj_stalactite3 ==========================
+
+
 
 #define SF_DRIP		1 //mxd
 #define SF_DARKSKIN	2 //mxd
@@ -823,9 +823,9 @@ void SP_obj_stalactite3(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_stalagmite1, obj_stalagmite2, obj_stalagmite3 ==========================
+
+
 
 #undef SF_DARKSKIN //mxd (UGH!)
 #define SF_DARKSKIN	8 //mxd
@@ -884,9 +884,9 @@ void SP_obj_stalagmite3(edict_t* self)
 	ObjectInit(self, 200, 200, MAT_BROWNSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ==== obj_statue_corvus, obj_statue_dolphin1, obj_statue_dolphin2, obj_statue_dolphin3, obj_statue_dolphin4, obj_statue_guardian ====
+
+
 
 // QUAKED obj_statue_corvus (1 .5 0) (-16 -16 0) (16 16 32)
 // A statue of Corvus.
@@ -978,9 +978,9 @@ void SP_obj_statue_guardian(edict_t* self)
 	ObjectInit(self, 400, 300, MAT_METAL, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_table1, obj_table2, obj_throne,  ==========================
+
+
 
 // QUAKED obj_table1 (1 .5 0) (-28 -54 -18) (28 54 18) INVULNERABLE x x NOPUSH
 // A large wooden dining table with two legs.
@@ -1027,9 +1027,9 @@ void SP_obj_throne(edict_t* self)
 	ObjectInit(self, 150, 200, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_kettle, obj_cauldron, obj_firepot ==========================
+
+
 
 // QUAKED obj_kettle (1 .5 0) (-8 -8 0) (8 8 10) INVULNERABLE x x NOPUSH
 // A kettle.
@@ -1093,9 +1093,9 @@ void SP_obj_firepot(edict_t* self)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_statue_duckbill1, obj_statue_duckbill2 ==========================
+
+
 
 // QUAKED obj_statue_duckbill1 (1 .5 0) (-67 -24 -51) (67 24 51)
 // The duckbilled thing - tail to the left.
@@ -1124,9 +1124,9 @@ void SP_obj_statue_duckbill2(edict_t* self)
 	ObjectInit(self, 150, 100, MAT_GREYSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_seasonglobe ==========================
+
+
 
 #define GLOBE_ENABLED	1.0f //mxd
 #define GLOBE_DISABLED	0.0f //mxd
@@ -1261,9 +1261,9 @@ void SP_obj_seasonglobe(edict_t* bottom)
 	top->enemy = bottom;
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_stein, obj_scroll, obj_fountain_fish, obj_statue_boulderfish ==========================
+
+
 
 // QUAKED obj_stein (1 .5 0) (-2 -2 -3) (2 2 3) INVULNERABLE x x NOPUSH
 // A beer stein.
@@ -1323,9 +1323,9 @@ void SP_obj_statue_boulderfish(edict_t* self)
 	ObjectInit(self, 200, 150, MAT_GREYSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_pottedplant, obj_plant1, obj_plant2, obj_plant3 ==========================
+
+
 
 // QUAKED obj_pottedplant (1 .5 0) (-20 -20 -30) (20 20 30) INVULNERABLE x x NOPUSH
 // A potted plant with ferns.
@@ -1393,9 +1393,9 @@ void SP_obj_plant3(edict_t* self)
 	ObjectInit(self, 20, 50, MAT_LEAF, SOLID_NOT);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_treetop, obj_tree, obj_tree2, obj_tree3, obj_treetall, obj_treefallen ==========================
+
+
 
 // QUAKED obj_treetop (1 .5 0) (-176 -176 -125) (176 176 125)
 // A canopy for a tree.
@@ -1524,9 +1524,9 @@ void SP_obj_treefallen(edict_t* self)
 	ObjectInit(self, 40, 50, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region == obj_shovel, obj_woodpile, obj_fishtrap, obj_bench, obj_bucket, obj_ropechain, obj_wheelbarrow, obj_wheelbarrowdamaged, obj_urn, obj_bigcrystal ==
+
+
 
 // QUAKED obj_shovel (1 .5 0) (-8 -8 -20) (8 8 20)  INVULNERABLE
 // A shovel.
@@ -1691,9 +1691,9 @@ void SP_obj_bigcrystal(edict_t* self)
 	self->gravity = 0.0f;
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_moss1, obj_moss2, obj_moss3, obj_moss4, obj_moss5 ==========================
+
+
 
 // QUAKED obj_moss1 (1 .5 0) (-4 -10 -40) (4 10 40)
 void SP_obj_moss1(edict_t* self)
@@ -1759,9 +1759,9 @@ void SP_obj_moss5(edict_t* self)
 	ObjectInit(self, 10, 10, MAT_LEAF, SOLID_NOT);
 }
 
-#pragma endregion
 
-#pragma region ==================== obj_floor_candelabrum, obj_statue_dragonhead, obj_statue_dragon, obj_flagonpole ====================
+
+
 
 // QUAKED obj_floor_candelabrum (1 .5 0) (-8 -8 -35) (8 8 35) x ANIMATE x NOPUSH
 // A floor candelabrum.
@@ -1823,9 +1823,9 @@ void SP_obj_flagonpole(edict_t* self)
 	ObjectInit(self, 40, 200, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_lever1, obj_lever2, obj_lever3 ==========================
+
+
 
 void ObjLeverDownThink(edict_t* self) //mxd. Merged lever1downthink(), lever2downthink() and lever3downthink() from original logic.
 {
@@ -1913,9 +1913,9 @@ void SP_obj_lever3(edict_t* self)
 	ObjectInit(self, 150, 125, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_bush1, obj_bush2 ==========================
+
+
 
 // QUAKED obj_bush1 (1 .5 0) (-34 -34 -19) (34 34 19)
 // A dome-shaped bush.
@@ -1949,9 +1949,9 @@ void SP_obj_bush2(edict_t* self)
 	//mxd. Skip non-functional bush_touch() logic. //TODO: re-implement (would require a new sound, "objects/bush.wav" is not present in .paks)?
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_cactus, obj_cactus3, obj_cactus4 ==========================
+
+
 
 // Cactus will hurt player.
 void ObjCactusTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'cactus_touch' in original logic.
@@ -2048,9 +2048,9 @@ void SP_obj_cactus4(edict_t* self)
 	self->touch = ObjCactusTouch;
 }
 
-#pragma endregion
 
-#pragma region == obj_basket, obj_claybowl, obj_clayjar, obj_gorgonbones, obj_grass, obj_swampflat_top, obj_swampflat_bottom, obj_treestump, obj_jawbone ==
+
+
 
 // QUAKED obj_basket (1 .5 0) (-13 -13 -21) (13 13 21) INVULNERABLE x x NOPUSH
 // A tall basket with a lid on it.
@@ -2186,9 +2186,9 @@ void SP_obj_jawbone(edict_t* self)
 	ObjectInit(self, 25, 125, MAT_NONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_barrel_metal, obj_barrel_explosive ==========================
+
+
 
 // QUAKED obj_barrel_metal (1 .5 0) (-11 -12 -18) (11 12 18) INVULNERABLE x x NOPUSH
 // A metal barrel.
@@ -2222,9 +2222,9 @@ void SP_obj_barrel_explosive(edict_t* self) //TODO: explosive barrel doesn't exp
 	ObjectInit(self, 75, 125, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_gascan, obj_pipe1, obj_pipe2, obj_pipewheel ==========================
+
+
 
 // QUAKED obj_gascan (1 .5 0) (-8 -9 -13) (8 9 13) INVULNERABLE x x NOPUSH
 // A metal gas can.
@@ -2286,9 +2286,9 @@ void SP_obj_pipewheel(edict_t* self)
 	ObjectInit(self, 50, 125, MAT_METAL, SOLID_BBOX); //mxd. Uses MAT_WOOD in original logic.
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_minecart, obj_minecart2, obj_minecart3 ==========================
+
+
 
 // QUAKED obj_minecart (1 .5 0) (-18 -29 -20) (18 29 20) INVULNERABLE x x NOPUSH
 // A full mine cart used on the mine levels.
@@ -2337,9 +2337,9 @@ void SP_obj_minecart3(edict_t* self)
 	ObjectInit(self, 75, 125, MAT_METAL, SOLID_BBOX); //mxd. Uses MAT_WOOD in original logic.
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_andwallhanging, obj_pick ==========================
+
+
 
 // QUAKED obj_andwallhanging (1 .5 0) ( 0 -19 -24) (4 19 24) INVULNERABLE x x NOPUSH
 // A circular Andorian wall hanging.
@@ -2372,9 +2372,9 @@ void SP_obj_pick(edict_t* self)
 	ObjectInit(self, 75, 125, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_metalchunk1, obj_metalchunk2, obj_metalchunk3 ==========================
+
+
 
 // QUAKED obj_metalchunk1 (1 .5 0) ( -10 -26 -4) (10 26 4) INVULNERABLE x x NOPUSH
 // A chunk of twisted metal.
@@ -2423,9 +2423,9 @@ void SP_obj_metalchunk3(edict_t* self)
 	ObjectInit(self, 75, 125, MAT_METAL, SOLID_BBOX); //mxd. Uses MAT_WOOD in original logic.
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_rocks1, obj_rocks2 ==========================
+
+
 
 // QUAKED obj_rocks1 (1 .5 0) ( -12 -13 -4) (12 13 4) INVULNERABLE
 // A bunch of rocks together. For the MINE levels.
@@ -2457,9 +2457,9 @@ void SP_obj_rocks2(edict_t* self)
 	ObjectInit(self, 75, 125, MAT_GREYSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_hivepriestessssymbol ==========================
+
+
 
 void ObjHivePriestessSymbolThink(edict_t* self) //mxd. Named 'symbolthink' in original logic.
 {
@@ -2506,9 +2506,9 @@ void SP_obj_hivepriestessssymbol(edict_t* self) //TODO: rename to 'SP_obj_hivepr
 	ObjectInit(self, 75, 125, MAT_GREYSTONE, SOLID_NOT);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_queenthrone, obj_queenchair ==========================
+
+
 
 // QUAKED obj_queenthrone (1 .5 0) ( -40 -56 -49) (40 56 49)
 // A throne for the queen. For the HIVE levels.
@@ -2538,9 +2538,9 @@ void SP_obj_queenchair(edict_t* self)
 	ObjectInit(self, 75, 125, MAT_GREYSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ====================== obj_larvaegg, obj_larvabrokenegg, obj_cocoon, obj_cocoonopen, obj_venusflytrap ======================
+
+
 
 // QUAKED obj_larvaegg (1 .5 0) ( -6 -14 -6) (6 14 6) INVULNERABLE
 // An egg for the larva. For the HIVE levels.
@@ -2633,9 +2633,9 @@ void SP_obj_venusflytrap(edict_t* self)
 	self->target_ent = leaves;
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_statue_techeckriktomb, obj_statue_techeckrikright, obj_statue_techeckrikleft ==========================
+
+
 
 #define SF_NOGEM	16 //mxd
 
@@ -2700,9 +2700,9 @@ void SP_obj_statue_techeckrikleft(edict_t* self)
 	ObjectInit(self, 75, 125, MAT_GREYSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_spellbook ==========================
+
+
 
 void ObjSpellbookAnimThink(edict_t* self) //mxd. Named 'spellbook_anim' in original logic.
 {
@@ -2755,9 +2755,9 @@ void SP_obj_spellbook(edict_t* self)
 	self->target_ent = beam;
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_skullpole, obj_pot1, obj_pot2, obj_bottle1, obj_jug1 ==========================
+
+
 
 // QUAKED obj_skullpole (1 .5 0) ( -10 -10 -47) (10 10 47)
 // A pole with skulls on it.
@@ -2832,9 +2832,9 @@ void SP_obj_jug1(edict_t* self)
 	ObjectInit(self, 5, 125, MAT_POTTERY, SOLID_BBOX); //mxd. health:75 in original logic.
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_torture_table, obj_torture_wallring ==========================
+
+
 
 // QUAKED obj_torture_table (1 .5 0) ( -46 -14 -14) (46 14 14)
 // A table useful for wringing confessions from your broken and pitiful enemies.
@@ -2866,9 +2866,9 @@ void SP_obj_torture_wallring(edict_t* self)
 	ObjectInit(self, 75, 125, MAT_METAL, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_statue_tchecktrik_bust ==========================
+
+
 
 void ObjStatueTchecktrikBustUse(edict_t* self, edict_t* other, edict_t* activator) //mxd. Named 'statue_tchecktrik_bust_use' in original logic.
 {
@@ -2893,9 +2893,9 @@ void SP_obj_statue_tchecktrik_bust(edict_t* self)
 	ObjectInit(self, 250, 200, MAT_GREYSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_statue_sithraguard ==========================
+
+
 
 void ObjStatueSsithraGuardThink(edict_t* self) //mxd. Named 'statue_sithraguard_think' in original logic.
 {
@@ -2950,9 +2950,9 @@ void SP_obj_statue_sithraguard(edict_t* self) //TODO: rename to 'SP_obj_statue_s
 	ObjectInit(self, 250, 200, MAT_GREYSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_torture_ironmaiden ==========================
+
+
 
 //mxd
 static vec3_t ironmaiden_opened_mins = { -28.0f, -48.0f, -49.0f };
@@ -3055,9 +3055,9 @@ void SP_obj_torture_ironmaiden(edict_t* self)
 	ObjectInit(self, 250, 200, MAT_METAL, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_torture_rack, obj_torture_bed, obj_statue_saraphbust ==========================
+
+
 
 // QUAKED obj_torture_rack (1 .5 0) (-22 -46 -19) (22 46 19)
 // A torture rack.
@@ -3100,9 +3100,9 @@ void SP_obj_statue_saraphbust(edict_t* self)
 	ObjectInit(self, 250, 200, MAT_GREYSTONE, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_biotank ==========================
+
+
 
 void ObjBiotankContentsAnimThink(edict_t* self) //mxd. Named 'fish_anim' in original logic.
 {
@@ -3237,9 +3237,9 @@ void SP_obj_biotank(edict_t* self)
 	self->touch = ObjBiotankTouch;
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_tapper, obj_wallringplaque, obj_hangingdude ==========================
+
+
 
 // QUAKED obj_tapper (1 .5 0) (-2 -5 -2) (2 5 2) INVULNERABLE
 // A tapper for a keg.
@@ -3305,9 +3305,9 @@ void SP_obj_hangingdude(edict_t* self)
 	gi.linkentity(plaque);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_frypan, obj_eggpan, obj_nest, obj_choppeddude ==========================
+
+
 
 // QUAKED obj_frypan (1 .5 0) (-1 -3 -10) (1 3 10) INVULNERABLE
 // A pan which is hanging on a nail.
@@ -3369,9 +3369,9 @@ void SP_obj_choppeddude(edict_t* self)
 	ObjectInit(self, 250, 200, MAT_FLESH, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_lab_parts_container, obj_eyeball_jar, obj_lab_tray ==========================
+
+
 
 // QUAKED obj_lab_parts_container (1 .5 0) (-8 -8 -11) (8 8 11) INVULNERABLE x x NOPUSH
 // A container of moving body parts.
@@ -3419,9 +3419,9 @@ void SP_obj_lab_tray(edict_t* self)
 	ObjectInit(self, 40, 200, MAT_FLESH, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_hanging_ogle ==========================
+
+
 
 void ObjHangingOgleMoanThink(edict_t* self) //mxd. Named 'ogle_moan' in original logic.
 {
@@ -3469,9 +3469,9 @@ void SP_obj_hanging_ogle(edict_t* self)
 	self->target_ent = plaque; // Set, so plaque is removed when ogle is killed. //TODO: don't remove? 
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_ring_plaque2, obj_statue_sariph, obj_pushcart ==========================
+
+
 
 // QUAKED obj_ring_plaque2 (1 .5 0) (-2 -24 -20) (2 24 20)
 // More rings mounted into a wall plate.
@@ -3516,9 +3516,9 @@ void SP_obj_pushcart(edict_t* self)
 	ObjectInit(self, 250, 200, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_bookopen, obj_bookclosed ==========================
+
+
 
 // QUAKED obj_bookopen (1 .5 0) (-8 -16 -2) (8 16 2) INVULNERABLE x x NOPUSH
 // An open book.
@@ -3550,9 +3550,9 @@ void SP_obj_bookclosed(edict_t* self)
 	ObjectInit(self, 250, 200, MAT_WOOD, SOLID_BBOX);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_web ==========================
+
+
 
 // QUAKED obj_web (1 .5 0) (-2 -18 -20) (2 18 20) INVULNERABLE x x NOPUSH
 // A cobweb.
@@ -3570,9 +3570,9 @@ void SP_obj_web(edict_t* self) //TODO: has 20 unused frames of idle animation.
 	ObjectInit(self, 250, 200, MAT_WOOD, SOLID_NOT);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_larva ==========================
+
+
 
 #define LARVA_FAST_TWITCH 16
 
@@ -3623,9 +3623,9 @@ void SP_obj_larva(edict_t* self)
 	self->touch = ObjLarvaTouch;
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_bloodsplat ==========================
+
+
 
 // QUAKED obj_bloodsplat (1 .5 0) (-8 -8 -2) (8 8 2) INVULNERABLE x x NOPUSH
 // A red blood splat.
@@ -3643,4 +3643,3 @@ void SP_obj_bloodsplat(edict_t* self)
 	ObjectInit(self, 2, 100, MAT_FLESH, SOLID_NOT);
 }
 
-#pragma endregion

@@ -17,7 +17,7 @@
 //		the ground to defeat the friction addition in the new system.
 #define PHYS_SCALER	1.4f //mxd. Named 'UNJH_VALUE' in original version.
 
-#pragma region ========================== Animation sequence names ==========================
+
 
 char* SeqNames[ASEQ_MAX] = //TODO: unused.
 {
@@ -276,9 +276,9 @@ char* SeqNames[ASEQ_MAX] = //TODO: unused.
 	"ASEQ_SSWIM_FAST",
 };
 
-#pragma endregion
 
-#pragma region ========================== Player animation tables ==========================
+
+
 
 int PlayerAnimWeaponSwitchSeq[WEAPON_READY_MAX][WEAPON_READY_MAX] =
 {
@@ -1081,9 +1081,9 @@ seq_data2_t PlayerSeqData2[ASEQ_MAX] =
 	{ false,	14,		ASEQ_NONE,	ASEQ_STAND },		// ASEQ_SSWIM_FAST
 };
 
-#pragma endregion
 
-#pragma region ========================== Chicken animation tables ==========================
+
+
 
 // Chicken tables. Pretty much duplicated the above tables - only with Chicken animations instead.
 // Most are null entries so we match the ones above, but they do nothing, since your a chicken. All you can do is cluck and peck. And die.
@@ -1611,9 +1611,9 @@ PLAYER_API paceldata_t PlayerChickenData[ASEQ_MAX] =
 	{ &chickenp_move_dummy,		0,	0,	PLAYER_FLAG_FALLBREAK },										// ASEQ_SSWIM_FAST
 };
 
-#pragma endregion
 
-#pragma region ========================== PLAYER SPELL ATTACK ANIMATIONS ==========================
+
+
 
 // Throwing a fireball.
 static panimframe_t player_frames_spellfireball[] =
@@ -1657,9 +1657,9 @@ static panimframe_t player_frames_spellarray[] =
 };
 panimmove_t player_move_spellarray = PANIMMOVE(player_frames_spellarray, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER SPHERE OF ANNIHILIATION ANIMATIONS ==========================
+
+
 
 // Start casting sphere-of-annihilation (part1).
 static panimframe_t player_frames_spellspherestart[] =
@@ -1718,9 +1718,9 @@ static panimframe_t player_frames_spellspherefire4[] =
 };
 panimmove_t player_move_spellspherefire4 = PANIMMOVE(player_frames_spellspherefire4, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER SPELL OF LOBBY BALL ANIMATIONS ==========================
+
+
 
 // Throw Ripper, the unpowered Iron Doom.
 static panimframe_t player_frames_spellripper[] =
@@ -1751,9 +1751,9 @@ static panimframe_t player_frames_spellbigball[] =
 };
 panimmove_t player_move_spellbigball = PANIMMOVE(player_frames_spellbigball, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER SPELL OF FIREWALL ANIMATIONS ==========================
+
+
 
 // Cast firewall.
 static panimframe_t player_frames_spellfirewall[] =
@@ -1773,9 +1773,9 @@ static panimframe_t player_frames_spellfirewall[] =
 };
 panimmove_t player_move_spellfirewall = PANIMMOVE(player_frames_spellfirewall, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER BOW AND ARROW ANIMATIONS ==========================
+
+
 
 // Bringing bow up and preparing to draw arrow.
 static panimframe_t player_frames_bowready[] =
@@ -1862,9 +1862,9 @@ static panimframe_t player_frames_bowunready[] =
 };
 panimmove_t player_move_bowunready = PANIMMOVE(player_frames_bowunready, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER HELLSTAFF ANIMATIONS ==========================
+
+
 
 // Bringing hellstaff up.
 static panimframe_t player_frames_hellready[] =
@@ -1896,9 +1896,9 @@ static panimframe_t player_frames_hellunready[] =
 };
 panimmove_t player_move_hellunready = PANIMMOVE(player_frames_hellunready, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER DEFENSIVE SPELL ANIMATION ==========================
+
+
 
 // Casting the current defensive spell.
 static panimframe_t player_frames_spelldefensive[] =
@@ -1913,9 +1913,9 @@ static panimframe_t player_frames_spelldefensive[] =
 };
 panimmove_t player_move_spelldefensive = PANIMMOVE(player_frames_spelldefensive, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER SPELL CHANGE ANIMATION ==========================
+
+
 
 // Reaching into his pouch and grabbing a new spell.
 static panimframe_t player_frames_spellchange[] =
@@ -1932,9 +1932,9 @@ static panimframe_t player_frames_spellchange[] =
 };
 panimmove_t player_move_spellchange = PANIMMOVE(player_frames_spellchange, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER DRAW WEAPON ANIMATIONS ==========================
+
+
 
 // Making the sword staff appear.
 static panimframe_t player_frames_drawsword[] =
@@ -1979,9 +1979,9 @@ static panimframe_t player_frames_drawbow[] =
 };
 panimmove_t player_move_drawbow = PANIMMOVE(player_frames_drawbow, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER CHANGE WEAPON ANIMATIONS ==========================
+
+
 
 // Making staff disappear.
 static panimframe_t player_frames_stowsword[] =
@@ -2153,9 +2153,9 @@ static panimframe_t player_frames_bow2bow[] =
 };
 panimmove_t player_move_bow2bow = PANIMMOVE(player_frames_bow2bow, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER STAFF ATTACK ANIMATIONS ==========================
+
+
 
 // Spin attack while running.
 static panimframe_t player_frames_staffatkspin[] =
@@ -2424,9 +2424,9 @@ static panimframe_t player_frames_staffblockedright[] =
 };
 panimmove_t player_move_staffblockedright = PANIMMOVE(player_frames_staffblockedright, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER CREEP ANIMATIONS ==========================
+
+
 
 static panimframe_t player_frames_creepforward[] =
 {
@@ -2523,9 +2523,9 @@ static panimframe_t player_frames_creep_strafe_right[] =
 };
 panimmove_t player_move_creep_strafe_right = PANIMMOVE(player_frames_creep_strafe_right, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER CROUCH-CREEP ANIMATIONS ==========================
+
+
 
 // Crouch-creep forward.
 static panimframe_t player_frames_crouch_creep_forward[] =
@@ -2566,9 +2566,9 @@ static panimframe_t player_frames_crouch_creep_right[] =
 };
 panimmove_t player_move_crouch_creep_right = PANIMMOVE(player_frames_crouch_creep_right, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER JOG ANIMATIONS ==========================
+
+
 
 // Start jogging.
 static panimframe_t player_frames_walkstart[] =
@@ -2598,9 +2598,9 @@ static panimframe_t player_frames_walkstop[] =
 };
 panimmove_t player_move_walkstop = PANIMMOVE(player_frames_walkstop, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER RUN ANIMATIONS ==========================
+
+
 
 // Start the run cycle.
 static panimframe_t player_frames_runstart[] =
@@ -2629,9 +2629,9 @@ static panimframe_t player_frames_runstop[] =
 };
 panimmove_t player_move_runstop = PANIMMOVE(player_frames_runstop, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER MOVE BACKWARDS ANIMATIONS ==========================
+
+
 
 // Creep backwards loop.
 static panimframe_t player_frames_creepback[] =
@@ -2670,9 +2670,9 @@ static panimframe_t player_frames_walkback[] =
 };
 panimmove_t player_move_walkback = PANIMMOVE(player_frames_walkback, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER STRAFE ANIMATIONS ==========================
+
+
 
 // Move sideways left loop.
 static panimframe_t player_frames_strafeleft[] =
@@ -2710,9 +2710,9 @@ static panimframe_t player_frames_straferight_end[] =
 };
 panimmove_t player_move_straferight_end = PANIMMOVE(player_frames_straferight_end, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER JUMP ANIMATIONS ==========================
+
+
 
 // Crouching down to jump.
 static panimframe_t player_frames_standjumpstart[] =
@@ -2953,9 +2953,9 @@ static panimframe_t player_frames_jumprightflip[] =
 };
 panimmove_t player_move_jumprightflip = PANIMMOVE(player_frames_jumprightflip, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER FALLING ANIMATIONS ==========================
+
+
 
 // Falling with arms up.
 static panimframe_t player_frames_fall[] =
@@ -3002,9 +3002,9 @@ static panimframe_t player_frames_fallwalkloop[] =
 };
 panimmove_t player_move_fallwalkloop = PANIMMOVE(player_frames_fallwalkloop, NULL);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER LANDING ANIMATIONS ==========================
+
+
 
 // Transition from standing with legs together to idle stance.
 static panimframe_t player_frames_land1[] =
@@ -3029,9 +3029,9 @@ static panimframe_t player_frames_land3[] =
 };
 panimmove_t player_move_land3 = PANIMMOVE(player_frames_land3, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER CROUCHING ANIMATIONS ==========================
+
+
 
 // One frame, preparing to jump and roll forward.
 static panimframe_t player_frames_crouchdown[] =
@@ -3054,9 +3054,9 @@ static panimframe_t player_frames_crouchup[] =
 };
 panimmove_t player_move_crouchup = PANIMMOVE(player_frames_crouchup, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER ROLL DIVE ANIMATIONS ==========================
+
+
 
 // From jog, dive forward into a roll.
 static panimframe_t player_frames_rolldivefwdwalk[] =
@@ -3091,9 +3091,9 @@ static panimframe_t player_frames_rolldivefwdrun[] =
 };
 panimmove_t player_move_rolldivefwdrun = PANIMMOVE(player_frames_rolldivefwdrun, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER POLE VAULT ANIMATIONS ==========================
+
+
 
 // Transition from jog to pole vault.
 static panimframe_t player_frames_polevault1walk[] =
@@ -3132,9 +3132,9 @@ static panimframe_t player_frames_polevault2[] =
 };
 panimmove_t player_move_polevault2 = PANIMMOVE(player_frames_polevault2, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER SWIM ANIMATIONS ==========================
+
+
 
 // Idle swim animation.
 static panimframe_t player_frames_sswimidle[] =
@@ -3303,9 +3303,9 @@ static panimframe_t player_frames_swim_fast[] =
 };
 panimmove_t player_move_swim_fast = PANIMMOVE(player_frames_swim_fast, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER UNDERWATER SWIM ANIMATIONS ==========================
+
+
 
 // Transition from swim idle to swim forward.
 static panimframe_t player_frames_uswimfwd_go[] =
@@ -3479,9 +3479,9 @@ static panimframe_t player_frames_resurface[] =
 };
 panimmove_t	player_move_resurface = PANIMMOVE(player_frames_resurface, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER PULL UP / VAULT ANIMATIONs ==========================
+
+
 
 // Transition, pulling himself up wall to standing.
 static panimframe_t player_frames_pullupwall[] =
@@ -3559,9 +3559,9 @@ static panimframe_t player_frames_overhang[] =
 };
 panimmove_t player_move_overhang = PANIMMOVE(player_frames_overhang, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER HANDSPRING ANIMATIONS ==========================
+
+
 
 // Start of backwards handspring.
 static panimframe_t player_frames_jumpfliphandspringgo[] =
@@ -3585,9 +3585,9 @@ static panimframe_t player_frames_jumpfliphandspring[] =
 };
 panimmove_t player_move_jumpfliphandspring = PANIMMOVE(player_frames_jumpfliphandspring, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER BACKFLIP ANIMATION ==========================
+
+
 
 // Backwards flip.
 static panimframe_t player_frames_flipback[] =
@@ -3606,9 +3606,9 @@ static panimframe_t player_frames_flipback[] =
 };
 panimmove_t player_move_jumpflipback = PANIMMOVE(player_frames_flipback, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER PIVOT ANIMATIONS ==========================
+
+
 
 // Start of pivot left.
 static panimframe_t player_frames_pivotleftgo[] =
@@ -3656,9 +3656,9 @@ static panimframe_t player_frames_pivotrightend[] =
 };
 panimmove_t player_move_pivotrightend = PANIMMOVE(player_frames_pivotrightend, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER NOTHING ANIMATION ==========================
+
+
 
 //mxd. Fall-back animation used by ASEQ_NONE. Frame pick is strange...
 static panimframe_t player_frames_nothing[] =
@@ -3667,9 +3667,9 @@ static panimframe_t player_frames_nothing[] =
 };
 panimmove_t player_move_nothing = PANIMMOVE(player_frames_nothing, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER PUZZLE PIECE / BUTTON / LEVER ANIMATIONS ==========================
+
+
 
 // Taking a puzzle piece.
 static panimframe_t player_frames_takepuzzlepiece[] =
@@ -3744,9 +3744,9 @@ static panimframe_t player_frames_pushleverright[] =
 };
 panimmove_t player_move_pushleverright = PANIMMOVE(player_frames_pushleverright, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER TUMBLE ANIMATIONS ==========================
+
+
 
 //TODO: unused
 static panimframe_t player_frames_tumbleon1[] =
@@ -3774,9 +3774,9 @@ static panimframe_t player_frames_tumbleon2[] =
 };
 panimmove_t player_move_tumbleon2 = PANIMMOVE(player_frames_tumbleon2, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER CROUCH PIVOT ANIMATIONS ==========================
+
+
 
 // Pivot to left while crouched.
 static panimframe_t player_frames_crouchpivotleft[] =
@@ -3798,9 +3798,9 @@ static panimframe_t player_frames_crouchpivotright[] =
 };
 panimmove_t player_move_crouchpivotright = PANIMMOVE(player_frames_crouchpivotright, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER FLIP ANIMATIONS ==========================
+
+
 
 // Flip to left side.
 static panimframe_t player_frames_jumpflipleft[] =
@@ -3891,9 +3891,9 @@ static panimframe_t player_frames_forward_flip_r[] =
 };
 panimmove_t	player_move_forward_flip_r = PANIMMOVE(player_frames_forward_flip_r, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER STAIR/SLOPE STANDING ANIMATIONS ==========================
+
+
 
 // Left
 static panimframe_t player_frames_lstair4[] = { FRAME_Lstair1, NULL, 0, 0, 0, NULL, 0, NULL };
@@ -3921,9 +3921,9 @@ panimmove_t player_move_rstair12 = PANIMMOVE(player_frames_rstair12, PlayerAnimL
 static panimframe_t player_frames_rstair16[] = { FRAME_Rstair4, NULL, 0, 0, 0, NULL, 0, NULL };
 panimmove_t player_move_rstair16 = PANIMMOVE(player_frames_rstair16, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER IDLE ANIMATIONS ==========================
+
+
 
 // Standing and breathing.
 static panimframe_t player_frames_stand[] =
@@ -4212,9 +4212,9 @@ static panimframe_t player_frames_idle_wipe_brow[] =
 };
 panimmove_t player_move_idle_wipe_brow = PANIMMOVE(player_frames_idle_wipe_brow, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER PAIN ANIMATIONS ==========================
+
+
 
 // Pain A.
 static panimframe_t player_frames_paina[] =
@@ -4234,9 +4234,9 @@ static panimframe_t player_frames_painb[] =
 };
 panimmove_t player_move_painb = PANIMMOVE(player_frames_painb, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER FALLING OFF LEDGES ANIMATIONS ==========================
+
+
 
 // Fall left.
 static panimframe_t player_frames_fallleft[] =
@@ -4290,9 +4290,9 @@ static panimframe_t player_frames_fallrightend[] =
 };
 panimmove_t player_move_fallrightend = PANIMMOVE(player_frames_fallrightend, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER DEATH ANIMATIONS ==========================
+
+
 
 static panimframe_t player_frames_death1[] =
 {
@@ -4433,9 +4433,9 @@ static panimframe_t player_frames_death_choke[] =
 };
 panimmove_t player_move_death_choke = PANIMMOVE(player_frames_death_choke, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER DROWN ANIMATIONS ==========================
+
+
 
 // Player drown animation.
 static panimframe_t player_frames_drown[] =
@@ -4521,9 +4521,9 @@ static panimframe_t player_frames_drown_idle[] =
 };
 panimmove_t player_move_drown_idle = PANIMMOVE(player_frames_drown_idle, PlayerAnimUpperUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER SLIDE ANIMATIONS ==========================
+
+
 
 // Slide forward.
 static panimframe_t player_frames_slide_forward[] =
@@ -4561,9 +4561,9 @@ static panimframe_t player_frames_slide_backward[] =
 };
 panimmove_t	player_move_slide_backward = PANIMMOVE(player_frames_slide_backward, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER ROLL ANIMATIONS ==========================
+
+
 
 // Roll left.
 static panimframe_t player_frames_roll_l[] =
@@ -4610,9 +4610,9 @@ static panimframe_t player_frames_roll_b[] =
 };
 panimmove_t	player_move_roll_b = PANIMMOVE(player_frames_roll_b, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER ROPE CLIMB ANIMATIONS ==========================
+
+
 
 // Transfer onto rope.
 static panimframe_t player_frames_climb_on[] =
@@ -4791,9 +4791,9 @@ static panimframe_t player_frames_climb_off[] =
 };
 panimmove_t	player_move_climb_off = PANIMMOVE(player_frames_climb_off, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER KNOCKDOWN ANIMATIONS ==========================
+
+
 
 // Knockdown animation.
 static panimframe_t player_frames_knockdown[] =
@@ -4840,9 +4840,9 @@ static panimframe_t player_frames_knockdown_evade[] =
 };
 panimmove_t	player_move_knockdown_evade = PANIMMOVE(player_frames_knockdown_evade, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER VISITS SHRINE ANIMATION ==========================
+
+
 
 // Use shrine animation
 static panimframe_t player_frames_shrine[] =
@@ -4870,9 +4870,9 @@ static panimframe_t player_frames_shrine[] =
 };
 panimmove_t	player_move_shrine = PANIMMOVE(player_frames_shrine, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER FORWARD/BACK-STRAFING ANIMATIONS ==========================
+
+
 
 //NOTE: If you alter the walking, running, or creeping animations, those MUST be directly mirrored in these structures!
 
@@ -4952,9 +4952,9 @@ static panimframe_t player_frames_walkb_strafe_right[] =
 };
 panimmove_t player_move_walkb_strafe_right = PANIMMOVE(player_frames_walkb_strafe_right, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER 180 TURN ANIMATION ==========================
+
+
 
 // Turn 180.
 static panimframe_t player_frames_turn180[] =
@@ -4967,9 +4967,9 @@ static panimframe_t player_frames_turn180[] =
 };
 panimmove_t player_move_turn180 = PANIMMOVE(player_frames_turn180, PlayerAnimLowerUpdate);
 
-#pragma endregion
 
-#pragma region ========================== PLAYER DASH ANIMATIONS ==========================
+
+
 
 // Dashing left start.
 static panimframe_t player_frames_dash_left_go[] =
@@ -5013,4 +5013,3 @@ static panimframe_t player_frames_dash_right[] =
 };
 panimmove_t player_move_dash_right = PANIMMOVE(player_frames_dash_right, PlayerAnimLowerUpdate);
 
-#pragma endregion

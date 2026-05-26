@@ -42,7 +42,7 @@ static FILE* logfile;
 static int server_state;
 static int com_last_error = 0; //mxd
 
-#pragma region ========================== CLIENT / SERVER INTERACTIONS ====================
+
 
 static int rd_target;
 static char* rd_buffer;
@@ -275,9 +275,9 @@ void Com_SetServerState(const int state)
 	server_state = state;
 }
 
-#pragma endregion
 
-#pragma region ========================== SIZEBUFFER HANDLING =============================
+
+
 
 // Q2 counterpart
 void SZ_Init(sizebuf_t* buf, byte* data, const int length)
@@ -337,9 +337,9 @@ void SZ_Print(sizebuf_t* buf, const char* data)
 		memcpy((byte*)SZ_GetSpace(buf, len - 1) - 1, data, len); // Write over trailing 0.
 }
 
-#pragma endregion
 
-#pragma region ========================== COMMAND LINE ARGS PROCESSING ====================
+
+
 
 // Q2 counterpart
 // Returns the position (1 to argc-1) in the program's argument list where the given parameter appears,
@@ -391,7 +391,7 @@ static void COM_InitArgv(const int argc, char** argv)
 	}
 }
 
-#pragma endregion
+
 
 // Q2 counterpart
 char* CopyString(const char* in)
@@ -451,7 +451,7 @@ void Info_Print(const char* s)
 	}
 }
 
-#pragma region ========================== ZONE MEMORY ALLOCATION ==========================
+
 
 #define Z_MAGIC		0x1d1d
 
@@ -540,7 +540,7 @@ void* Z_Malloc(const int size)
 	return Z_TagMalloc(size, 0);
 }
 
-#pragma endregion
+
 
 // For proxy protecting.
 byte COM_BlockSequenceCheckByte(const byte* base, int length, const int sequence)

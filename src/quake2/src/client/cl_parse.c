@@ -346,7 +346,7 @@ static void CL_ParseDownload(void)
 	CL_RequestNextDownload();
 }
 
-#pragma region ========================== SERVER CONNECTING MESSAGES ==========================
+
 
 static void CL_ParseServerData(void)
 {
@@ -767,9 +767,9 @@ static void CL_ParseConfigString(void)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== ACTION MESSAGES ==========================
+
+
 
 //mxd. Written by SV_StartSound() / SV_StartEventSound().
 static void CL_ParseStartSoundPacket(void)
@@ -1171,4 +1171,3 @@ void CL_ParseServerMessage(void)
 		CL_WriteDemoMessage();
 }
 
-#pragma endregion

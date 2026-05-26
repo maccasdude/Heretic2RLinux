@@ -20,7 +20,7 @@ static char* argv[MAX_NUM_ARGVS];
 static char console_text[256];
 static int console_textlen;
 
-#pragma region ========================== SYSTEM IO ==========================
+
 
 H2R_NORETURN void Sys_Error(const char* error, ...)
 {
@@ -62,9 +62,9 @@ H2R_NORETURN void Sys_Quit(void)
 	exit(0);
 }
 
-#pragma endregion
 
-#pragma region ========================== DLL HANDLING ==========================
+
+
 
 void Sys_LoadGameDll(const char* dll_name, HINSTANCE* hinst, DWORD* checksum)
 {
@@ -120,7 +120,7 @@ void Sys_UnloadGameDll(const char* name, HINSTANCE* hinst)
 	*hinst = NULL;
 }
 
-#pragma endregion
+
 
 void Sys_Init(void)
 {

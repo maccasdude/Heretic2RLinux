@@ -20,7 +20,7 @@
 #include "Random.h"
 #include "Vector.h"
 
-#pragma region ========================== Spreader Base Info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -57,9 +57,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 static void SpreaderCrouch(edict_t* self) //mxd. Named 'spreader_crouch' in original logic. //TODO: inline?
 {
@@ -172,9 +172,9 @@ static void SpreaderTakeOff(edict_t* self) //mxd. Named 'spreaderTakeOff' in ori
 	SetAnim(self, ANIM_FLY);
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void SpreaderCheckMoodMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'spreader_check_mood' in original logic.
 {
@@ -439,9 +439,9 @@ static void SpreaderJumpMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named
 	SetAnim(self, ANIM_FJUMP);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 static qboolean SpreaderThrowHead(edict_t* self, float damage, const qboolean dismember_ok) //mxd. Added to simplify logic.
 {
@@ -725,9 +725,9 @@ void SpreaderDropDownThink(edict_t* self) //mxd. Named 'spreaderDropDown' in ori
 	self->nextthink = level.time + FRAMETIME; //mxd. Use define.
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void spreader_show_grenade(edict_t* self) //mxd. Named 'spreader_showgrenade' in original logic.
 {
@@ -989,7 +989,7 @@ void spreader_inair_go(edict_t* self) //mxd. Named 'spreader_go_inair' in origin
 	SetAnim(self, ANIM_INAIR);
 }
 
-#pragma endregion
+
 
 void SpreaderStaticsInit(void)
 {

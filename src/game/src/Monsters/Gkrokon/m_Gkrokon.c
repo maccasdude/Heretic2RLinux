@@ -24,7 +24,7 @@
 #define GKROKON_SPOO_SPEED	450.0f
 #define GKROKON_SPOO_ARC	150.0f
 
-#pragma region ========================== Gkrokon base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -56,9 +56,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Spoo functions ==========================
+
+
 
 void GkrokonSpooTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surface)
 {
@@ -191,9 +191,9 @@ void gkrokon_spoo_attack(edict_t* self) //mxd. Named 'GkrokonSpoo' in original l
 	self->monsterinfo.misc_debounce_time = level.time + flrand(0.5f, 3.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void GkrokonFallbackMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'beetle_skitter' in original logic.
 {
@@ -418,9 +418,9 @@ static void GkrokonDeathPainMsgHandler(edict_t* self, G_Message_t* msg) //mxd. N
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== GkrokonDismember logic ==========================
+
+
 
 static qboolean GkrokonCanThrowNode(edict_t* self, const int node_id, int* throw_nodes) //mxd. Named 'canthrownode_gk' in original logic.
 {
@@ -630,9 +630,9 @@ void GkrokonDismember(edict_t* self, int damage, HitLocation_t hl) //mxd. Named 
 		self->monsterinfo.aiflags |= (AI_COWARD | AI_NO_MELEE | AI_NO_MISSILE);
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void gkrokon_bite(edict_t* self, float right_side) //mxd. Named 'GkrokonBite' in original logic.
 {
@@ -770,7 +770,7 @@ void gkrokon_set_crouch_anim(edict_t* self) //mxd. Named 'beetle_to_crouch' in o
 	gkrokon_pause(self);
 }
 
-#pragma endregion
+
 
 void GkrokonStaticsInit(void)
 {

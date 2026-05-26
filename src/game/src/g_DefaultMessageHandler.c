@@ -55,7 +55,7 @@ G_MsgReceiver_t DefaultMessageReceivers[NUM_MESSAGES] =
 	NULL,						// MSG_CHECK_MOOD
 };
 
-#pragma region ================================ MESSAGE HANDLERS ================================
+
 
 void DefaultMsgHandler(edict_t* self, G_Message_t* msg)
 {
@@ -133,9 +133,9 @@ void DeadMsgHandler(edict_t* self, G_Message_t* msg)
 		HandleMessage(self, msg); //mxd
 }
 
-#pragma endregion
 
-#pragma region ================================ MESSAGE RECIEVERS ================================
+
+
 
 void DefaultReceiver_Repulse(edict_t* self, G_Message_t* msg)
 {
@@ -169,4 +169,3 @@ void DefaultReceiver_Unsuspend(edict_t* self, G_Message_t* msg)
 	self->flags &= ~FL_SUSPENDED;
 }
 
-#pragma endregion

@@ -116,6 +116,73 @@ void FS_FCloseFile(FILE* f)
 	fclose(f);
 }
 
+#if !(defined(_WIN32) || defined(WIN32))
+#include <dirent.h>
+#include <strings.h>
+
+// Find a directory entry by case-insensitive match. Returns 0 (success)
+// or -1 (not found). On success the on-disk name goes into `out`.
+static int FS_DirLookupCI(const char* dir, const char* want, char* out, size_t outsz)
+{
+	DIR* d = opendir(dir);
+	if (!d) return -1;
+	struct dirent* de;
+	int rc = -1;
+	while ((de = readdir(d)) != NULL) {
+		if (strcasecmp(de->d_name, want) == 0) {
+			if (strcmp(de->d_name, want) == 0) {
+				strncpy(out, de->d_name, outsz - 1);
+				out[outsz - 1] = '\0';
+				rc = 0;
+				break;
+			}
+			// Tentative case-insensitive match - keep looking for exact.
+			strncpy(out, de->d_name, outsz - 1);
+			out[outsz - 1] = '\0';
+			rc = 0;
+		}
+	}
+	closedir(d);
+	return rc;
+}
+
+// Walk a multi-component path like "video/intro.smk", fixing case of each
+// component to match whatever exists on disk under `searchroot`.
+// On success opens the file into *fp and returns 1, else 0.
+int FS_TryOpenCaseInsensitive(const char* searchroot, const char* rel, FILE** fp)
+{
+	char built[MAX_OSPATH];
+	char part[256];
+	snprintf(built, sizeof(built), "%s", searchroot);
+
+	const char* cursor = rel;
+	while (*cursor) {
+		const char* slash = strchr(cursor, '/');
+		size_t n;
+		int is_last;
+		if (slash) { n = (size_t)(slash - cursor); is_last = 0; }
+		else       { n = strlen(cursor);           is_last = 1; }
+		if (n >= sizeof(part)) return 0;
+		memcpy(part, cursor, n);
+		part[n] = '\0';
+
+		char found[256];
+		if (FS_DirLookupCI(built, part, found, sizeof(found)) != 0)
+			return 0;
+
+		size_t blen = strlen(built);
+		if (blen + 1 + strlen(found) + 1 >= sizeof(built)) return 0;
+		built[blen] = '/';
+		strcpy(built + blen + 1, found);
+
+		if (is_last) break;
+		cursor = slash + 1;
+	}
+
+	return (fopen_s(fp, built, "rb") == 0) ? 1 : 0;
+}
+#endif
+
 // Finds the file in the search path. Returns file size and an open FILE*.
 // Used for streaming data out of either a pak file or a separate file.
 int FS_FOpenFile(const char* filename, FILE** file)
@@ -208,7 +275,19 @@ int FS_FOpenFile(const char* filename, FILE** file)
 			Com_sprintf(netpath, sizeof(netpath), "%s/%s", search->filename, filename);
 
 			if (fopen_s(file, netpath, "rb") != 0) //mxd. fopen -> fopen_s
+			{
+#if !(defined(_WIN32) || defined(WIN32))
+				// Linux case-insensitive fallback: the engine's hardcoded
+				// pathnames don't match the case used in the H2 install
+				// ("default.cfg" vs "Default.cfg", "video/" vs "VIDEO/" etc).
+				// Walk the directory and find a case-insensitive match.
+				if (FS_TryOpenCaseInsensitive(search->filename, filename, file)) {
+					Com_DDPrintf(2, "FindFile (ci): %s\n", filename);
+					return FS_FileLength(*file);
+				}
+#endif
 				continue;
+			}
 
 			Com_DDPrintf(2, "FindFile: %s\n", netpath); //mxd. Com_DPrintf() -> Com_DDPrintf(), to reduce console spam when developer 1.
 

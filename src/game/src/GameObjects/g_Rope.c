@@ -28,7 +28,7 @@ enum
 	RM_TENDRIL
 };
 
-#pragma region ========================== Sir Nate the Tutorial Chicken ==========================
+
 
 #define NATE_HEALTH	10000
 
@@ -400,9 +400,9 @@ static void TutorialChickenSpawn(edict_t* self) //mxd. Named 'spawn_hanging_chic
 	gi.linkentity(chicken);
 }
 
-#pragma endregion
 
-#pragma region ========================== obj_rope ==========================
+
+
 
 static void ObjRopeUpdateUser(edict_t* self) //mxd. Named 'rope_think' in original logic.
 {
@@ -690,4 +690,3 @@ void SP_obj_rope(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion

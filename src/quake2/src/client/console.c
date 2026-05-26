@@ -345,7 +345,7 @@ void Con_Print(const char* txt)
 	}
 }
 
-#pragma region ========================== DRAWING ==========================
+
 
 // The input line scrolls horizontally if typing goes beyond the right edge.
 static void Con_DrawInput(void)
@@ -510,4 +510,3 @@ void Con_DrawConsole(float frac)
 	Con_DrawInput();
 }
 
-#pragma endregion

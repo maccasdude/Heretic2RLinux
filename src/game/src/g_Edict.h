@@ -70,7 +70,9 @@ struct edict_s
 
 	MsgQueue_t msgQ;
 	G_MessageHandler_t msgHandler;
-	enum ClassID_e classID; //mxd. int in original version.
+	int classID; //mxd. Originally 'int'; this was changed to 'enum ClassID_e' but
+	             //     that introduces a circular-include incomplete-type error
+	             //     on GCC, so revert to int. ClassID_e values implicit-convert.
 
 	void (*think)(edict_t* self);
 	void (*ai)(edict_t* self);

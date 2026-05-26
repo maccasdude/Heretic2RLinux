@@ -120,7 +120,7 @@ static int IN_TranslateSDLtoQ2Key(const uint keysym)
 	}
 }
 
-#pragma region ========================== MOUSE CONTROL ==========================
+
 
 // Q2 counterpart
 static void IN_MLookDown(void) //TODO: ancient "mouselook only when "mlook" key is pressed" logic. Remove?
@@ -191,9 +191,9 @@ static void IN_MouseMove(usercmd_t* cmd)
 	mouse_y = 0.0f;
 }
 
-#pragma endregion
 
-#pragma region ========================== GAMEPAD CONTROL ==========================
+
+
 
 static void IN_InitController(void)
 {
@@ -215,7 +215,7 @@ static void IN_ControllerMove(usercmd_t* cmd)
 	//TODO: implement later...
 }
 
-#pragma endregion
+
 
 void IN_Init(void)
 {

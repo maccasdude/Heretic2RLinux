@@ -213,15 +213,58 @@ qboolean GLimp_InitGraphics(const int width, const int height)
 
 	// Let renderer prepare things (set OpenGL attributes).
 	// FIXME: This is no longer necessary, the renderer could and should pass the flags when calling this function.
-	const SDL_WindowFlags flags = re.PrepareForWindow();
+	SDL_WindowFlags flags = re.PrepareForWindow();
 
 	if ((int)flags == -1)
 		return false; // It's PrepareForWindow() job to log an error.
 
-	// Create the window. Will be borderless if width and height match current screen resolution.
+	// Read fullscreen mode preference:
+	//   0 = windowed (resizable)
+	//   1 = exclusive fullscreen (changes display mode)
+	//   2 = borderless fullscreen window (matches desktop)
+	cvar_t* vid_fs = Cvar_Get("vid_fullscreen", "0", CVAR_ARCHIVE);
+	const int fs_mode = (int)vid_fs->value;
+
+	int win_width = width;
+	int win_height = height;
+
+	if (fs_mode == 1)
+	{
+		// Exclusive fullscreen: request SDL_WINDOW_FULLSCREEN at create time.
+		// Width/height stay at user's requested resolution; SDL will pick a
+		// matching display mode.
+		flags |= SDL_WINDOW_FULLSCREEN;
+	}
+	else if (fs_mode == 2)
+	{
+		// Borderless fullscreen: create a borderless window covering the
+		// entire desktop. We override the requested dimensions to match
+		// the desktop so the window genuinely fills the screen.
+		const SDL_DisplayMode* desktop = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+		if (desktop != NULL)
+		{
+			win_width = desktop->w;
+			win_height = desktop->h;
+		}
+		flags |= SDL_WINDOW_BORDERLESS;
+	}
+	// fs_mode == 0: leave flags alone -> resizable windowed.
+	else
+	{
+		flags |= SDL_WINDOW_RESIZABLE;
+	}
+
+	// Create the window.
 	// If this fails, R_SetMode() will retry with gl_state.prev_mode.
-	if (!CreateSDLWindow(flags, width, height))
+	if (!CreateSDLWindow(flags, win_width, win_height))
 		return false;
+
+	// For borderless fullscreen we need to additionally position the window
+	// at 0,0 - SDL_WINDOWPOS_CENTERED may leave it slightly off on some WMs.
+	if (fs_mode == 2 && window != NULL)
+	{
+		SDL_SetWindowPosition(window, 0, 0);
+	}
 
 	last_flags = (int)flags;
 
@@ -232,8 +275,8 @@ qboolean GLimp_InitGraphics(const int width, const int height)
 	// Another bug or design failure in SDL: when we are not high dpi aware, the drawable size returned by SDL may be too small.
 	// It seems like the window decoration are taken into account when they shouldn't. It can be seen when creating a fullscreen window.
 	// Work around that by always using the resolution and not the drawable size when we are not high dpi aware.
-	viddef.width = width;
-	viddef.height = height;
+	viddef.width = win_width;
+	viddef.height = win_height;
 
 	SetSDLIcon();
 	SDL_ShowCursor();

@@ -11,7 +11,7 @@
 #define MAX_FRAMES		64
 #define MAX_FRAMENAME	64
 
-#pragma region ========================== .PAK ==========================
+
 
 // The .pak files are just a linear collapse of a directory tree.
 #define IDPAKHEADER		(('K' << 24) + ('C' << 16) + ('A' << 8) + 'P')
@@ -32,9 +32,9 @@ typedef struct
 
 #define MAX_FILES_IN_PACK	6144 // Q2: 4096
 
-#pragma endregion
 
-#pragma region ========================== .BK ==========================
+
+
 
 #define IDBOOKHEADER	(('K' << 24) + ('O' << 16) + ('O' << 8) + 'B')
 #define BOOK_VERSION	2
@@ -63,9 +63,9 @@ typedef struct book_s
 	bookframe_t	bframes[MAX_FRAMES];
 } book_t;
 
-#pragma endregion
 
-#pragma region ========================== .SP2 sprite file format ==========================
+
+
 
 #define IDSPRITEHEADER	(('2' << 24) + ('S' << 16) + ('D' << 8) + 'I') // Little-endian "IDS2".
 #define SPRITE_VERSION	2
@@ -87,9 +87,9 @@ typedef struct
 	dsprframe_t frames[1]; // Variable sized (up to MAX_FRAMES).
 } dsprite_t;
 
-#pragma endregion
 
-#pragma region ========================== .M8 texture file format ==========================
+
+
 
 #define MIP_VERSION		2
 #define PAL_SIZE		256
@@ -109,9 +109,9 @@ typedef struct miptex_s
 	int value;
 } miptex_t;
 
-#pragma endregion
 
-#pragma region ========================== .M32 texture file format ==========================
+
+
 
 #define MIP32_VERSION	4
 
@@ -145,9 +145,9 @@ typedef struct miptex32_s
 	int unused[20];			// Future expansion to maintain compatibility with h2 //TODO: ???
 } miptex32_t;
 
-#pragma endregion
 
-#pragma region ========================== .BSP file format ==========================
+
+
 
 #define IDBSPHEADER	(('P' << 24) + ('S' << 16) + ('B' << 8) + 'I') // Little-endian "IBSP"
 #define BSPVERSION	38
@@ -343,4 +343,3 @@ typedef struct
 	int firstareaportal;
 } darea_t;
 
-#pragma endregion

@@ -9,7 +9,7 @@
 #include "g_func_Utility.h"
 #include "Vector.h"
 
-#pragma region ========================== func_button ==========================
+
 
 #define SF_TOUCH	1 //mxd
 
@@ -161,9 +161,9 @@ void SP_func_button(edict_t* self)
 	self->msgHandler = DefaultMsgHandler;
 }
 
-#pragma endregion
 
-#pragma region ========================== func_button support logic ==========================
+
+
 
 static void FuncButtonOnDeathMessage(edict_t* self, G_Message_t* msg) //mxd. Named 'button_killed2' in original logic.
 {
@@ -177,4 +177,3 @@ void FuncButtonStaticsInit(void)
 	classStatics[CID_BUTTON].msgReceivers[MSG_DEATH] = FuncButtonOnDeathMessage;
 }
 
-#pragma endregion

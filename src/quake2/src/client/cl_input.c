@@ -14,8 +14,8 @@ static uint frame_msec;
 static uint old_sys_frame_time;
 static float quickturn_time; // H2
 
-int pred_pm_flags; // H2
-int pred_pm_w_flags; // H2
+extern int pred_pm_flags; // H2
+extern int pred_pm_w_flags; // H2
 
 qboolean command_down; // H2
 

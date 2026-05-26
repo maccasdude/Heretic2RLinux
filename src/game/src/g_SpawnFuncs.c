@@ -372,7 +372,7 @@ void SpawnEntities(const char* map_name, char* entities, const char* spawn_point
 	G_FindTeams();
 }
 
-#pragma region ========================== worldspawn ==========================
+
 
 #define SF_NOBODIES	1 //mxd
 
@@ -515,4 +515,3 @@ void SP_worldspawn(edict_t* ent)
 	gi.configstring(CS_LIGHTS + 63, "a"); // 63 testing.
 }
 
-#pragma endregion

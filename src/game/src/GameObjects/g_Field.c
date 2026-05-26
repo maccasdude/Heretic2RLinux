@@ -29,7 +29,7 @@ static void InitField(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma region ========================== trigger_fogdensity ==========================
+
 
 void FogDensityTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'FogDensity_touch' in original logic.
 {
@@ -51,9 +51,9 @@ void SP_trigger_fogdensity(edict_t* self)
 	self->solid = SOLID_TRIGGER;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_push ==========================
+
+
 
 #define SF_FORCE_ONCE	1
 
@@ -133,9 +133,9 @@ void SP_trigger_push(edict_t* self)
 	self->TriggerActivated = TriggerPushActivated;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_damage ==========================
+
+
 
 #define SF_START_OFF		1 //mxd
 #define SF_TOGGLE			2 //mxd
@@ -224,9 +224,9 @@ void SP_trigger_damage(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_gravity ==========================
+
+
 
 void TriggerGravityTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'GravityField_Touch' in original logic.
 {
@@ -253,9 +253,9 @@ void SP_trigger_gravity(edict_t* self)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_monsterjump ==========================
+
+
 
 void TriggerMonsterJumpTouch(edict_t* self, edict_t* other, cplane_t* plane, csurface_t* surf) //mxd. Named 'MonsterJumpField_Touch' in original logic.
 {
@@ -287,9 +287,9 @@ void SP_trigger_monsterjump(edict_t* self)
 	self->touch = TriggerMonsterJumpTouch;
 }
 
-#pragma endregion
 
-#pragma region ========================== trigger_goto_buoy ==========================
+
+
 
 #define SF_BUOY_TOUCH			1
 #define SF_BUOY_IGNORE_ENEMY	2
@@ -477,4 +477,3 @@ void SP_trigger_goto_buoy(edict_t* self)
 	}
 }
 
-#pragma endregion

@@ -20,6 +20,13 @@ typedef struct Message_s
 	SinglyLinkedList_t parms;
 } CE_Message_t;
 
+// Forward declaration at file scope - without this, the appearances of
+// `struct client_entity_s` inside the function-pointer typedefs below would
+// create a per-typedef scoped tag (per C99 6.7.2.3p6), and any later
+// re-declaration would be considered a different type by strict compilers
+// like GCC.
+struct client_entity_s;
+
 typedef void (*CE_MessageHandler_t)(struct client_entity_s* self, CE_Message_t* msg);
 typedef void (*CE_MsgReceiver_t)(struct client_entity_s* self, CE_Message_t* msg);
 

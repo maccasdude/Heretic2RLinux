@@ -324,7 +324,7 @@ static void DropWeapons(edict_t* self, const int damage, const int which_weapons
 	}
 }
 
-#pragma region ========================== PlayerDismember() logic ==========================
+
 
 //mxd. Added to avoid code duplication.
 static void PlayerSetDamagedSkin(edict_t* self, const int body_part)
@@ -643,7 +643,7 @@ void PlayerDismember(edict_t* self, edict_t* other, const int damage, HitLocatio
 	Player_UpdateModelAttributes(self); //mxd
 }
 
-#pragma endregion
+
 
 void PlayerDecapitate(edict_t* self, edict_t* other) //mxd. Named 'player_decap' in original logic.
 {
@@ -737,7 +737,7 @@ static void PlayerLeaderEffect(void) //mxd. Named 'player_leader_effect' in orig
 
 static void ClientObituary(edict_t* self, edict_t* attacker)
 {
-#pragma region ========================== Message arrays ==========================
+
 
 	static const short killed_self[MOD_MAX] =
 	{
@@ -841,7 +841,7 @@ static void ClientObituary(edict_t* self, edict_t* attacker)
 		GM_OBIT_TORN			// MOD_TORN
 	};
 
-#pragma endregion
+
 
 	assert(self->client != NULL);
 
@@ -1096,7 +1096,7 @@ void PlayerDie(edict_t* self, edict_t* inflictor, edict_t* attacker, int damage,
 	gi.linkentity(self);
 }
 
-#pragma region ========================== SelectSpawnPoint logic ==========================
+
 
 // Returns the distance to the nearest player from the given spot.
 static float PlayersRangeFromSpot(const edict_t* spot)
@@ -1213,9 +1213,9 @@ void SelectSpawnPoint(const edict_t* ent, vec3_t origin, vec3_t angles)
 	VectorCopy(spot->s.angles, angles);
 }
 
-#pragma endregion
 
-#pragma region ========================== Respawn / body que logic ==========================
+
+
 
 void InitBodyQue(void)
 {
@@ -1356,7 +1356,7 @@ void ClientRespawn(edict_t* self) //TODO: rename to Respawn().
 	self->client->ps.pmove.pm_time = 50; // Q2: 14 //TODO: does nothing on its own. Should also set PMF_TIME_TELEPORT flag. Or not needed at all?..
 }
 
-#pragma endregion
+
 
 void SpawnInitialPlayerEffects(edict_t* ent)
 {
@@ -1855,7 +1855,7 @@ void ClientBegin(edict_t* ent)
 	ClientEndServerFrame(ent);
 }
 
-#pragma region ========================== ClientUserinfoChanged logic ==========================
+
 
 //mxd. Split from ClientUserinfoChanged().
 static void SetDMPlayerSkin(const edict_t* ent, const char* skin_name, const int player_num)
@@ -2149,7 +2149,7 @@ void ClientUserinfoChanged(edict_t* ent, char* userinfo) //TODO: add int userinf
 	strncpy_s(pers->userinfo, userinfo_size, userinfo, userinfo_size - 1); //mxd. strncpy -> strncpy_s
 }
 
-#pragma endregion
+
 
 // Called when a player begins connecting to the server.
 // The game can refuse entrance to a client by returning false.

@@ -7,7 +7,7 @@
 #include "client.h"
 #include "cl_effects.h"
 #include "cs_shared/cmodel.h"
-#include "g_playstats.h"
+#include "g_PlayStats.h"
 #include "Random.h"
 #include "Vector.h"
 
@@ -267,7 +267,7 @@ void V_Init(void)
 	crosshair = Cvar_Get("crosshair", "0", CVAR_ARCHIVE);
 }
 
-#pragma region ========================== H2 SCREEN FLASH ==========================
+
 
 void Activate_Screen_Flash(const int color)
 {
@@ -287,9 +287,9 @@ int Is_Screen_Flashing(void)
 	return screen_flash_color;
 }
 
-#pragma endregion
 
-#pragma region ========================== H2 SCREEN SHAKE ==========================
+
+
 
 void Activate_Screen_Shake(const float intensity, const float duration, const float current_time, const int flags)
 {
@@ -360,4 +360,3 @@ void Reset_Screen_Shake(void)
 	sshake.flags = 0;
 }
 
-#pragma endregion

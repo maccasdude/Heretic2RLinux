@@ -401,8 +401,10 @@ static void CL_DeltaEntity(frame_t* frame, const int newnum, const entity_state_
 		{
 			if (cl.clientinfo[ent->current.number].model != NULL)
 				model = *cl.clientinfo[ent->current.number].model;
-			else
+			else if (cl.baseclientinfo.model != NULL) //mxd-style NULL check. Mirrors the check at the other call site below.
 				model = *cl.baseclientinfo.model;
+			else
+				model = NULL;
 		}
 		else
 		{

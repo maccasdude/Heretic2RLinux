@@ -29,7 +29,7 @@
 
 #define IMP_PROJECTILE_SEARCH_RADIUS	1024.0f //mxd. Named 'IMP_PROJECTILE_RADIUS' in original logic.
 
-#pragma region ========================== Imp base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -55,9 +55,9 @@ static int sounds[NUM_SOUNDS];
 static const vec3_t dead_imp_mins = { -16.0f, -16.0f, 0.0f }; //mxd
 static const vec3_t dead_imp_maxs = {  16.0f,  16.0f, 16.0f }; //mxd
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 static qboolean ImpCanMove(const edict_t* self, const float dist) //mxd. Named 'imp_check_move' in original logic. //TODO: very similar to HarpyCanMove(). Move to m_move.c as M_FlyMonsterCanMove().
 {
@@ -190,9 +190,9 @@ static qboolean ImpCheckSwoop(const edict_t* self, const vec3_t goal_pos) //mxd.
 	return (trace.ent == self->enemy);
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void ImpDeathPainMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'imp_death_pain' in original logic.
 {
@@ -270,9 +270,9 @@ static void ImpWatchMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'im
 	SetAnim(self, ANIM_PERCH);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void ImpIsBlocked(edict_t* self, trace_t* trace) //mxd. Named 'imp_blocked' in original logic.
 {
@@ -297,9 +297,9 @@ void ImpIsBlocked(edict_t* self, trace_t* trace) //mxd. Named 'imp_blocked' in o
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 // Various sound functions.
 void imp_flap_noise(edict_t* self)
@@ -793,9 +793,9 @@ void imp_fly_move(edict_t* self) //mxd. Named 'move_imp_fly' in original logic.
 		imp_check_dodge(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== Imp Fireball ==========================
+
+
 
 static void ImpFireballFizzle(edict_t* self) //mxd. Named 'FireFizzle' in original logic.
 {
@@ -947,7 +947,7 @@ void imp_fireball(edict_t* self)
 	gi.linkentity(proj);
 }
 
-#pragma endregion
+
 
 void ImpStaticsInit(void)
 {

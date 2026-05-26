@@ -21,7 +21,7 @@
 #define RAT_MIN_ATTACK_SUPPORTERS	2 //mxd. Named 'MAX_RAT_ATTACK' in original logic.
 #define RAT_IGNORE_DISTANCE			150.0f //mxd. Named 'MAX_RAT_IGNORE_DIST' in original logic.
 
-#pragma region ========================== Rat Base Info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -52,9 +52,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void RatDeathPainMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'rat_dead_pain' in original logic.
 {
@@ -194,9 +194,9 @@ static void RatEatMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'rat_
 		SetAnim(self, ANIM_EATING2);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void RatUse(edict_t* self, edict_t* other, edict_t* activator) //mxd. Named 'rat_use' in original logic.
 {
@@ -218,9 +218,9 @@ void RatTouch(edict_t* ent, edict_t* other, cplane_t* plane, csurface_t* surf) /
 		T_Damage(ent, other, other, vec3_down, self_pos, vec3_origin, irand(4, 6), 0, DAMAGE_AVOID_ARMOR, MOD_DIED); //mxd. flrand() in original logic.
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void rat_chew(edict_t* self) //mxd. Named 'ratchew' in original logic.
 {
@@ -430,7 +430,7 @@ void rat_ai_run(edict_t* self, float distance)
 	}
 }
 
-#pragma endregion
+
 
 void RatStaticsInit(void)
 {

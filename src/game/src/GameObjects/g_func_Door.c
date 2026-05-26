@@ -11,7 +11,7 @@
 #include "g_func_Utility.h"
 #include "Vector.h"
 
-#pragma region ========================== func_door, func_door_rotating, func_water ==========================
+
 
 #define SF_DOOR_ROTATING_X_AXIS		64
 #define SF_DOOR_ROTATING_Y_AXIS		128
@@ -691,9 +691,9 @@ void SP_func_water(edict_t* self)
 	self->classname = "func_door";
 }
 
-#pragma endregion
 
-#pragma region ========================== func_door_secret ==========================
+
+
 
 #define SF_SECRET_ALWAYS_SHOOT	1
 #define SF_SECRET_1ST_LEFT		2
@@ -910,9 +910,9 @@ void SP_func_door_secret(edict_t* ent)
 	ent->classname = "func_door";
 }
 
-#pragma endregion
 
-#pragma region ========================== func_door support logic ==========================
+
+
 
 void FuncDoorSetSounds(edict_t* ent) //mxd. Named 'door_sounds' in original logic.
 {
@@ -1060,4 +1060,3 @@ void FuncDoorStaticsInit(void)
 	classStatics[CID_FUNC_DOOR].msgReceivers[G_MSG_UNSUSPEND] = FuncDoorActivate;
 }
 
-#pragma endregion

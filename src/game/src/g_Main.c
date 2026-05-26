@@ -5,12 +5,13 @@
 //
 
 #include "g_Main.h" //mxd
+#include <stddef.h>   // for offsetof
 #include "cl_strings.h"
 #include "Monsters/g_AI.h" //mxd
 #include "g_Combat.h" //mxd
 #include "Commands/g_ClientCommands.h" //mxd
 #include "Physics/g_Physics.h"
-#include "g_playstats.h"
+#include "g_PlayStats.h"
 #include "Saving/g_Save.h" //mxd
 #include "g_Skeletons.h"
 #include "g_SpawnFuncs.h" //mxd
@@ -20,13 +21,17 @@
 #include "Player/p_View.h" //mxd
 #include "Scripting/sc_Main.h" //mxd
 #include "FX.h"
-#include "g_items.h" //mxd
+#include "g_Items.h" //mxd
 #include "Random.h"
 #include "g_Utilities.h"
 #include "Vector.h"
 #include "g_Local.h"
 
-#define GAME_DECLSPEC	__declspec(dllexport)
+#if defined(_WIN32) || defined(WIN32)
+#define GAME_DECLSPEC __declspec(dllexport)
+#else
+#define GAME_DECLSPEC __attribute__((visibility("default")))
+#endif
 
 game_locals_t game;
 level_locals_t level;

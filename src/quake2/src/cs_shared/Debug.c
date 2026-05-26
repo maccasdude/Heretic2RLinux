@@ -8,7 +8,7 @@
 #include "client/client.h"
 #include "Vector.h"
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && (defined(_WIN32) || defined(WIN32))
 	#include <windows.h>
 #endif
 
@@ -34,7 +34,11 @@ Q2DLL_DECLSPEC void DBG_IDEPrint(const char* fmt, ...)
 	va_end(argptr);
 
 	strcat_s(msg, sizeof(msg), "\n");
+#if defined(_WIN32) || defined(WIN32)
 	OutputDebugString(msg);
+#else
+	fputs(msg, stderr);
+#endif
 #endif
 }
 

@@ -111,7 +111,7 @@ void SV_DropClient(client_t* drop)
 	drop->name[0] = 0;
 }
 
-#pragma region ========================== CONNECTIONLESS COMMANDS ==========================
+
 
 // Q2 counterpart
 // Builds the string that is sent as heartbeats and status replies.
@@ -485,7 +485,7 @@ static void SV_ConnectionlessPacket(void)
 		Com_Printf("bad connectionless packet from %s:\n%s\n", NET_AdrToString(&net_from), s);
 }
 
-#pragma endregion
+
 
 // Q2 counterpart
 // Updates the cl->ping variables.

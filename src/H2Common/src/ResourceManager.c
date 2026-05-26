@@ -4,12 +4,12 @@
 // Copyright 1998 Raven Software
 //
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && (defined(_WIN32) || defined(WIN32))
 	#include <windows.h>
 #endif
 
 #include "ResourceManager.h"
-#include "q_shared.h"
+#include "q_Shared.h"
 
 typedef struct ResMngr_Block_s
 {

@@ -12,7 +12,7 @@
 #include "Vector.h"
 #include "g_Local.h"
 
-#pragma region ========================== Light support logic ==========================
+
 
 void LightStaticsInit(void) //TODO: remove?
 {
@@ -84,9 +84,9 @@ void SpawnFlame(edict_t* self, const vec3_t origin)
 	SpawnFlameDamager(self, origin);
 }
 
-#pragma endregion
 
-#pragma region ========================== light ==========================
+
+
 
 #define SF_LIGHT_START_OFF	1
 
@@ -124,9 +124,9 @@ void SP_light(edict_t* self)
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== env_fire ==========================
+
+
 
 #define SF_ENV_FIRE_OFF			8
 #define SF_ENV_FIRE_MOVEABLE	16
@@ -244,9 +244,9 @@ void SP_env_fire(edict_t* self)
 	SpawnFlameDamager(self, self->s.origin);
 }
 
-#pragma endregion
 
-#pragma region ========================== Many variants of light_torch... ==========================
+
+
 
 #define SF_TORCH_ANIMATE	2 //mxd
 #define SF_TORCH_STARTOFF	8
@@ -569,4 +569,3 @@ void SP_light_buglight(edict_t* self)
 	TorchInit(self);
 }
 
-#pragma endregion

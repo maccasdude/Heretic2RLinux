@@ -6,7 +6,7 @@
 
 #pragma once
 
-#pragma region ========================== SHRINE STATS ==========================
+
 
 #define LIGHT_DURATION				90.0f	// Duration of shrine light on player - in seconds.
 #define REFLECT_DURATION_SINGLE		30.0f	// Duration of shrine reflect on player - in seconds.
@@ -28,9 +28,9 @@
 #define SHRINE_HEALTH		100
 #define SHRINE_MAX_HEALTH	150
 
-#pragma endregion
 
-#pragma region ========================== MANA ITEM STATS ==========================
+
+
 
 #define HALF_OFF_MANA	20
 #define FULL_OFF_MANA	40
@@ -41,9 +41,9 @@
 #define HALF_COMBO_MANA	30
 #define FULL_COMBO_MANA	30
 
-#pragma endregion
 
-#pragma region ========================== SPELL ITEM STATS ==========================
+
+
 
 // In seconds.
 #define RESPAWN_TIME_WEAPON		30.0f
@@ -85,4 +85,3 @@
 #define MAX_PHOENIX_AMMO		20
 #define MAX_HELL_AMMO			200
 
-#pragma endregion

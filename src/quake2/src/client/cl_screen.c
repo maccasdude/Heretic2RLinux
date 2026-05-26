@@ -65,7 +65,7 @@ typedef struct
 	int width;
 } HudNumInfo_t; // H2
 
-#pragma region ========================== BAR GRAPHS ==========================
+
 
 // A new packet was just parsed.
 void CL_AddNetgraph(void)
@@ -126,7 +126,7 @@ static void SCR_DrawDebugGraph(void)
 	re.DrawFill(x, y - (int)(scr_graphscale->value * 200.0f), 256, 1, TextPalette[P_RED]);
 }
 
-#pragma endregion
+
 
 // Sets scr_vrect, the coordinates of the rendered window.
 static void SCR_CalcVrect(void)

@@ -8,7 +8,7 @@
 #include "Vector.h"
 #include "g_Local.h"
 
-#pragma region ========================== env_dust, env_muck ==========================
+
 
 void EnvDustUse(edict_t* self, edict_t* other, edict_t* activator) //mxd. Named 'env_dust_use' in original logic.
 {
@@ -58,9 +58,9 @@ void SP_env_muck(edict_t* self)
 	gi.linkentity(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== env_smoke ==========================
+
+
 
 #define SF_START_OFF	8
 
@@ -143,9 +143,9 @@ void SP_env_smoke(edict_t* self)
 		SetupEnvSmokeEffect(self); //mxd
 }
 
-#pragma endregion
 
-#pragma region ========================== env_sun1 ==========================
+
+
 
 #define SF_SUN_WHITE		1 //mxd
 #define SF_SUN_WHITE_HALO	2 //mxd
@@ -206,4 +206,3 @@ void SP_env_sun1(edict_t* self)
 	self->nextthink = level.time + FRAMETIME;
 }
 
-#pragma endregion

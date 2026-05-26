@@ -6,7 +6,7 @@
 
 #pragma once
 
-#pragma region ========================== Model definitions ==========================
+
 
 #define FRAME_ss_breath1      	0
 #define FRAME_ss_breath2      	1
@@ -619,7 +619,7 @@
 #define MESH__RIGHT2SPIKE			14
 #define MESH__CAPHEAD				15
 
-#pragma endregion
+
 
 typedef enum AnimID_e
 {

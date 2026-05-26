@@ -485,7 +485,7 @@ void SV_StartEventSound(const byte event_id, const float leveltime, const vec3_t
 		SV_MulticastSound(origin, (use_phs ? MULTICAST_PHS : MULTICAST_ALL), msg_start);
 }
 
-#pragma region ========================== FRAME UPDATES ==========================
+
 
 static qboolean SV_SendClientDatagram(client_t* client, const qboolean send_client_data)
 {
@@ -686,4 +686,3 @@ void SV_SendPrepClientMessages(void) // YQ2
 	}
 }
 
-#pragma endregion

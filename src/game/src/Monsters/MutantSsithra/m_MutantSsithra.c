@@ -19,7 +19,7 @@
 #include "Player.h" //mxd
 #include "g_Local.h"
 
-#pragma region ========================== Mutant Ssithra base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -42,9 +42,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 // Create the guts of the ssithra arrow.
 static void MssithraArrowInit(edict_t* arrow) //mxd. Named 'create_ssithra_arrow' in original logic.
@@ -123,9 +123,9 @@ static qboolean MssithraCheckMood(edict_t* self) //mxd. Named 'mssithraCheckMood
 	return false;
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void MssithraStandMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'mssithra_stand' in original logic.
 {
@@ -206,9 +206,9 @@ static void MssithraMissileMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Na
 		SetAnim(self, ANIM_IDLE1);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void MssithraArrowExplodeThink(edict_t* self) //mxd. Named 'mssithra_missile_explode' in original logic.
 {
@@ -272,9 +272,9 @@ void MssithraPostThink(edict_t* self) //mxd. Named 'mssithra_postthink' in origi
 	self->next_post_think = level.time + 0.05f;
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void mssithra_dead(edict_t* self)
 {
@@ -451,7 +451,7 @@ void mssithra_check_shoot_loop(edict_t* self) //mxd. Named 'mssithraCheckShotLoo
 		SetAnim(self, ANIM_SHOOT_DETRANS); //TODO: never do this when health < 50% (or 33%)?
 }
 
-#pragma endregion
+
 
 void MssithraStaticsInit(void)
 {

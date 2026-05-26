@@ -22,7 +22,7 @@
 #define PRIESTESS_JUMP_FRAMES	10.0f //mxd. Named 'PRIESTESS_JUMPFRAMES' in original logic.
 #define PRIESTESS_HOP_DISTANCE	0.0f //mxd. Named 'PRIESTESS_HOPDIST' in original logic.
 
-#pragma region ========================== High Priestess Base Info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -68,9 +68,9 @@ enum HighPriestessAttackStates_e
 	AS_JUMP_LEFT,
 };
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 // Create the guts of the high priestess projectile.
 static void PriestessProjectileInit(const edict_t* self, edict_t* proj) //mxd. Named 'create_priestess_proj' in original logic.
@@ -235,9 +235,9 @@ static void PriestessFire4(edict_t* self) //mxd. Named 'priestess_fire4' in orig
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void PriestessDeathMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'priestess_death' in original logic.
 {
@@ -295,9 +295,9 @@ static void PriestessPainMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Name
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void PriestessProjectile1DrunkenThink(edict_t* self) //mxd. Named 'priestess_proj1_drunken' in original logic.
 {
@@ -498,9 +498,9 @@ void PriestessPostThink(edict_t* self) //mxd. Named 'priestess_postthink' in ori
 	self->next_post_think = level.time + 0.05f;
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void priestess_teleport_go(edict_t* self)
 {
@@ -991,7 +991,7 @@ void priestess_dead(edict_t* self)
 	self->nextthink = level.time + FRAMETIME; //mxd. Use define.
 }
 
-#pragma endregion
+
 
 void HighPriestessStaticsInit(void)
 {

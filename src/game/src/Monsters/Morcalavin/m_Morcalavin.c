@@ -14,7 +14,7 @@
 #include "Monsters/g_Monster.h"
 #include "Monsters/m_Stats.h"
 #include "NavSys/mg_AI.h" //mxd
-#include "NavSys/mg_guide.h" //mxd
+#include "NavSys/mg_Guide.h" //mxd
 #include "Random.h"
 #include "Vector.h"
 #include "Player.h" //mxd
@@ -22,7 +22,7 @@
 
 #define MORCALAVIN_GRAVITY	0.3f //mxd. Named 'MORK_GRAV' in original logic.
 
-#pragma region ========================== Morcalavin base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -47,9 +47,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Morcalavin projectiles utility functions =========================
+
+
 
 void MorcalavinProjectile1Blocked(edict_t* self, trace_t* trace) //mxd. Named 'morcalavin_proj1_blocked' in original logic.
 {
@@ -199,9 +199,9 @@ static void MorcalavinProjectileInit(edict_t* self, edict_t* proj) //mxd. Named 
 	VectorCopy(self->s.origin, proj->s.origin);
 }
 
-#pragma endregion
 
-#pragma region ========================== Morcalavin big shot =========================
+
+
 
 void MorcalavinLightning2Think(edict_t* self) //mxd. Named 'morcalavin_check_lightning2' in original logic.
 {
@@ -273,9 +273,9 @@ void morcalavin_big_shot(edict_t* self)
 	gi.sound(self, CHAN_AUTO, sounds[SND_PPCHARGE], 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== Morcalavin tracking projectile =========================
+
+
 
 void MorcalavinTrackingProjectileThink(edict_t* self) //mxd. Named 'morcalavin_proj_track' in original logic.
 {
@@ -385,9 +385,9 @@ void morcalavin_tracking_projectile(edict_t* self, float pitch, float yaw, float
 	gi.CreateEffect(&proj->s, FX_M_EFFECTS, CEF_OWNERS_ORIGIN, NULL, "bv", FX_MORK_TRACKING_MISSILE, proj->velocity);
 }
 
-#pragma endregion
 
-#pragma region ========================== Morcalavin beam and beam 2 =========================
+
+
 
 void MorcalavinBeamIsBlocked(edict_t* self, trace_t* trace) //mxd. Named 'beam_blocked' in original logic.
 {
@@ -487,9 +487,9 @@ void morcalavin_beam2(edict_t* self)
 	gi.linkentity(beam);
 }
 
-#pragma endregion
 
-#pragma region ========================== Morcalavin missile =========================
+
+
 
 void MorcalavinLightningThink(edict_t* self) //mxd. Named 'morcalavin_check_lightning' in original logic.
 {
@@ -668,9 +668,9 @@ void morcalavin_release_missile(edict_t* self)
 	gi.sound(self, CHAN_AUTO, sounds[SND_PPFIRE], 1.0f, ATTN_NORM, 0.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== Morcalavin taunt missile =========================
+
+
 
 void morcalavin_taunt_shot(edict_t* self)
 {
@@ -719,9 +719,9 @@ void morcalavin_taunt_shot(edict_t* self)
 	gi.linkentity(proj);
 }
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 static void MorcalavinPhaseOutInit(edict_t* self) //mxd. Named 'morcalavin_init_phase_out' in original logic.
 {
@@ -823,9 +823,9 @@ static void MorcalavinTeleportAttack(edict_t* self) //mxd. Named 'morcalavin_tel
 		gi.sound(self, CHAN_AUTO, sounds[irand(TAUNT_LAUGH2, TAUNT_LAUGH4)], 1.0f, ATTN_NONE, 0.0f);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void MorcalavinPhaseOutPreThink(edict_t* self) //mxd. Named 'morcalavin_phase_out' in original logic.
 {
@@ -1039,9 +1039,9 @@ void MorcalavinDie(edict_t* self, edict_t* inflictor, edict_t* attacker, int dam
 	//FIXME: Create a barrier around him so the player cannot get close to him.
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void MorcalavinDeathMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'morcalavin_death' in original logic.
 {
@@ -1138,9 +1138,9 @@ static void MorcalavinMeleeMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Na
 	SetAnim(self, ANIM_ATTACK1);
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void morcalavin_end_retort(edict_t* self)
 {
@@ -1314,7 +1314,7 @@ void morcalavin_fade_out(edict_t* self)
 	SetAnim(self, ANIM_FLOAT);
 }
 
-#pragma endregion
+
 
 void MorcalavinStaticsInit(void)
 {

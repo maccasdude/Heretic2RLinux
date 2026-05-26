@@ -21,7 +21,7 @@
 
 #define OVERLORD_ENFORCE_RADIUS	1000.0f //FIXME: Tweak out. //mxd. Named 'OVERLORD_RADIUS' in original logic.
 
-#pragma region ========================== Seraph Base Info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -57,9 +57,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 // Check to see if you can make it to an idle ogle and scare them.
 static qboolean SeraphCheckScare(edict_t* self, edict_t* ogle) //mxd. Named 'seraph_checkscare' in original logic.
@@ -169,9 +169,9 @@ static void SeraphDropWeapon(edict_t* self) //mxd. Named 'seraph_dropweapon' in 
 	self->s.fmnodeinfo[MESH__WHIP].flags |= FMNI_NO_DRAW;
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 static void SeraphDeathPainMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'seraph_death_pain' in original logic.
 {
@@ -335,9 +335,9 @@ static void SeraphCheckMoodMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Na
 	seraph_pause(self);
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 qboolean SeraphAlert(edict_t* self, alertent_t* alerter, edict_t* enemy) //mxd. Named 'seraphAlerted' in original logic.
 {
@@ -544,9 +544,9 @@ void SeraphDismember(edict_t* self, int damage, HitLocation_t hl) //mxd. Named '
 	}
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void seraph_jump(edict_t* self) //mxd. Named 'seraphApplyJump' in original logic.
 {
@@ -820,7 +820,7 @@ void seraph_back(edict_t* self, float distance)
 	}
 }
 
-#pragma endregion
+
 
 void SeraphOverlordStaticsInit(void)
 {

@@ -4,7 +4,7 @@
 // Copyright 2025 m-x-d
 //
 
-#pragma region ================================ HUGE INCLUDES LIST ================================
+
 
 #include "g_SaveDefs.h"
 #include "g_DefaultMessageHandler.h"
@@ -31,9 +31,9 @@
 #include "Cinematics/Tome/c_Tome_moves.h"
 #include "GameObjects/g_BreakableBrush.h"
 #include "GameObjects/g_Debris.h"
-#include "GameObjects/g_env.h"
-#include "GameObjects/g_field.h"
-#include "GameObjects/g_flamethrower.h"
+#include "GameObjects/g_Env.h"
+#include "GameObjects/g_Field.h"
+#include "GameObjects/g_Flamethrower.h"
 #include "GameObjects/g_func_Button.h"
 #include "GameObjects/g_func_Door.h"
 #include "GameObjects/g_func_MonsterSpawner.h"
@@ -46,10 +46,10 @@
 #include "GameObjects/g_Misc.h"
 #include "GameObjects/g_MorcalavinBarrier.h"
 #include "GameObjects/g_Obj.h"
-#include "GameObjects/g_rope.h"
+#include "GameObjects/g_Rope.h"
 #include "GameObjects/g_Shrine.h"
 #include "GameObjects/g_Target.h"
-#include "GameObjects/g_trigger.h"
+#include "GameObjects/g_Trigger.h"
 #include "GameObjects/g_WaterEffects.h"
 #include "Monsters/g_Monster.h"
 #include "Monsters/Assassin/m_Assassin.h"
@@ -78,8 +78,8 @@
 #include "Monsters/Ogle/m_Ogle_moves.h"
 #include "Monsters/PlagueElf/m_PlagueElf.h"
 #include "Monsters/PlagueElf/m_PlagueElf_moves.h"
-#include "Monsters/PlagueSsithra/m_PlaguesSithra.h"
-#include "Monsters/PlagueSsithra/m_PlaguesSithra_moves.h"
+#include "Monsters/PlagueSsithra/m_PlagueSsithra.h"
+#include "Monsters/PlagueSsithra/m_PlagueSsithra_moves.h"
 #include "Monsters/Rat/m_Rat.h"
 #include "Monsters/Rat/m_Rat_moves.h"
 #include "Monsters/SeraphGuard/m_SeraphGuard.h"
@@ -115,9 +115,9 @@
 #include "SpellsOffensive/spl_Ripper.h"
 #include "SpellsOffensive/spl_SphereOfAnnihilation.h"
 
-#pragma endregion
 
-#pragma region ================================ FUNCS LIST ================================
+
+
 
 const func_map_t funcs_list[] =
 {
@@ -643,9 +643,9 @@ const func_map_t funcs_list[] =
 	{ NULL, NULL }
 };
 
-#pragma endregion
 
-#pragma region ================================ MMOVES LIST ================================
+
+
 
 const animmove_map_t mmoves_list[] =
 {
@@ -1629,4 +1629,3 @@ const animmove_map_t mmoves_list[] =
 	{ NULL, NULL }
 };
 
-#pragma endregion

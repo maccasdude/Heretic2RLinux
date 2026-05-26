@@ -28,6 +28,7 @@ static menuframework_t s_video_menu;
 
 static menulist_t s_ref_list;
 static menulist_t s_mode_list;
+static menulist_t s_fs_list; //mxd. "Window Mode" - windowed / fullscreen / borderless.
 static menulist_t s_target_fps_list; //mxd
 static menuslider_t s_gamma_slider;
 static menuslider_t s_brightness_slider;
@@ -42,12 +43,19 @@ static int initial_reflib_index; // vid_ref index when entering menu.
 static const char* vid_mode_titles[MAX_DISPLAYED_VIDMODES];
 static int initial_vid_mode; // vid_mode when entering menu.
 
-#pragma region ========================== MENU ITEM CALLBACKS ==========================
+
 
 static void UpdateTargetFPSFunc(void* self) //mxd
 {
 	const menulist_t* list = (menulist_t*)self;
 	Cvar_SetValue("vid_maxfps", (float)(list->curvalue + 1) * 30.0f);
+}
+
+// Window mode toggle (0=windowed, 1=fullscreen, 2=borderless).
+static void UpdateFullscreenFunc(void* self)
+{
+	const menulist_t* list = (menulist_t*)self;
+	Cvar_SetValue("vid_fullscreen", (float)list->curvalue);
 }
 
 static void UpdateGammaFunc(void* self) // H2
@@ -116,7 +124,7 @@ static void ApplyChanges(const qboolean close_menu) //mxd. +close_menu arg.
 	}
 }
 
-#pragma endregion
+
 
 void VID_PreMenuInit(void)
 {
@@ -196,10 +204,32 @@ static void VID_MenuInit(void)
 	s_mode_list.curvalue = initial_vid_mode;
 	s_mode_list.itemnames = vid_mode_titles;
 
+	// Window-mode toggle - 3 options. Labels are plain ASCII so they're
+	// always available; if the original H2 had localized strings for them
+	// they'd live in cvars like the other items use, but the orphan
+	// m_item_fullscreen string was never wired up by H2R.
+	// Single-line layout (like Target FPS) keeps it compact and avoids
+	// vertical-overlap glitches with neighbouring items in the dual-line
+	// big-font glyph rhythm.
+	static const char* fs_names[] = { "Windowed", "Fullscreen", "Borderless", NULL };
+	s_fs_list.generic.type = MTYPE_SPINCONTROL;
+	s_fs_list.generic.x = 0;
+	s_fs_list.generic.y = 80;
+	s_fs_list.generic.name = "\x02Window mode";
+	s_fs_list.generic.width = re.BF_Strlen("\x02Window mode");
+	s_fs_list.generic.flags = QMF_SINGLELINE;
+	s_fs_list.generic.callback = UpdateFullscreenFunc;
+	s_fs_list.itemnames = fs_names;
+	{
+		int v = (int)Cvar_VariableValue("vid_fullscreen");
+		if (v < 0 || v > 2) v = 0;
+		s_fs_list.curvalue = v;
+	}
+
 	Com_sprintf(name_target_fps, sizeof(name_target_fps), "\x02%s", m_item_target_fps->string);
 	s_target_fps_list.generic.type = MTYPE_SPINCONTROL;
 	s_target_fps_list.generic.x = 0;
-	s_target_fps_list.generic.y = 80;
+	s_target_fps_list.generic.y = 100;
 	s_target_fps_list.generic.name = name_target_fps;
 	s_target_fps_list.generic.width = re.BF_Strlen(name_target_fps);
 	s_target_fps_list.generic.flags = QMF_SINGLELINE;
@@ -211,7 +241,7 @@ static void VID_MenuInit(void)
 	s_gamma_slider.generic.type = MTYPE_SLIDER;
 	s_gamma_slider.generic.flags = QMF_SELECT_SOUND;
 	s_gamma_slider.generic.x = 0;
-	s_gamma_slider.generic.y = 100;
+	s_gamma_slider.generic.y = 120;
 	s_gamma_slider.generic.name = name_gamma;
 	s_gamma_slider.generic.width = re.BF_Strlen(name_gamma);
 	s_gamma_slider.generic.callback = UpdateGammaFunc;
@@ -223,7 +253,7 @@ static void VID_MenuInit(void)
 	s_brightness_slider.generic.type = MTYPE_SLIDER;
 	s_brightness_slider.generic.flags = QMF_SELECT_SOUND;
 	s_brightness_slider.generic.x = 0;
-	s_brightness_slider.generic.y = 140;
+	s_brightness_slider.generic.y = 160;
 	s_brightness_slider.generic.name = name_brightness;
 	s_brightness_slider.generic.width = re.BF_Strlen(name_brightness);
 	s_brightness_slider.generic.callback = UpdateBrightnessFunc;
@@ -235,7 +265,7 @@ static void VID_MenuInit(void)
 	s_contrast_slider.generic.type = MTYPE_SLIDER;
 	s_contrast_slider.generic.flags = QMF_SELECT_SOUND;
 	s_contrast_slider.generic.x = 0;
-	s_contrast_slider.generic.y = 180;
+	s_contrast_slider.generic.y = 200;
 	s_contrast_slider.generic.name = name_contrast;
 	s_contrast_slider.generic.width = re.BF_Strlen(name_contrast);
 	s_contrast_slider.generic.callback = UpdateContrastFunc;
@@ -248,7 +278,7 @@ static void VID_MenuInit(void)
 	s_minlight_slider.generic.type = MTYPE_SLIDER;
 	s_minlight_slider.generic.flags = QMF_SELECT_SOUND;
 	s_minlight_slider.generic.x = 0;
-	s_minlight_slider.generic.y = 220;
+	s_minlight_slider.generic.y = 240;
 	s_minlight_slider.generic.name = name_minlight;
 	s_minlight_slider.generic.width = re.BF_Strlen(name_minlight);
 	s_minlight_slider.generic.callback = UpdateMinlightFunc;
@@ -260,7 +290,7 @@ static void VID_MenuInit(void)
 	s_detail_slider.generic.type = MTYPE_SLIDER;
 	s_detail_slider.generic.flags = QMF_SELECT_SOUND; //mxd. QMF_SELECT_SOUND flag was missing in original version.
 	s_detail_slider.generic.x = 0;
-	s_detail_slider.generic.y = 260;
+	s_detail_slider.generic.y = 280;
 	s_detail_slider.generic.name = name_detail;
 	s_detail_slider.generic.width = re.BF_Strlen(name_detail);
 	s_detail_slider.generic.callback = UpdateDetailFunc;
@@ -270,6 +300,7 @@ static void VID_MenuInit(void)
 
 	Menu_AddItem(&s_video_menu, &s_ref_list);
 	Menu_AddItem(&s_video_menu, &s_mode_list);
+	Menu_AddItem(&s_video_menu, &s_fs_list); //mxd. Window mode.
 	Menu_AddItem(&s_video_menu, &s_target_fps_list); //mxd
 	Menu_AddItem(&s_video_menu, &s_gamma_slider);
 	Menu_AddItem(&s_video_menu, &s_brightness_slider);

@@ -12,7 +12,7 @@
 #include "g_Utilities.h"
 #include "GameObjects/g_Debris.h" //mxd
 #include "Monsters/g_Monster.h"
-#include "Monsters/m_stats.h"
+#include "Monsters/m_Stats.h"
 #include "NavSys/mg_AI.h" //mxd
 #include "NavSys/mg_Guide.h" //mxd
 #include "Random.h"
@@ -22,7 +22,7 @@
 #define GORGON_MELEE_RANGE		48.0f //mxd. Named 'GORGON_STD_MELEE_RNG' in original logic.
 #define GORGON_MAX_HOP_RANGE	200.0f //mxd. Named 'GORGON_STD_MAXHOP_RNG' in original logic.
 
-#pragma region ========================== Gorgon base info ==========================
+
 
 static const animmove_t* animations[NUM_ANIMS] =
 {
@@ -85,9 +85,9 @@ static const animmove_t* animations[NUM_ANIMS] =
 
 static int sounds[NUM_SOUNDS];
 
-#pragma endregion
 
-#pragma region ========================== Utility functions =========================
+
+
 
 // Checks if there are any gorgons in range that aren't awake.
 static qboolean GorgonFindAsleepGorgons(const edict_t* self) //mxd. Named 'gorgonFindAsleepGorgons' in original logic.
@@ -270,9 +270,9 @@ static qboolean GorgonStartSlipAnimation(edict_t* self, const qboolean from_pain
 	return false;
 }
 
-#pragma endregion
 
-#pragma region ========================== Edict callbacks ===========================
+
+
 
 void GorgonRoarResponsePreThink(edict_t* self) //mxd. Named 'gorgon_roar_response_go' in original logic.
 {
@@ -318,9 +318,9 @@ void GorgonPreThink(edict_t* self) //mxd. Named 'gorgon_prethink' in original lo
 	self->next_pre_think = level.time + FRAMETIME; //mxd. Use define.
 }
 
-#pragma endregion
 
-#pragma region ========================== Message handlers ==========================
+
+
 
 // Respond to call.
 static void GorgonVoicePollMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named 'gorgon_roar_response' in original logic.
@@ -752,9 +752,9 @@ static void GorgonJumpMsgHandler(edict_t* self, G_Message_t* msg) //mxd. Named '
 		SetAnim(self, ANIM_FJUMP);
 }
 
-#pragma endregion
 
-#pragma region ========================== Action functions ==========================
+
+
 
 void gorgon_roar_sound(edict_t* self)
 {
@@ -1664,7 +1664,7 @@ void gorgon_melee5check(edict_t* self) //mxd. Originally defined in m_gorgon_ani
 		gorgon_footstep(self);
 }
 
-#pragma endregion
+
 
 void GorgonStaticsInit(void)
 {

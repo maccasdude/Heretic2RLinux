@@ -6,7 +6,7 @@
 
 #pragma once
 
-#pragma region ========================== Model definitions ==========================
+
 
 #define FRAME_poly000         	0
 #define FRAME_poly001         	1
@@ -45,7 +45,7 @@
 
 #define MESH_DEFAULT		0
 
-#pragma endregion
+
 
 typedef enum AnimID_e
 {

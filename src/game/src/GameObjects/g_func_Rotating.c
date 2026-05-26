@@ -10,7 +10,7 @@
 #include "g_func_Door.h"
 #include "Vector.h"
 
-#pragma region ========================== func_rotating ==========================
+
 
 #define SF_START_ON			1 //mxd
 #define SF_REVERSE			2 //mxd
@@ -141,9 +141,9 @@ void SP_func_rotating(edict_t* ent)
 	gi.linkentity(ent);
 }
 
-#pragma endregion
 
-#pragma region ========================== func_rotating support logic ==========================
+
+
 
 static void FuncRotateDeactivate(edict_t* self, G_Message_t* msg) //mxd. Named 'FuncRotate_Deactivate' in original logic.
 {
@@ -163,4 +163,3 @@ void FuncRotateStaticsInit(void)
 	classStatics[CID_FUNC_ROTATE].msgReceivers[G_MSG_UNSUSPEND] = FuncRotateActivate;
 }
 
-#pragma endregion

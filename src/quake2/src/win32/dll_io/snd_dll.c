@@ -4,7 +4,11 @@
 // Copyright 1998 Raven Software
 //
 
+#if defined(_WIN32) || defined(WIN32)
 #include <windows.h>
+#else
+#include "compat/win_compat.h"
+#endif
 #include "qcommon.h"
 #include "snd_dll.h" //mxd
 #include "clfx_dll.h"
@@ -27,7 +31,7 @@ static void InitClientEffects(void)
 		CLFX_Init();
 }
 
-#pragma region ========================== NULL SOUND CALLBACKS ==========================
+
 
 static void NullSnd_Init(void) { }
 static void NullSnd_Shutdown(void) { }
@@ -87,7 +91,7 @@ static void InitNullSound(void)
 	InitClientEffects();
 }
 
-#pragma endregion
+
 
 static qboolean SND_StoreSndlibInfo(const char* snd_path) //mxd
 {
