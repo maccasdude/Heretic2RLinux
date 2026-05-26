@@ -47,6 +47,7 @@ add_compile_options(
     -Wno-unknown-pragmas        # the source has lots of #pragma region from MSVC
     -fvisibility=hidden
     -fno-strict-aliasing        # Quake-style code aliases through structs
+    -O2                          # release-grade optimization; -O0 default causes physics jitter
 )
 
 # Dependencies ----------------------------------------------------------------

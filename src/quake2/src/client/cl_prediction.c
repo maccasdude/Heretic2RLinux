@@ -663,6 +663,17 @@ void CL_PredictMovement(void)
 		//mxd. Interpolate between packetframes...
 		origin_lerp += origin_lerp_increment;
 		pred_playerLerp += player_lerp_increment;
+
+		// Clamp lerps to [0, 1] - on slow/uneven main-loop ticks the
+		// number of render frames per packet frame can exceed the
+		// expected ratio (vid_maxfps / cl_maxfps), and an unclamped
+		// origin_lerp overshoots past the target. The next packet then
+		// snaps back, producing player movement stutter. Particularly
+		// visible on Linux compositors with non-deterministic timing.
+		if (origin_lerp > 1.0f)
+			origin_lerp = 1.0f;
+		if (pred_playerLerp > 1.0f)
+			pred_playerLerp = 1.0f;
 	}
 
 	int delta[3];

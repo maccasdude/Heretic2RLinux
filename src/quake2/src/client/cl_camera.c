@@ -150,11 +150,26 @@ static void CL_InterpolateCameraOrigin(vec3_t cam_lerp_origin, const float yaw, 
 		VectorMA(PlayerEntPtr->origin, lerp_dist * DotProduct(cam_forward, cam_lerp_dir), cam_forward, cam_origin);
 		VectorMA(cam_origin, lerp_dist * 0.5f * DotProduct(cam_right, cam_lerp_dir), cam_right, cam_origin);
 
+		// Framerate-independent smoothing factor. Original logic applied a
+		// fixed fraction per call, which works when the renderer ticks at
+		// a stable interval (Windows VBLANK) but produces visible micro-
+		// jitter on Linux where consecutive render frames vary by 1-2 ms.
+		// We scale the smoothing by the ratio of actual frametime to the
+		// expected nominal frametime (1 / vid_maxfps). With value 0.9 and
+		// nominal-rate ticks this matches the original behaviour exactly.
+		const float nominal_frametime = 1.0f / max(1.0f, vid_maxfps->value);
+		const float frame_ratio = cls.rframetime / nominal_frametime;
+		float decay = 1.0f - cl_camera_position_lerp->value;       // per-nominal-frame retention
+		// Exponential decay across the actual frametime: decay^frame_ratio
+		float retention = powf(decay, frame_ratio);
+		retention = Clamp(retention, 0.0f, 1.0f);
+
 		// Z-axis requires special handling (mainly because we want smoother camera movement on z-axis when walking up the stairs)...
-		const float frac_z = ((cam_lerp_origin[2] < PlayerEntPtr->origin[2]) ? 0.1f : 0.75f * cl_camera_position_lerp->value);
+		const float frac_z_base = ((cam_lerp_origin[2] < PlayerEntPtr->origin[2]) ? 0.1f : 0.75f * cl_camera_position_lerp->value);
+		const float frac_z = 1.0f - powf(1.0f - Clamp(frac_z_base, 0.0f, 1.0f), frame_ratio);
 		cam_origin[2] = LerpFloat(cam_lerp_origin[2], PlayerEntPtr->origin[2], frac_z);
 
-		VectorLerp(cam_lerp_origin, 1.0f - cl_camera_position_lerp->value, PlayerEntPtr->origin, cam_lerp_origin);
+		VectorLerp(cam_lerp_origin, retention, PlayerEntPtr->origin, cam_lerp_origin);
 	}
 	else
 	{
@@ -353,6 +368,12 @@ static void CL_UpdateCameraOrientation(const vec3_t look_angles, float viewheigh
 		float damp_factor = fabsf(look_angles[PITCH]);
 		damp_factor = min(1.0f, damp_factor / 89.0f);
 		damp_factor = (1.0f - cl_camera_dampfactor->value) * damp_factor * damp_factor * damp_factor + cl_camera_dampfactor->value;
+
+		// Framerate-independent: same reasoning as position lerp above.
+		// Original applies damp_factor per-call; scale via frametime ratio.
+		const float nominal_frametime = 1.0f / max(1.0f, vid_maxfps->value);
+		const float frame_ratio = cls.rframetime / nominal_frametime;
+		damp_factor = 1.0f - powf(1.0f - Clamp(damp_factor, 0.0f, 1.0f), frame_ratio);
 
 		VectorLerp(old_vieworg, damp_factor, end_2, end_2);
 	}
