@@ -1,3 +1,7 @@
+##### CLAUDE MADE THIS ######
+I'm not that smart so I had Claude port this to Linux, seems to work well enough I'm iterating on it with Claude as I find issues.
+
+
 # Heretic2R
 
 Heretic2R is Heretic II (1998, Raven Software) reverse-engineered source port.
