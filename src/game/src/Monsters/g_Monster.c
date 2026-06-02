@@ -748,8 +748,11 @@ void M_WalkmonsterStartGo(edict_t* self) //mxd. Named 'walkmonster_start_go' in 
 	if (self->yaw_speed == 0.0f)
 		self->yaw_speed = 20.0f;
 
-	//mxd. Original logic invariantly sets viewheight to 25 instead.
-	assert(self->viewheight > 0 && self->viewheight < (int)(self->maxs[2] * self->s.scale));
+	// Original logic invariantly sets viewheight to 25 here (the reverse-
+	// engineered port had replaced this with an assert, which aborts on
+	// Andoria where a walking monster spawns with a viewheight outside the
+	// asserted range). Restore the original assignment for faithful behavior.
+	self->viewheight = 25;
 
 	//H2_BUGFIX: mxd. Original logic calls M_MonsterStartGo() regardless of MSF_ASLEEP flag, which results in M_BBoxAndOriginAdjustForScale() called twice for triggered monsters, resulting in incorrect bbox size.
 	if (self->spawnflags & MSF_ASLEEP)
@@ -772,8 +775,10 @@ void M_FlymonsterStartGo(edict_t* self) //mxd. Named 'flymonster_start_go' in or
 	if (self->yaw_speed == 0.0f)
 		self->yaw_speed = 10.0f;
 
-	//mxd. Original logic sets viewheight to 25 if it's 0 instead.
-	assert(self->viewheight > 0 && self->viewheight < (int)(self->maxs[2] * self->s.scale) - 1);
+	// Original logic sets viewheight to 25 if it's 0 (the port had replaced
+	// this with an assert). Restore the original behavior.
+	if (self->viewheight == 0)
+		self->viewheight = 25;
 
 	//H2_BUGFIX: mxd. Original logic calls M_MonsterStartGo() regardless of MSF_ASLEEP flag, which results in M_BBoxAndOriginAdjustForScale() called twice for triggered monsters, resulting in incorrect bbox size.
 	if (self->spawnflags & MSF_ASLEEP)

@@ -292,8 +292,20 @@ char* Sys_ConsoleInput(void)
 
 void Sys_ConsoleOutput(const char* string)
 {
-    if (dedicated == NULL || !(int)dedicated->value)
+    // In non-dedicated mode the engine sends every console message here.
+    // The Windows build also no-ops in non-dedicated mode (it has a real
+    // console window for the dev server), but on Linux we just want the
+    // text to go to stdout so users can see startup messages, renderer
+    // diagnostics, and crashes that happen before the in-game console
+    // is up.
+    if (dedicated == NULL || !(int)dedicated->value) {
+        size_t len = strlen(string);
+        ssize_t r = write(STDOUT_FILENO, string, len); (void)r;
         return;
+    }
+
+    // Dedicated mode: same as before, with line-editing protection for
+    // the user's typed input.
 
     // If the user is mid-input, blank the in-progress line first so the
     // server output doesn't smear over their typing.

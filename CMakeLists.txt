@@ -50,6 +50,19 @@ add_compile_options(
     -O2                          # release-grade optimization; -O0 default causes physics jitter
 )
 
+# Disable assert() like the retail game shipped. The reverse-engineered source
+# contains many debug-only asserts (and in a couple of places, e.g.
+# M_WalkmonsterStartGo in g_Monster.c, an assert was substituted where the
+# original simply assigned a value). With no NDEBUG these abort the whole game
+# mid-play on assertions the retail build never enforced (the Andoria
+# transition crash was one: a walking monster's viewheight tripped the assert).
+# Define NDEBUG for a faithful retail-style build. Set -DH2R_ENABLE_ASSERTS=ON
+# to keep asserts live for debugging.
+option(H2R_ENABLE_ASSERTS "Keep debug asserts enabled (retail builds disable them)" OFF)
+if(NOT H2R_ENABLE_ASSERTS)
+    add_compile_definitions(NDEBUG)
+endif()
+
 # Dependencies ----------------------------------------------------------------
 
 # SDL3 is required for window/input/audio.
@@ -218,6 +231,58 @@ target_link_libraries(ref_gl1 PRIVATE
     OpenGL::GL
     ${MATH_LIB} ${DL_LIB}
 )
+
+# ----------------------------------------------------------------------------
+# libref_vk.so  (Vulkan renderer - work in progress)
+# ----------------------------------------------------------------------------
+
+find_package(Vulkan)
+
+if(Vulkan_FOUND)
+    set(REF_VK_SRC
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_init.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_frame.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_main.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_buffer.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_pipeline.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_pipeline3d.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_pipeline_world.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_image.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_draw.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_world.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_lightpoint.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_skeleton.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_model.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_sprite.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_engine_model.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_particles.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_sky.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_shaders.c
+        ${H2R_INC_ROOT}/src/qcommon/Skeletons.c
+        ${H2R_INC_ROOT}/src/qcommon/Reference.c
+        ${H2R_INC_ROOT}/src/qcommon/anorms.c
+    )
+
+    add_library(ref_vk SHARED
+        ${REF_VK_SRC}
+        $<TARGET_OBJECTS:h2r_compat>
+    )
+    target_include_directories(ref_vk PRIVATE
+        ${H2R_INC_ROOT}/src
+        ${H2R_INC_ROOT}/src/ref_vk/src
+        ${H2R_INC_ROOT}/src/quake2/src
+        ${Vulkan_INCLUDE_DIRS}
+    )
+    target_link_libraries(ref_vk PRIVATE
+        H2Common
+        ${SDL3_TARGET}
+        ${Vulkan_LIBRARIES}
+        ${MATH_LIB} ${DL_LIB}
+    )
+    message(STATUS "Vulkan renderer (ref_vk) will be built")
+else()
+    message(STATUS "Vulkan SDK not found - skipping libref_vk.so")
+endif()
 
 # ----------------------------------------------------------------------------
 # libsnd_sdl3.so

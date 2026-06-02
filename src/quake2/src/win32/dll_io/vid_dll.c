@@ -288,6 +288,9 @@ static qboolean VID_StroreReflibInfo(const char* ref_path) //mxd
 		return false;
 	}
 
+	// On Windows ref_path looks like "ref_gl1.dll"; the id is between '_' and '.'.
+	// On Linux ref_path can be "libref_gl1.so"; the id is still between '_' and '.',
+	// since strchr/strrchr will pick the right separators.
 	const char* start = strchr(ref_path, '_');
 	const char* end = strrchr(ref_path, '.');
 	const qboolean is_valid = (start != NULL && end != NULL);
@@ -298,7 +301,7 @@ static qboolean VID_StroreReflibInfo(const char* ref_path) //mxd
 		reflib_info_t* info = &reflib_infos[num_reflib_infos];
 
 		strcpy_s(info->title, sizeof(info->title), ref_export.title);
-		strncpy_s(info->id, sizeof(info->id), start + 1, end - start - 1); // Strip "ref_" and ".dll" parts...
+		strncpy_s(info->id, sizeof(info->id), start + 1, end - start - 1); // Strip "ref_" / "libref_" and ".dll" / ".so" parts.
 	}
 
 	FreeLibrary(reflib);
@@ -306,23 +309,34 @@ static qboolean VID_StroreReflibInfo(const char* ref_path) //mxd
 	return is_valid;
 }
 
-static void VID_InitReflibInfos(void) //mxd
+static void VID_ScanRefPattern(const char* pattern) //mxd
 {
-	num_reflib_infos = 0;
+	const char* ref_path = Sys_FindFirst(pattern, 0, 0);
 
-	// Find all compatible ref_xxx.dll libraries.
-	const char* ref_path = Sys_FindFirst("ref_*.dll", 0, 0);
-	
 	while (ref_path != NULL && num_reflib_infos < MAX_REFLIBS)
 	{
-		const char* path = strchr(ref_path, '/') + 1; // Skip starting '/'...
-		if (VID_StroreReflibInfo(path != NULL ? path : ref_path))
+		const char* slash = strrchr(ref_path, '/');
+		const char* path = (slash != NULL) ? slash + 1 : ref_path;
+		if (VID_StroreReflibInfo(path))
 			num_reflib_infos++;
 
 		ref_path = Sys_FindNext(0, 0);
 	}
 
 	Sys_FindClose();
+}
+
+static void VID_InitReflibInfos(void) //mxd
+{
+	num_reflib_infos = 0;
+
+	// Find all compatible ref_xxx.dll libraries.
+	VID_ScanRefPattern("ref_*.dll");
+#ifndef _WIN32
+	// On Linux the renderer modules are libref_xxx.so. Scan for those too so
+	// the menu discovers them.
+	VID_ScanRefPattern("libref_*.so");
+#endif
 }
 
 // This function gets called once just before drawing each frame, and it's sole purpose is to check to see
