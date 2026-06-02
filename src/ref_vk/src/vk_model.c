@@ -644,18 +644,74 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
     }
     float pc[32];
     memcpy(pc, mvp, 64);
-    pc[16] = (float)e->color.r / 255.0f;
-    pc[17] = (float)e->color.g / 255.0f;
-    pc[18] = (float)e->color.b / 255.0f;
+
+    // Base shadelight, following ref_gl1 R_DrawFlexModel order:
+    //   RF_FULLBRIGHT      -> white
+    //   absLight set       -> that color
+    //   RF_GLOW            -> handled below (pulse), skip sampling
+    //   otherwise          -> R_LightPoint(origin): sample world light so the
+    //                         model is dark in shadow and bright in light.
+    // Then multiply by the entity color, apply RF_MINLIGHT floor, and the
+    // RF_GLOW pulse. Previously we used the raw entity color as the tint and
+    // never sampled the world light, so models (e.g. the player) stayed full-
+    // bright in shadowed areas.
+    float shade[3];
+    if (e->flags & RF_TRANS_ADD_ALPHA) {
+        // ref_gl1: additive-alpha models use a grey shade = entity alpha, so the
+        // additive contribution scales with alpha.
+        float a = (float)e->color.a / 255.0f;
+        shade[0] = shade[1] = shade[2] = a;
+    } else if (e->flags & RF_FULLBRIGHT) {
+        shade[0] = shade[1] = shade[2] = 1.0f;
+    } else if (e->absLight.r != 0 || e->absLight.g != 0 || e->absLight.b != 0) {
+        shade[0] = (float)e->absLight.r / 255.0f;
+        shade[1] = (float)e->absLight.g / 255.0f;
+        shade[2] = (float)e->absLight.b / 255.0f;
+    } else if (e->flags & RF_GLOW) {
+        shade[0] = shade[1] = shade[2] = 1.0f;   // overwritten by pulse below
+    } else {
+        float sl[3];
+        if (VK_LightPoint_SampleRGB(e->origin, sl)) {
+            // The world surfaces are drawn at lm * 2.0 (our effective modulate),
+            // so scale the model's sampled light by the same factor; otherwise
+            // the player would render at half the brightness of the floor it
+            // stands on. Apply the same desaturating peak cap world.frag uses so
+            // brightly-lit spots don't blow out differently.
+            shade[0] = sl[0] * 2.0f;
+            shade[1] = sl[1] * 2.0f;
+            shade[2] = sl[2] * 2.0f;
+            float peak = shade[0];
+            if (shade[1] > peak) peak = shade[1];
+            if (shade[2] > peak) peak = shade[2];
+            if (peak > 2.0f) {
+                float s = 2.0f / peak;
+                shade[0] *= s; shade[1] *= s; shade[2] *= s;
+            }
+        } else {
+            shade[0] = shade[1] = shade[2] = 1.0f;  // no light data -> fullbright
+        }
+    }
+
+    // Modulate by entity color (c_array / 255), matching GL.
+    float ecol[3] = {
+        (float)e->color.r / 255.0f,
+        (float)e->color.g / 255.0f,
+        (float)e->color.b / 255.0f,
+    };
+    // All-zero entity RGB historically means "default = white".
+    if (ecol[0] == 0.0f && ecol[1] == 0.0f && ecol[2] == 0.0f)
+        ecol[0] = ecol[1] = ecol[2] = 1.0f;
+
+    pc[16] = shade[0] * ecol[0];
+    pc[17] = shade[1] * ecol[1];
+    pc[18] = shade[2] * ecol[2];
     pc[19] = (float)e->color.a / 255.0f;
-    // Some entities arrive with a zeroed color meaning "default" (full white,
-    // opaque). Only treat all-zero RGB as that default - do NOT force alpha to
-    // 1, or a fully-faded translucent entity (alpha 0) would snap back to
-    // opaque. If RGB is zero but alpha is set, keep the given alpha and just
-    // default the color to white.
-    if (pc[16]==0 && pc[17]==0 && pc[18]==0) {
-        pc[16]=pc[17]=pc[18]=1.0f;
-        if (pc[19]==0 && !want_trans) pc[19]=1.0f;  // truly uninitialized
+    if (pc[19] == 0.0f && !want_trans) pc[19] = 1.0f;  // truly uninitialized alpha
+
+    // RF_MINLIGHT: floor at 0.1 when the model is essentially black, so it never
+    // vanishes entirely in deep shadow (matches ref_gl1).
+    if ((e->flags & RF_MINLIGHT) && pc[16] <= 0.1f && pc[17] <= 0.1f && pc[18] <= 0.1f) {
+        pc[16] = pc[17] = pc[18] = 0.1f;
     }
     // RF_GLOW: bonus items (health, mana, etc) pulse with time. ref_gl1
     // (gl1_FlexModel.c) overrides shadelight with sin(time*7)*0.3 + 0.7 (a grey

@@ -84,6 +84,11 @@ typedef struct {
     uint32_t num_vertices;
     int      visframe;        // last frame this face was marked visible
     float    center[3];       // world-space centroid (alpha back-to-front sort)
+    int      surf_flags;      // this face's OWN SURF_* flags (warp/flow/etc) -
+                              // ref_gl1 evaluates flow/warp per-face, not per
+                              // texture-batch, so we store the face's own flags
+                              // to avoid one flowing face making its whole
+                              // texture batch flow.
 } pvs_face_t;
 
 typedef struct { float normal[3]; float dist; } pvs_plane_t;
@@ -1332,6 +1337,9 @@ qboolean VK_World_LoadMap(const char* name)
                 s_pvs_faces[i].first_vertex = face_start;
                 s_pvs_faces[i].num_vertices = cursor - face_start;
                 s_pvs_faces[i].visframe     = -1;
+                // This face's OWN warp/flow/trans flags (per-face, like GL).
+                s_pvs_faces[i].surf_flags   = (ti->flags & (SURF_WARP | SURF_TRANS33 |
+                                               SURF_TRANS66 | SURF_FLOWING | SURF_UNDULATE));
                 // World-space centroid of this face (for alpha back-to-front sort).
                 double fx = 0, fy = 0, fz = 0;
                 const uint32_t fn = cursor - face_start;
@@ -1354,6 +1362,37 @@ qboolean VK_World_LoadMap(const char* name)
             s_batches[s_num_batches].num_vertices = batch_count;
             s_batches[s_num_batches].surf_flags   = batch_surf;
             s_batches[s_num_batches].alpha        = batch_alpha;
+            // Texture animation chain (e.g. animated waterfall/flowing textures
+            // that cycle frames over time via SURF_ANIMSPEED, and func_* frame
+            // swaps). Built the same way as for submodels below.
+            s_batches[s_num_batches].num_frames   = 1;
+            s_batches[s_num_batches].frame_desc[0] = wt->descriptor;
+            s_batches[s_num_batches].anim_speed   = 0;
+            {
+                int start_ti = -1;
+                for (int i2 = 0; i2 < num_faces; i2++) {
+                    if (face_is_submodel && face_is_submodel[i2]) continue;
+                    const dface_t* f2 = &faces[i2];
+                    if (f2->numedges < 3) continue;
+                    if (f2->texinfo < 0 || f2->texinfo >= num_texinfo) continue;
+                    if (strcasecmp(texinfo[f2->texinfo].texture, wt->tex_name) != 0) continue;
+                    start_ti = f2->texinfo;
+                    break;
+                }
+                if (start_ti >= 0) {
+                    if (texinfo[start_ti].flags & SURF_ANIMSPEED)
+                        s_batches[s_num_batches].anim_speed = texinfo[start_ti].value;
+                    int cur = texinfo[start_ti].nexttexinfo;
+                    int guard = 0;
+                    while (cur > 0 && cur < num_texinfo && cur != start_ti &&
+                           s_batches[s_num_batches].num_frames < 8 && guard++ < 64) {
+                        world_tex_t* fwt = WorldTex_Resolve(texinfo[cur].texture);
+                        s_batches[s_num_batches].frame_desc[s_batches[s_num_batches].num_frames++] =
+                            (fwt && fwt->descriptor) ? fwt->descriptor : wt->descriptor;
+                        cur = texinfo[cur].nexttexinfo;
+                    }
+                }
+            }
             s_batch_face_start[s_num_batches] = batch_face_start;
             s_batch_face_count[s_num_batches] = s_pvs_face_order_n - batch_face_start;
             // World-space centroid of this batch's verts (for alpha sorting).
@@ -1739,6 +1778,23 @@ void VK_World_UpdateLightstyles(const refdef_t* fd)
     s_lightstyles_valid = true;
 }
 
+// Pick the descriptor for a world batch this frame, honoring its texture
+// animation chain. SURF_ANIMSPEED textures (animated waterfalls/flowing
+// textures) cycle by wall-clock time; func_* swaps would use entity frame, but
+// world batches have no entity, so non-ANIMSPEED multi-frame chains just stay on
+// frame 0. Matches ref_gl1 R_TextureAnimation.
+static VkDescriptorSet WorldBatchFrameDesc(const world_batch_t* wb)
+{
+    if (wb->num_frames <= 1) return wb->descriptor;
+    int fr = 0;
+    if (wb->anim_speed > 0)
+        fr = (int)(s_frame_time * (float)wb->anim_speed);
+    fr %= wb->num_frames;
+    if (fr < 0) fr += wb->num_frames;
+    VkDescriptorSet d = wb->frame_desc[fr];
+    return (d != VK_NULL_HANDLE) ? d : wb->descriptor;
+}
+
 void VK_World_Render(const refdef_t* fd)
 {
     if (!s_loaded || s_total_verts == 0 || !fd) return;
@@ -1832,8 +1888,9 @@ void VK_World_Render(const refdef_t* fd)
                 }
                 if (run_count > 0) {
                     if (!bound) {
+                        VkDescriptorSet bdesc = WorldBatchFrameDesc(&s_batches[b]);
                         vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            vk_pipeline_world.layout, 0, 1, &s_batches[b].descriptor, 0, NULL);
+                            vk_pipeline_world.layout, 0, 1, &bdesc, 0, NULL);
                         bound = true;
                     }
                     vkCmdDraw(cb, run_count, 1, run_start, 0);
@@ -1842,9 +1899,11 @@ void VK_World_Render(const refdef_t* fd)
                 if (vis) { run_start = pf->first_vertex; run_count = pf->num_vertices; }
             }
             if (run_count > 0) {
-                if (!bound)
+                if (!bound) {
+                    VkDescriptorSet bdesc = WorldBatchFrameDesc(&s_batches[b]);
                     vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                        vk_pipeline_world.layout, 0, 1, &s_batches[b].descriptor, 0, NULL);
+                        vk_pipeline_world.layout, 0, 1, &bdesc, 0, NULL);
+                }
                 vkCmdDraw(cb, run_count, 1, run_start, 0);
             }
         }
@@ -1853,8 +1912,9 @@ void VK_World_Render(const refdef_t* fd)
         for (int i = 0; i < s_num_batches; i++) {
             if (s_batches[i].descriptor == VK_NULL_HANDLE) continue;
             if (s_batches[i].surf_flags != 0) continue;
+            VkDescriptorSet bdesc = WorldBatchFrameDesc(&s_batches[i]);
             vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    vk_pipeline_world.layout, 0, 1, &s_batches[i].descriptor, 0, NULL);
+                                    vk_pipeline_world.layout, 0, 1, &bdesc, 0, NULL);
             vkCmdDraw(cb, s_batches[i].num_vertices, 1, s_batches[i].first_vertex, 0);
         }
     }
@@ -2021,21 +2081,26 @@ void VK_World_RenderWater(const refdef_t* fd,
         if (sf & SURF_TRANS33) alpha = s_gl_trans33 ? s_gl_trans33->value : 0.33f;
         else if (sf & SURF_TRANS66) alpha = s_gl_trans66 ? s_gl_trans66->value : 0.66f;
 
+        // Use this FACE's own flags for warp/flow/undulate (ref_gl1 evaluates
+        // them per-face). The batch-level OR could otherwise make a still
+        // turbulent pool flow just because a sibling inflow face is SURF_FLOWING.
+        const int ff = pf->surf_flags ? pf->surf_flags : sf;
         warp_pc[16] = fd->time;
         warp_pc[17] = alpha;
-        warp_pc[18] = (sf & SURF_FLOWING)  ? 1.0f : 0.0f;
-        warp_pc[19] = (sf & SURF_UNDULATE) ? 1.0f : 0.0f;
-        warp_pc[20] = (sf & SURF_WARP)     ? 1.0f : 0.0f;
+        warp_pc[18] = (ff & SURF_FLOWING)  ? 1.0f : 0.0f;
+        warp_pc[19] = (ff & SURF_UNDULATE) ? 1.0f : 0.0f;
+        warp_pc[20] = (ff & SURF_WARP)     ? 1.0f : 0.0f;
         warp_pc[21] = warp_pc[22] = warp_pc[23] = 0.0f;
         vkCmdPushConstants(cb, vk_pipeline_world.warp_layout,
                            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                            0, sizeof(warp_pc), warp_pc);
 
-        if (s_batches[b].descriptor != bound_desc) {
+        VkDescriptorSet wdesc = WorldBatchFrameDesc(&s_batches[b]);
+        if (wdesc != bound_desc) {
             vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                     vk_pipeline_world.warp_layout, 0, 1,
-                                    &s_batches[b].descriptor, 0, NULL);
-            bound_desc = s_batches[b].descriptor;
+                                    &wdesc, 0, NULL);
+            bound_desc = wdesc;
         }
         vkCmdDraw(cb, pf->num_vertices, 1, pf->first_vertex, 0);
     }

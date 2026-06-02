@@ -1133,3 +1133,82 @@ build, asserts compiled out. Verified the viewheight assert string is gone from
 libgame.so.
 PACKAGING: this release ships ALL libraries (libgame.so fix + NDEBUG affects
 every module), not just libref_vk.so.
+
+## v98 - DIAG: identify flowing-waterfall surface flags
+User: a downward-flowing waterfall animates in GL but is STATIC in VK. Also asks
+whether environmental (world) light level is applied to the player model (player
+looks brighter/flatter in VK than the shadowed GL Corvus).
+Findings so far:
+- ref_gl1 opaque lightmapped path literally has "// Missing: SURF_FLOWING logic"
+  (gl1_Surface.c) - opaque flowing surfaces do NOT scroll in GL either.
+- ref_gl1 R_EmitWaterPolys (gl1_Warp.c) applies BOTH turb + flow scroll, but only
+  to SURF_WARP/DRAWTURB (alpha/water) surfaces.
+- So the flowing waterfall must be SURF_WARP+SURF_FLOWING (goes through the warp
+  path). Our warp shader (world_warp.vert) DOES implement the flow scroll, but
+  ONLY inside the isWarp branch (params2.x>0.5). If the waterfall surface lacks
+  SURF_WARP (FLOWING only), it hits the else branch -> no scroll -> static. Need
+  to confirm the actual flags.
+DIAG build: logs "vk: WATERBATCH tex=... surf=0x.. warp/flow/trans/undul/alpha"
+for every batch with FLOWING or WARP, so we can see exactly what the waterfall is
+and fix the shader gating accordingly.
+TODO after diag: also investigate player model world-light sampling (looks like
+the model isn't picking up the local lightmap/ambient level - separate from this).
+
+## v98 - animated world textures (flowing waterfall) - frame cycling
+User: a waterfall that ANIMATES (flowing downward) in GL is STATIC in VK. User
+correctly noted it looks like an ANIMATED TEXTURE, not UV-scroll flow.
+ROOT CAUSE: ref_gl1 R_TextureAnimation walks the texinfo 'next' chain to cycle
+world-texture frames; SURF_ANIMSPEED textures cycle by time
+(frame = num_frames * time). We BUILT this anim chain (num_frames/anim_speed/
+frame_desc) and consumed it ONLY for SUBMODELS - the MAIN-WORLD opaque batches
+left num_frames=1 and the opaque draw bound the base descriptor, so animated
+world textures (the waterfall) were stuck on frame 0 = static.
+FIX (vk_world.c):
+- Main-world batch builder now resolves the texture animation chain (same logic
+  as submodels): finds a representative texinfo for the batch, reads
+  SURF_ANIMSPEED 'value' as anim_speed, walks nexttexinfo collecting frame
+  descriptors into frame_desc[]/num_frames.
+- New WorldBatchFrameDesc(wb): picks the frame descriptor for this frame
+  (anim_speed>0 -> time-driven fr = time*anim_speed; else frame 0), matching
+  R_TextureAnimation.
+- Opaque world draw (both PVS path + draw-all fallback) and the water/warp pass
+  now bind WorldBatchFrameDesc(&batch) instead of the static base descriptor.
+Removed the earlier wrong-theory SURF_FLOWING WATERBATCH diagnostic.
+Note: SURF_FLOWING UV-scroll is a separate mechanism we already had in the warp
+shader; this waterfall was frame animation, not flow scroll.
+
+## v99 - model world-light sampling (player/monsters dark in shadow)
+User: the player looks too bright/flat in VK vs GL - in a shadowed alcove GL's
+Corvus is dark, VK's stays bright. ROOT CAUSE: VK_Model_DrawEntity used the raw
+entity color (usually white) as the tint and NEVER sampled the world light at the
+model origin. ref_gl1 R_DrawFlexModel calls R_LightPoint(e->origin) for normal
+models so they darken in shadow / brighten in light, then multiplies by entity
+color, applies RF_MINLIGHT floor, RF_GLOW pulse.
+FIX (vk_model.c): replaced the tint setup with GL's shadelight order:
+  RF_TRANS_ADD_ALPHA -> grey = alpha; RF_FULLBRIGHT -> white; absLight -> that
+  colour; RF_GLOW -> handled by pulse; else -> VK_LightPoint_SampleRGB(origin).
+  Then * entity color, RF_MINLIGHT floor (0.1 when near-black), RF_GLOW pulse.
+KEY SCALING: VK_LightPoint_SampleRGB returns the raw lightmap (0..1, GL1
+fallback 0.25). Our world surfaces draw at lm*2.0 (effective modulate 2), so the
+sampled model light is scaled by 2.0 with the same desaturating peak-cap (peak>2
+-> scale to 2) world.frag uses, so the player matches the brightness of the floor
+it stands on. (GL uses gl_modulate=1 for BOTH world and R_LightPoint; we use 2
+for both - consistent within VK.) In-shader dynamic lights still add on top, so
+models near torches/lights still light up per-pixel.
+Broad change: affects ALL flex models (player, monsters, items) - they now
+respect world light like GL instead of rendering fullbright-ish.
+
+## v100 - per-face SURF_FLOWING (water flowing in VK but not GL)
+User: some Andoria water FLOWS in VK but is just turbulent-in-place in GL; unsure
+which is right. ANALYSIS: both renderers gate the flow scroll on SURF_FLOWING
+with the same formula, but ref_gl1 evaluates the flag PER-FACE
+(fa->texinfo->flags in R_EmitWaterPolys), while our water pass used the
+PER-BATCH surf_flags which is a bitwise OR across all faces sharing a texture
+(vk_world.c batch_surf |= ...). So if any one face of a water texture was
+SURF_FLOWING (e.g. an inflow), the whole pool of that texture flowed in VK.
+GL is correct (honors per-face map data); VK was contaminating siblings.
+FIX: added per-face surf_flags to pvs_face_t (set from ti->flags when the face
+is emitted), and the water draw now uses pf->surf_flags for the warp/flow/
+undulate decision (falling back to batch sf if 0). Alpha/trans still from the
+batch (uniform per texture). VK now matches GL: only genuinely-flowing faces
+flow.
