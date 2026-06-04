@@ -1212,3 +1212,74 @@ is emitted), and the water draw now uses pf->surf_flags for the warp/flow/
 undulate decision (falling back to batch sf if 0). Alpha/trans still from the
 batch (uniform per texture). VK now matches GL: only genuinely-flowing faces
 flow.
+
+## v101 - model mesh gap (Morph Ovum egg missing a wedge)
+User: the Morph Ovum egg pickup has a wedge-shaped section of mesh missing.
+ROOT CAUSE: the per-node glcmd walk in VK_Model_DrawEntity used fixed 256-entry
+temp arrays (tmp_uv/tmp_pos/tmp_nrm[256]) and clamped nprim to 256. ref_gl1
+walks each triangle fan/strip with NO vertex cap (immediate mode glBegin/glEnd).
+Any single primitive with >256 verts had its tail silently dropped, leaving a
+pie-slice/wedge hole - exactly the egg's missing section.
+FIX (vk_model.c): raised the per-primitive limit to VKM_MAX_PRIM_VERTS (2048)
+via static temp arrays (avoids a large per-call stack alloc; renderer is
+single-threaded so static is fine). Added a one-shot diagnostic logging any
+primitive with >256 verts (model name + node + count) to confirm the cause.
+TODO after user confirms: remove the diagnostic log.
+
+## v102 - egg see-through band (flex models wrongly alpha-tested)
+User: the Morph Ovum egg has a see-through horizontal band just below the top
+(can see straight through to the far side) in VK; whole in GL. Glow sprite is
+fine in both. v101 (>256 prim) was the WRONG theory - the egg-primitive
+diagnostic confirmed all 30 fans are count=4, no truncation.
+ROOT CAUSE: entity.frag applied a global alpha-test discard (c.a < 0.05) to ALL
+entities including flex models. ref_gl1 gl1_FlexModel.c draws flex models with
+NO glAlphaFunc/alpha test. The egg's .m8 skin has a band of palette index-255
+texels (-> alpha 0 via our LoadM8); our discard punched that band through,
+showing the background. GL drew it opaque.
+FIX:
+- entity.frag: added a "no alpha test" mode (fog_extra.w < -0.5). is_sky still
+  w>0.5; cutout sprites/decals/alpha-textured keep w>=-0.5 and still discard.
+- vk_model.c: after Model_FillFogParams, set pc[31] (fog_extra.w) = -1.0 for
+  flex models UNLESS RF_ALPHA_TEXTURE is set (those genuinely want cutout). So
+  plain models never alpha-test (matches GL); alpha-textured models still do.
+Regenerated vk_shaders.c (shaders.sh) for the entity.frag change.
+Removed the v101/v102 egg primitive diagnostics.
+
+## v103 - flex model alpha: match ref_gl1 exactly via skin has_alpha
+v102 (skip alpha test unless RF_ALPHA_TEXTURE) fixed the egg but broke other
+models that legitimately need the cutout/alpha. Replaced the heuristic with
+ref_gl1's ACTUAL rule.
+ref_gl1 R_DrawFlexModel + R_HandleTransparency:
+- Enter the transparency path only when:
+      color.a != 255 || (flags & RF_TRANS_ANY) || skin->has_alpha
+  Outside it: NO blend, NO alpha test (fully opaque).
+- GL sets image->has_alpha = 1 for EVERY .m32 image, and leaves .m8 images
+  has_alpha = false. (So .m32-skinned models are alpha-tested/blended; .m8-
+  skinned models like the Morph Ovum egg draw fully opaque - no index-255
+  discard.)
+- Within the transparency path, alpha test GL_GREATER 0.05 is ON for the normal
+  translucent case and for RF_TRANS_ADD + RF_ALPHA_TEXTURE, but OFF for plain
+  RF_TRANS_ADD / RF_TRANS_ADD_ALPHA (pure additive).
+IMPLEMENTATION:
+- vk_image.c: added image_t.has_alpha; LoadM32 sets true (all m32), LoadM8 sets
+  false (matches GL). Added VK_ImageHasAlpha() accessor (+ header decl). White
+  fallback + RGBA textures default false via memset.
+- vk_model.c: resolve the skin image pointer (entity skin or model skin), then
+  apply GL's exact trans_path + alpha_test decision; when alpha test is off set
+  pc[31] = -1 (shader skips the discard; entity.frag no_alpha_test mode from
+  v102). .m8 keeps index-255 -> alpha 0 baked so sprites/surfaces that DO opt
+  into alpha testing still cut out.
+This is the general fix across ALL flex models, keyed off the same data GL uses.
+
+## v104 - additive models blow out to white in fog
+User: v103 broke the health pickups in fog again - they render as solid white
+capsules. ROOT CAUSE: Model_FillFogParams applies the global fog to ALL models;
+ref_gl1 R_HandleTransparency does glDisable(GL_FOG) for additive models
+(RF_TRANS_ADD / RF_TRANS_ADD_ALPHA). In a foggy area the additive health-pickup
+glow got mixed toward the bright fog color -> solid white blob. (The earlier
+additive-sprite fog-off fix covered the SPRITE path; pickups use the MODEL path,
+which still applied fog.)
+FIX (vk_model.c): after Model_FillFogParams, if RF_TRANS_ADD|RF_TRANS_ADD_ALPHA
+set pc[27] (fog_color.w mode) = -1 to disable fog for that draw, matching GL.
+The v103 alpha-rule work was correct and unchanged; this is the missing fog-off
+for additive models.

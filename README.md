@@ -1,3 +1,5 @@
+I had Claude knock this together, obviously it has had testing and revisions. I think it works pretty good so far.
+
 # Heretic2R
 
 Heretic2R is Heretic II (1998, Raven Software) reverse-engineered source port.

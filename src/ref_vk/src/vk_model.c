@@ -601,13 +601,18 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
     // ent->skin is an externally-registered image (e.g. player skin); its
     // descriptor was allocated at image creation.
     VkDescriptorSet default_desc = VK_NULL_HANDLE;
+    const image_t* skin_img = NULL;
     if (e->skin) {
         default_desc = VK_ImageDescriptor((const image_t*)e->skin);
+        skin_img = (const image_t*)e->skin;
     }
     if (default_desc == VK_NULL_HANDLE) {
         int skin_idx = e->skinnum;
         if (skin_idx < 0 || skin_idx >= m->num_skins) skin_idx = 0;
-        if (m->num_skins > 0) default_desc = m->skin_desc[skin_idx];
+        if (m->num_skins > 0) {
+            default_desc = m->skin_desc[skin_idx];
+            skin_img = m->skins[skin_idx];
+        }
     }
 
     // Push constants (shared by all node draws of this entity).
@@ -738,6 +743,42 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
         }
     }
     Model_FillFogParams(pc);
+    // ref_gl1 R_HandleTransparency disables fog (glDisable(GL_FOG)) for additive
+    // models (RF_TRANS_ADD / RF_TRANS_ADD_ALPHA). Without this, an additive glow
+    // like the health pickup gets blended toward the (bright) fog color in a
+    // foggy area and blows out into a solid white blob. Match GL: fog off.
+    if (e->flags & (RF_TRANS_ADD | RF_TRANS_ADD_ALPHA))
+        pc[27] = -1.0f;   // fog_color.w = mode < 0 => fog disabled
+    // Replicate ref_gl1's exact alpha handling for flex models (R_DrawFlexModel
+    // + R_HandleTransparency):
+    //  * Transparency path is entered only when:
+    //        color.a != 255 || RF_TRANS_ANY || skin->has_alpha
+    //    (GL marks every .m32 skin has_alpha; .m8 skins are opaque.) Outside
+    //    that path GL draws with NO blend and NO alpha test - fully opaque. This
+    //    is why an .m8-skinned model like the Morph Ovum egg must NOT be alpha-
+    //    tested (its index-255 band would otherwise be punched through).
+    //  * Within the transparency path, alpha test (GL_GREATER 0.05) is enabled
+    //    for the normal translucent case and for RF_TRANS_ADD + RF_ALPHA_TEXTURE,
+    //    but DISABLED for plain RF_TRANS_ADD / RF_TRANS_ADD_ALPHA (pure additive).
+    // fog_extra.w: >0.5 sky, <-0.5 = "no alpha test", else alpha test on.
+    {
+        qboolean skin_has_alpha = VK_ImageHasAlpha(skin_img);
+        qboolean trans_path = (e->color.a != 255) ||
+                              (e->flags & RF_TRANS_ANY) || skin_has_alpha;
+        qboolean alpha_test;
+        if (!trans_path) {
+            alpha_test = false;                 // opaque: GL uses no alpha test
+        } else if (e->flags & RF_TRANS_ADD) {
+            // Additive: alpha test only with RF_ALPHA_TEXTURE.
+            alpha_test = (e->flags & RF_ALPHA_TEXTURE) ? true : false;
+        } else if (e->flags & RF_TRANS_ADD_ALPHA) {
+            alpha_test = false;                 // additive-alpha: no alpha test
+        } else {
+            alpha_test = true;                  // normal translucent: GL_GREATER 0.05
+        }
+        if (!alpha_test)
+            pc[31] = -1.0f;                     // signal shader: skip discard
+    }
 
     vkm_vert_t* vbuf = s_model_mapped[frame];
     qboolean pipeline_bound = false;
@@ -794,10 +835,16 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
             qboolean fan = (count < 0);
             if (fan) count = -count;
 
-            float tmp_uv[256][2];
-            float tmp_pos[256][3];
-            float tmp_nrm[256][3];
-            int nprim = (count > 256) ? 256 : count;
+            // ref_gl1 walks each fan/strip with no vertex cap (immediate mode).
+            // A fixed 256-cap here silently dropped the tail of any primitive
+            // with >256 verts, leaving a wedge-shaped hole in the mesh (e.g. the
+            // Morph Ovum egg). Size the temp arrays to the model vertex limit so
+            // no primitive is ever truncated.
+            #define VKM_MAX_PRIM_VERTS 2048
+            static float tmp_uv[VKM_MAX_PRIM_VERTS][2];
+            static float tmp_pos[VKM_MAX_PRIM_VERTS][3];
+            static float tmp_nrm[VKM_MAX_PRIM_VERTS][3];
+            int nprim = (count > VKM_MAX_PRIM_VERTS) ? VKM_MAX_PRIM_VERTS : count;
             for (int c = 0; c < count; c++) {
                 const float s = ((const float*)order)[0];
                 const float t = ((const float*)order)[1];

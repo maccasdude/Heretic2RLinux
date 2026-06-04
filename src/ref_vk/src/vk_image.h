@@ -28,6 +28,7 @@ image_t* VK_FindImage(const char* name);
 int             VK_ImageWidth(const image_t* img);
 int             VK_ImageHeight(const image_t* img);
 VkDescriptorSet VK_ImageDescriptor(const image_t* img);
+qboolean VK_ImageHasAlpha(const image_t* img);
 VkImageView     VK_ImageView(const image_t* img);
 
 #endif

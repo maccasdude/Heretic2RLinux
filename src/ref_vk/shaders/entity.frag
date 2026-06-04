@@ -59,14 +59,20 @@ void main() {
     vec4 c = texture(u_diffuse, v_uv) * v_tint;
 
     bool is_sky = (pc.fog_extra.w > 0.5);
+    // fog_extra.w < -0.5 means "do not alpha-test this draw". ref_gl1 draws flex
+    // models with NO alpha test (gl1_FlexModel.c has no glAlphaFunc), so an
+    // opaque model whose skin has a band of fully-transparent palette texels
+    // (index 255 in an .m8 -> alpha 0) must still draw that band opaque. The
+    // global discard below is only correct for cutout sprites/decals/alpha-
+    // textured surfaces, which set w >= -0.5.
+    bool no_alpha_test = (pc.fog_extra.w < -0.5);
 
     // Alpha test (matches ref_gl1 R_AlphaFunc GL_GREATER ~0.05 for sprites and
     // alpha-textured surfaces): discard near-transparent texels so cutout
     // sprites (vines, plant cards) and decals don't draw opaque quads where the
     // texture is transparent. Harmless for fully-opaque textures (alpha 1).
-    // NEVER alpha-test the sky - it is an opaque background; discarding low-alpha
-    // sky texels would punch holes that reveal the dark framebuffer clear colour.
-    if (!is_sky && c.a < 0.05) discard;
+    // NEVER alpha-test the sky, and never alpha-test plain flex models.
+    if (!is_sky && !no_alpha_test && c.a < 0.05) discard;
 
     // Models are pre-lit by the engine's shadelight baked into v_tint. Add
     // dynamic light on top when enabled, with the same desaturating cap as the

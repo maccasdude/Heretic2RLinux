@@ -20,6 +20,7 @@ typedef struct image_s {
     vk_texture_t    tex;
     VkDescriptorSet descriptor;
     int             width, height;
+    qboolean        has_alpha;   // texture has any non-opaque texel (matches GL image->has_alpha)
     qboolean        used;
 } image_t;
 
@@ -117,6 +118,7 @@ static image_t* LoadM32(const char* name)
     slot->descriptor = VK_AllocDescriptorSetFor(slot->tex.view);
     slot->width  = w;
     slot->height = h;
+    slot->has_alpha = true;   // GL marks every .m32 image has_alpha = 1
 
     ri.FS_FreeFile(mt);
     return slot;
@@ -174,6 +176,11 @@ static image_t* LoadM8(const char* name)
     slot->descriptor = VK_AllocDescriptorSetFor(slot->tex.view);
     slot->width  = w;
     slot->height = h;
+    // GL leaves .m8 images has_alpha = false (only .m32 are marked has_alpha).
+    // We still bake index-255 -> alpha 0 above so that sprites/surfaces which DO
+    // opt into alpha testing (via their own flags) can cut it out; but flex
+    // models keyed off has_alpha will treat an .m8 skin as opaque, like GL.
+    slot->has_alpha = false;
 
     free(rgba);
     ri.FS_FreeFile(mt);
@@ -240,4 +247,5 @@ void VK_ShutdownImages(void)
 int             VK_ImageWidth     (const image_t* img) { return img ? img->width      : 0; }
 int             VK_ImageHeight    (const image_t* img) { return img ? img->height     : 0; }
 VkDescriptorSet VK_ImageDescriptor(const image_t* img) { return img ? img->descriptor : VK_NULL_HANDLE; }
+qboolean VK_ImageHasAlpha(const image_t* img) { return img ? img->has_alpha : false; }
 VkImageView     VK_ImageView      (const image_t* img) { return img ? img->tex.view   : VK_NULL_HANDLE; }
