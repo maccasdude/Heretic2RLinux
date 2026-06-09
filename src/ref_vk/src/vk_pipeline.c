@@ -73,6 +73,9 @@ qboolean VK_CreatePipeline2D(void)
 
     VkDescriptorPoolCreateInfo pool_ci = {0};
     pool_ci.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    // FREE bit lets us release individual sets when evicting stale per-level
+    // textures at level load (see VK_FreeUnusedImages).
+    pool_ci.flags         = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
     pool_ci.maxSets       = VK_MAX_TEXTURES;
     pool_ci.poolSizeCount = 1;
     pool_ci.pPoolSizes    = &pool_size;
@@ -263,4 +266,13 @@ VkDescriptorSet VK_AllocDescriptorSetFor(VkImageView view)
     vkUpdateDescriptorSets(vk_state.device, 1, &w, 0, NULL);
 
     return ds;
+}
+
+// Free a descriptor set allocated from the 2D pool. Only valid because the pool
+// is created with VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT. Caller must
+// ensure the set is no longer referenced by any in-flight frame.
+void VK_FreeDescriptorSet(VkDescriptorSet ds)
+{
+    if (ds != VK_NULL_HANDLE)
+        vkFreeDescriptorSets(vk_state.device, vk_pipeline_2d.descriptor_pool, 1, &ds);
 }

@@ -31,5 +31,6 @@ void     VK_DestroyPipeline3D(void);
 
 // Allocate a descriptor set bound to a given image view (world textures).
 VkDescriptorSet VK_AllocWorldDescriptor(VkImageView view);
+void VK_FreeWorldDescriptor(VkDescriptorSet ds);
 
 #endif

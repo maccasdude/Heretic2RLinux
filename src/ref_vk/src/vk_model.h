@@ -19,6 +19,8 @@ vk_model_t* VK_Model_Register(const char* name);
 
 // Free all loaded models (called at renderer shutdown / map change).
 void        VK_Model_FreeAll(void);
+void VK_Model_FreeUnused(void);
+void VK_Model_SetRegSeq(int seq);
 
 // Reference type for this model (REF_CORVUS etc.), or -1 if it has none.
 // Used by re.GetReferencedID so the client allocates entity->referenceInfo.

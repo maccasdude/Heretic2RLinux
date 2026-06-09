@@ -36,7 +36,6 @@ typedef struct {
     int             w, h;
     int             origin_x, origin_y;
     image_t*        image;
-    VkDescriptorSet descriptor;
 } vk_sprite_frame_t;
 
 struct vk_sprite_s {
@@ -114,7 +113,15 @@ vk_sprite_t* VK_Sprite_TryLoad(const char* name)
 {
     if (!name || !*name) return NULL;
     struct vk_sprite_s* hit = SpriteFindCached(name);
-    if (hit) return hit;
+    if (hit) {
+        // Re-stamp the cached sprite's frame images as used this registration
+        // sequence, so VK_FreeUnusedImages doesn't evict them out from under the
+        // cached frame descriptors (-> imageView 0x0 device-lost). Same bug class
+        // as the sky and model-skin fixes.
+        for (int i = 0; i < hit->num_frames; i++)
+            if (hit->frames[i].image) VK_Image_Touch(hit->frames[i].image);
+        return hit;
+    }
 
     byte* buffer = NULL;
     int length = ri.FS_LoadFile(name, (void**)&buffer);
@@ -151,15 +158,14 @@ vk_sprite_t* VK_Sprite_TryLoad(const char* name)
         snprintf(frame_path, sizeof(frame_path), "Sprites/%s", f->name);
 
         s->frames[i].image    = VK_FindImage(frame_path);
-        if (s->frames[i].image)
-            s->frames[i].descriptor = VK_AllocWorldDescriptor(VK_ImageView(s->frames[i].image));
-        else
+        // Descriptor fetched from the image at draw time (eviction-safe).
+        if (!s->frames[i].image)
             ri.Con_Printf(PRINT_ALL, "vk:   sprite '%s' frame %d: image '%s' NOT FOUND\n",
                           name, i, frame_path);
     }
 
     ri.FS_FreeFile(buffer);
-    ri.Con_Printf(PRINT_ALL, "vk: sprite '%s': %d frames\n", name, nf);
+    ri.Con_Printf(PRINT_DEVELOPER, "vk: sprite '%s': %d frames\n", name, nf);
     return s;
 }
 
@@ -191,7 +197,11 @@ void VK_Sprite_DrawEntity(const struct entity_s* e, const vk_sprite_t* s,
     if (s->num_frames > 0) fi %= s->num_frames;
 
     const vk_sprite_frame_t* f = &s->frames[fi];
-    if (!f->image || f->descriptor == VK_NULL_HANDLE) return;
+    // Descriptor lives on the image now (eviction-safe): NULL if the frame's
+    // image was freed (e.g. a sprite not re-registered after a reload), in
+    // which case we skip the draw instead of binding a dangling set.
+    VkDescriptorSet frame_desc = VK_ImageWorldDescriptor(f->image);
+    if (!f->image || frame_desc == VK_NULL_HANDLE) return;
 
     const uint32_t frame = vk_state.current_frame;
     if (s_sprite_cursor[frame] + 6 > VK_SPRITE_MAX_VERTS) return;
@@ -366,7 +376,7 @@ void VK_Sprite_DrawEntity(const struct entity_s* e, const vk_sprite_t* s,
                            0, sizeof(pc), pc);
     }
     vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            vk_pipeline_3d.layout, 0, 1, &f->descriptor, 0, NULL);
+                            vk_pipeline_3d.layout, 0, 1, &frame_desc, 0, NULL);
     {
         VkDescriptorSet dlset = VK_World_CurrentDlightSet();
         if (dlset != VK_NULL_HANDLE)

@@ -318,3 +318,54 @@ qboolean VK_LightPoint_SampleRGB(const float p[3], float out[3])
     }
     return true;
 }
+
+// ---------------------------------------------------------------------------
+// gl_minlight - minimum light floor (port of ref_gl1 R_InitMinlight)
+//
+// Builds a 256-entry LUT mapping a light byte through floor 'ml': anything below
+// ml is lifted to ml, the range [0,255] is rescaled to [ml,255]. Applied to
+// world lightmap luxels (vk_world.c BakeSurfaceLightmap) and to entity shade
+// (vk_model.c), exactly where ref_gl1 applies minlight[]. gl_minlight defaults
+// to 0 (off) and is CVAR_ARCHIVE, matching GL.
+// ---------------------------------------------------------------------------
+
+byte           vk_minlight[256];
+qboolean       vk_minlight_set = false;
+static cvar_t* s_gl_minlight   = NULL;
+
+void VK_InitMinlight(void)
+{
+    if (!s_gl_minlight)
+        s_gl_minlight = ri.Cvar_Get("gl_minlight", "0", CVAR_ARCHIVE);
+
+    float ml = s_gl_minlight->value;
+    if (ml < 0.0f)   ml = 0.0f;
+    if (ml > 255.0f) ml = 255.0f;
+
+    vk_minlight_set = (ml != 0.0f);
+
+    if (vk_minlight_set) {
+        for (int i = 0; i < 256; i++) {
+            int inf = (int)((255.0f - ml) * (float)i / 255.0f + ml);
+            if (inf < 0)   inf = 0;
+            if (inf > 255) inf = 255;
+            vk_minlight[i] = (byte)inf;
+        }
+    } else {
+        for (int i = 0; i < 256; i++)
+            vk_minlight[i] = (byte)i;
+    }
+}
+
+// Returns true (and rebuilds the LUT) if gl_minlight changed since last call, so
+// the world lightmaps can be re-baked. Lazily registers + builds on first use.
+qboolean VK_Minlight_CheckModified(void)
+{
+    if (!s_gl_minlight) { VK_InitMinlight(); return true; }
+    if (s_gl_minlight->modified) {
+        VK_InitMinlight();
+        s_gl_minlight->modified = false;
+        return true;
+    }
+    return false;
+}

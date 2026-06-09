@@ -24,7 +24,6 @@ static char    s_sky_name[64] = {0};
 static float   s_sky_rotate   = 0.0f;
 static float   s_sky_axis[3]  = {0,0,1};
 static image_t* s_sky_images[6] = {0};
-static VkDescriptorSet s_sky_desc[6] = {VK_NULL_HANDLE};
 
 #define SKY_CLIPDIST 2300.0f
 
@@ -75,6 +74,13 @@ void VK_Sky_Set(const char* name, float rotate, const float axis[3])
     if (strcasecmp(s_sky_name, name) == 0) {
         s_sky_rotate = rotate;
         if (axis) { s_sky_axis[0]=axis[0]; s_sky_axis[1]=axis[1]; s_sky_axis[2]=axis[2]; }
+        // Same sky as the previous map: we skip reloading, but we MUST re-touch
+        // the sky images so they are stamped with the current registration
+        // sequence. Otherwise R_EndRegistration's VK_FreeUnusedImages sees them
+        // as stale, destroys their image views, and the still-bound sky
+        // descriptors then reference a destroyed view -> GPU device-lost.
+        for (int i = 0; i < 6; i++)
+            if (s_sky_images[i]) VK_Image_Touch(s_sky_images[i]);
         return;
     }
     strncpy(s_sky_name, name, sizeof(s_sky_name) - 1);
@@ -90,14 +96,11 @@ void VK_Sky_Set(const char* name, float rotate, const float axis[3])
             snprintf(path, sizeof(path), "pics/skies/%s%s.m32", name, k_suf[i]);
             s_sky_images[i] = VK_FindImage(path);
         }
-        if (!s_sky_images[i]) {
+        if (!s_sky_images[i])
             ri.Con_Printf(PRINT_ALL, "vk: sky '%s%s' missing\n", name, k_suf[i]);
-            s_sky_desc[i] = VK_NULL_HANDLE;
-        } else {
-            s_sky_desc[i] = VK_AllocWorldDescriptor(VK_ImageView(s_sky_images[i]));
-        }
+        // Descriptor is fetched from the image at draw time (VK_ImageWorldDescriptor).
     }
-    ri.Con_Printf(PRINT_ALL, "vk: sky set to '%s'\n", name);
+    ri.Con_Printf(PRINT_DEVELOPER, "vk: sky set to '%s'\n", name);
 }
 
 // Per-frame VBO holding 6 faces * 6 verts = 36 verts.
@@ -129,7 +132,6 @@ void VK_Sky_Shutdown(void)
         s_vbo_ready = false;
     }
     memset(s_sky_images, 0, sizeof(s_sky_images));
-    memset(s_sky_desc, 0, sizeof(s_sky_desc));
     s_sky_name[0] = 0;
 }
 
@@ -143,10 +145,17 @@ void VK_Sky_Render(const refdef_t* fd, const float vieworg[3], const float* mvp)
     VkCommandBuffer cb = vk_state.command_buffers[frame];
     sky_vert_t* vb = s_sky_mapped[frame];
 
+    // Resolve each sky face's descriptor once, from the image (eviction-safe;
+    // NULL if the sky image was freed). Build and draw loops must agree on which
+    // faces are skipped, since vertex offsets are face*6.
+    VkDescriptorSet face_desc[6];
+    for (int i = 0; i < 6; i++)
+        face_desc[i] = VK_ImageWorldDescriptor(s_sky_images[i]);
+
     int v = 0;
     for (int face = 0; face < 6; face++) {
         const int img_idx = k_tex_order[face];
-        if (s_sky_desc[img_idx] == VK_NULL_HANDLE) { v += 6; continue; }
+        if (face_desc[img_idx] == VK_NULL_HANDLE) { v += 6; continue; }
         float p[3], uv[2];
         const float corners[4][2] = {
             { -1.0f, -1.0f }, { -1.0f, 1.0f }, { 1.0f, 1.0f }, { 1.0f, -1.0f }
@@ -196,9 +205,9 @@ void VK_Sky_Render(const refdef_t* fd, const float vieworg[3], const float* mvp)
 
     for (int face = 0; face < 6; face++) {
         const int img_idx = k_tex_order[face];
-        if (s_sky_desc[img_idx] == VK_NULL_HANDLE) continue;
+        if (face_desc[img_idx] == VK_NULL_HANDLE) continue;
         vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                vk_pipeline_3d.layout, 0, 1, &s_sky_desc[img_idx], 0, NULL);
+                                vk_pipeline_3d.layout, 0, 1, &face_desc[img_idx], 0, NULL);
         vkCmdDraw(cb, 6, 1, face * 6, 0);
     }
 

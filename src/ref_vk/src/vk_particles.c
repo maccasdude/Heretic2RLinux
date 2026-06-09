@@ -250,6 +250,10 @@ qboolean VK_Particles_Init(void)
                       s_part_image, s_apart_image);
         // Not fatal; particles just won't draw.
     }
+    // Particle textures persist across all maps and we cache their descriptors
+    // statically, so they must never be evicted at level change.
+    VK_Image_MarkPermanent(s_part_image);
+    VK_Image_MarkPermanent(s_apart_image);
     if (s_part_image)
         s_part_desc = VK_AllocWorldDescriptor(VK_ImageView(s_part_image));
     if (s_apart_image)

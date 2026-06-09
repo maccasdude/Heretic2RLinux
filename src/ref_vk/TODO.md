@@ -1283,3 +1283,414 @@ FIX (vk_model.c): after Model_FillFogParams, if RF_TRANS_ADD|RF_TRANS_ADD_ALPHA
 set pc[27] (fog_color.w mode) = -1 to disable fog for that draw, matching GL.
 The v103 alpha-rule work was correct and unchanged; this is the missing fog-off
 for additive models.
+
+## v105 - EmitQuad overflow FIXED (grow-on-demand) + GL parity audit
+The 2D quad buffer (vk_draw.c) hit its fixed ceiling on the loading screen (full
+book background + entire console scrollback at high res) and dropped quads,
+printing "EmitQuad cursor overflow (cursor 98304 max 98304)". FIXED (not
+silenced): the per-frame VBO now GROWS on demand.
+- frame_vbo_t gained capacity + a retired-buffer slot.
+- GrowFrameVBO(): on overflow, FlushBatch the pending quads (they referenced the
+  old buffer, correct), allocate a 2x buffer, copy the in-progress un-flushed
+  batch [s_batch_start,cursor) into it at the same indices so absolute vertex
+  indices stay valid, retire the old buffer, rebind the new one.
+- The retired buffer is freed in VK_Draw_BeginFrame next time this frame slice is
+  reused (its fence has been waited on by then - safe with frames-in-flight=2).
+  Also freed in VK_DrawShutdown.
+- BeginQuad grows instead of dropping; EmitQuad's overflow path is now an
+  unreachable guard (no console message).
+Verified: full clean rebuild of all 9 libs, ref_vk dlopen OK (no undefined syms).
+
+### GL feature-parity audit (this session)
+- Renderer API surface: VK implements ALL 44 re.* entry points GL does. None
+  missing, none extra.
+- Per-frame pipeline matches GL R_RenderView step-for-step: dlights (in-shader),
+  frame setup, frustum cull, PVS (R_MarkLeaves), world, entities, alpha-surface/
+  water interleave (R_SortAndDrawAlphaSurfaces), BOTH particle lists (normal +
+  additive aparticles), screen flash (R_PolyBlend). Nothing visual absent.
+- KNOWN DIVERGENCES (low impact, documented, NOT yet addressed):
+  1. R_EndRegistration is empty in VK; GL frees models/textures unused by the new
+     level (Mod_Free + R_FreeUnusedImages). VK keeps prior-level assets resident.
+     Bounded: engine-model WRAPPERS already reset each map (VK_EModel_
+     BeginRegistration), and the flex/texture caches are name-deduped, so growth
+     tends toward "all assets seen this session", not an unbounded per-frame leak.
+     To implement faithfully: add registration_sequence to image_t + flex cache,
+     stamp on each find/load, exempt never-free textures (conchars/fonts/reflect/
+     particle), and tear down Vulkan resources only when guaranteed idle. Invasive
+     + crash-risky if rushed; deserves its own focused session.
+  2. R_FindSurface returns 0 (stub). Engine marks it //TODO: unused (client.h),
+     so GL's full BSP-walk implementation is never actually called. No real gap.
+  3. Debug primitives (AddDebugBox/Line/Label/etc) are no-ops under non-_DEBUG;
+     developer visualization tools only, not gameplay. GL implements them.
+
+## v106 - removed leftover diagnostic console spam
+User still saw "vk: model 'models/items/health/...' flags=... pipe=add" printed
+in-game. Removed the two leftover diagnostics flagged in the v105 audit:
+- vk_model.c: the per-entity translucent/alpha-textured model logger (s_md<40);
+  fired in-game for the first 40 additive/translucent models (health pickups).
+- vk_world.c: the per-submodel-batch "SUBMODEL trans batch" logger (load-time).
+Swept all remaining Con_Printf in the renderer: only legitimate one-time load
+messages, errors, and the EmitQuad NULL-mapped one-shot guard remain. No per-
+frame/per-entity logging left.
+
+## v107 - resource management: free per-level assets at level change (Part 1)
+Implements the R_EndRegistration asset-freeing that was the one known divergence
+from ref_gl1 (VK previously kept every texture/model from every level resident
+for the whole session). Matches GL's registration_sequence + R_FreeUnusedImages.
+
+Mechanism:
+- Descriptor pools (2D in vk_pipeline.c, world-3D in vk_pipeline3d.c) now created
+  with VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT so individual sets can
+  be freed. Added VK_FreeDescriptorSet / VK_FreeWorldDescriptor.
+  (Side benefit: the cinematic code already called vkFreeDescriptorSets on the 2D
+  pool - that was only valid once the FREE bit was added.)
+- image_t gained reg_seq + permanent. s_image_reg_seq bumped each map; stamped on
+  every FindByName/AllocImageSlot. VK_FreeUnusedImages() frees texture+descriptor
+  for any non-permanent image not touched this sequence. AllocImageSlot now reuses
+  freed interior slots so the pool doesn't creep to the cap.
+- vk_model_s gained reg_seq. VK_Model_FreeUnused() frees CPU frame/glcmd blocks,
+  per-skin world descriptors, and skeletal data for stale models; reuses slots.
+- R_BeginRegistration bumps a shared sequence (BEFORE world load, so the new
+  map's assets stamp current); R_EndRegistration does vkDeviceWaitIdle then
+  VK_Model_FreeUnused + VK_FreeUnusedImages.
+- PERMANENT assets (never evicted): white fallback, conchars (both load sites),
+  font1/font2 atlases, reflect sphere-map, particle + aparticle textures.
+- Fixed a pre-existing world-texture descriptor leak: VK_World_LoadMap reset the
+  world-texture table to 0 without freeing the per-level diffuse+lightmap pair
+  descriptors. Added VK_ResetWorldPairDescriptors() (whole-pool reset, all per-
+  level, none permanent), called from VK_World_Free after a device-idle wait.
+
+Safety: all eviction happens at level load behind vkDeviceWaitIdle, so no freed
+texture/descriptor is referenced by an in-flight frame. Sequence is bumped before
+the new map loads, so current-level assets are never evicted. Cinematic texture
+is standalone (not in the image cache), unaffected.
+
+NEEDS: transition-heavy playtest. This is teardown code - verify (a) no missing
+textures/HUD after several map changes, (b) memory stays flat across transitions
+(the "freed N unused textures/models" console lines confirm eviction is firing),
+(c) revisiting a map re-loads its assets cleanly.
+
+## v108 - performance: flex-model frustum cull + skip wasted normal work
+Two performance wins in the per-frame flex-model path (vk_model.c), both also
+closing small divergences from ref_gl1. Also demoted leftover load prints.
+
+1. Stray console prints (the "plague bomb" report): the flex-model, skeletal,
+   sprite and sky load-confirmation messages fired on lazy mid-game asset loads
+   (e.g. an enemy projectile spawning its effect). Demoted PRINT_ALL ->
+   PRINT_DEVELOPER (routed through Com_DPrintf, only shown with "developer 1"),
+   matching GL which does not print load info during gameplay. Swept the whole
+   renderer: no console prints remain in any gameplay/per-frame path.
+
+2. Skip per-vertex normal decode+transform for non-reflective models. The normal
+   (nx,ny,nz) is consumed ONLY by the reflect shaders (entity_reflect.*); the
+   base entity shader ignores it. Previously every model (every monster, player,
+   item) ran DecodeLerpNormal + XformNormal per vertex and uploaded a normal the
+   shader threw away. Now computed only when node_reflect is set; otherwise a
+   cheap constant is written. Saves a decode + 3x3 transform per vertex for the
+   overwhelming majority of model vertices each frame.
+
+3. Frustum-cull flex models before skinning (ref_gl1 R_CullFlexModel parity).
+   DrawEntityList previously dispatched EVERY entity with no cull, so off-screen
+   monsters/items were fully CPU-skinned, uploaded, and draw-recorded every
+   frame. Now: compute the model's local AABB from current+old frame
+   translate/scale, transform the 8 corners with the SAME entity transform used
+   to draw (XformPoint, so the cull box exactly matches on-screen geometry),
+   and reject if all 8 corners fall outside one frustum plane (aggregate-mask
+   test, matches GL). Skipped for viewmodels (RF_DEPTHHACK) and honors r_nocull.
+   New VK_World_CullWorldCorners() in vk_world.c exposes the frustum test.
+
+Risk note: the cull reuses the exact draw transform (not a hand-rolled angle
+basis) specifically to avoid the classic "models pop at screen edges" bug. Watch
+for any model disappearing while still partly visible - would indicate the frame
+AABB is tighter than the actual animated verts for some model. r_nocull 1
+disables culling to A/B test if anything looks wrong.
+
+## v109 - CRITICAL FIX: device-lost from sky descriptor referencing evicted image
+Symptom: after some map transitions, per-frame validation spam "vkCmdDraw():
+descriptor ... using imageView 0x0 that is invalid or has been destroyed",
+escalating to VK_ERROR_DEVICE_LOST (GPU hang) + fence/semaphore cascade.
+
+ROOT CAUSE: the v107 resource eviction (VK_FreeUnusedImages) interacting with
+VK_Sky_Set's same-name early-out. When two consecutive maps use the SAME sky,
+VK_Sky_Set('X') early-returned without re-resolving the 6 sky images through the
+image cache, so they were NOT re-stamped with the new registration sequence.
+R_EndRegistration then saw them as stale (last used by the previous map) and
+VK_FreeUnusedImages destroyed their image views - but s_sky_desc[] still held
+descriptors pointing at those views, and the sky is drawn every frame, so every
+sky draw referenced a destroyed view -> device lost. (Explains the intermittent
+nature: only triggers when adjacent maps share a sky name.)
+
+FIX (vk_sky.c): on the same-name early-out, re-touch the 6 sky images via
+VK_FindImage (a cheap cache hit) so they are stamped current and survive
+eviction. The reload path (different sky) was already fine.
+
+AUDIT: checked every persistent descriptor/image cache for the same class of bug
+(cached descriptor referencing an image-cache view that eviction can destroy):
+- draw_chars, bf_atlas1/2, white, particle/aparticle, reflect: marked permanent
+  in v107 -> safe.
+- cinematic: standalone texture, not in image cache -> safe.
+- HUD pics: re-registered by client each map (VK_FindPic stamps) -> safe.
+- sky: was the ONLY unprotected cache; now fixed. Sky is correctly NOT made
+  permanent (it legitimately changes between maps; old skies should evict when
+  the new map uses a different one).
+
+## v110 - CRITICAL: complete the cache-hit re-stamp fix (device-lost cont'd)
+v109 fixed sky but the SAME bug existed for other cached-asset types. Crash on
+load into canyon.bsp ("freed 382 unused textures", then imageView 0x0 on ~4
+persistent descriptors -> device lost).
+
+GENERAL ROOT CAUSE (bug class): any cache that stores an image_t* (or a
+descriptor built from an image's view) across registrations AND has a cache-hit
+early-out that skips the normal VK_FindImage re-resolve will NOT re-stamp those
+images with the new registration sequence. VK_FreeUnusedImages then evicts them
+(destroying the image view) while the cached descriptor still references it ->
+GPU device-lost on the next draw.
+
+Found and fixed ALL instances (added VK_Image_Touch(img) helper in vk_image.c
+that re-stamps reg_seq; called on each cache hit):
+- vk_model.c: cached flex model (FindCached hit) - re-stamp m->skins[]. THIS was
+  the canyon crash (model skins shared with the previous map).
+- vk_sprite.c: cached sprite (SpriteFindCached hit) - re-stamp frames[].image.
+- vk_draw.c: cached book (Book_FindCached hit) - re-stamp skins[] (latent: open
+  book, change map, reopen).
+- vk_sky.c: switched the v109 same-name re-resolve to the VK_Image_Touch helper
+  (functionally identical, cleaner).
+Audited every image_t*-holding cache: world textures are re-resolved each load
+(WorldTex_Resolve, table reset to 0) so always re-stamped - safe; image-cache
+FindByName already re-stamps - safe. These four were the complete set.
+
+Lesson: the v107 eviction needs EVERY long-lived image reference to be re-stamped
+each registration. Cache-hit fast-paths are the trap. If another imageView 0x0
+device-lost appears, look for a new cached image_t* with a skip-on-hit path.
+
+## v111 - FIX: level-change eviction freed the main-menu (book) textures
+User: after a level change the main menu was unusable - its textures had been
+freed. The main menu is drawn via re.BookDrawPic (a .bk composite, menu.c:1351).
+
+ROOT CAUSE: VK_BookDrawPic drew each segment via the CACHED image_t* pointer
+(book->skins[i]) resolved once at book load. The menu/books are not part of any
+map's registration, so on level change VK_FreeUnusedImages freed their segment
+images, leaving book->skins[i] dangling -> menu drew nothing usable. (The v110
+"re-stamp cached book skins on cache hit" was ineffective here: the menu book is
+not re-loaded during a map change, so the cache-hit path never ran before
+eviction; and re-stamping an already-freed slot pointer is meaningless.)
+
+GENERAL PRINCIPLE (now explicit): a draw path that uses a cached image_t* is only
+safe across eviction if that asset is GUARANTEED re-registered every map (so its
+cache-hit re-stamp fires before eviction). Assets drawn outside the map
+registration cycle (menu, books) must RE-RESOLVE BY NAME each draw, exactly like
+VK_Draw_Pic does, so an evicted image is transparently reloaded.
+
+FIX (vk_draw.c VK_BookDrawPic): re-resolve each segment image via VK_FindImage
+("Book/<segment name>") at draw time instead of using book->skins[i]. Reverted
+the v110 book cache-hit re-stamp (superseded). 
+
+Audit of all 2D/UI draw paths vs eviction:
+- Draw_Pic/StretchPic/TileClear/GetPicSize: re-resolve by name -> safe.
+- Draw_Char (conchars), BigFont (font atlases): permanent -> safe.
+- BookDrawPic: NOW re-resolves by name -> safe.
+- sprites, model skins: cached image_t* BUT re-registered every map (cache-hit
+  re-stamp from v110 fires before eviction, pointer still valid) -> safe.
+- sky: re-stamped via VK_Sky_Set each map -> safe.
+- particle/aparticle/reflect/white: permanent -> safe.
+This completes the eviction-safety pass across every image reference.
+
+## v112 - FIX: death-reload device-lost (model/sprite/sky 3D descriptors dangling)
+User: after dying and reloading the saved game, the renderer crashed. Validation
+log: "freed 116 unused textures (level change)" immediately followed by a broad
+burst of VUID-vkCmdDraw-None-08114 (imageView 0x0) across ~30 descriptor sets,
+narrowing to a steady per-frame pair (0x24a2, 0x24a7), escalating to
+VK_ERROR_DEVICE_LOST + the fence/semaphore/command-buffer cascade.
+
+ROOT CAUSE (section-9 bug class, 3D path): the eviction is GL-faithful - a reload
+into an already-visited map re-registers only the baseline configstring assets,
+so textures lazy-loaded mid-game (enemy skins, gibs, effect sprites) go stale and
+are correctly freed (the 116). The defect was the VK CONSUMER side: model skins
+(m->skin_desc[]), sprite frames (frames[].descriptor) and sky (s_sky_desc[]) each
+cached a world-3D VkDescriptorSet built from an image's view. VK_FreeUnusedImages
+freed only the image's OWN 2D descriptor and destroyed the view; those separate
+cached 3D sets were never nulled, so they stayed bound referencing a destroyed
+view -> imageView 0x0 -> device-lost. ref_gl1 survives the identical eviction
+only because binding a freed GL texture id is benign; Vulkan treats a destroyed
+view in a bound descriptor as fatal, so "match GL eviction" is not the fix (the
+eviction already matches). The v110/v109 re-touch only protects assets that ARE
+re-registered; lazy-loaded-but-not-re-registered entities still drawn for a frame
+after reload slipped through (hence the broad burst then steady pair).
+
+FIX: the world-3D descriptor now lives ON THE IMAGE (image_t.world_descriptor),
+allocated lazily by VK_ImageWorldDescriptor(img) and freed+nulled in
+VK_FreeUnusedImages alongside the texture - exactly mirroring the existing 2D
+img->descriptor lifetime. Model skins, sprite frames and sky fetch it at draw
+time: a freed image returns VK_NULL_HANDLE (caller already null-checks and skips
+the draw, like GL drawing nothing), and a reused slot gets a fresh descriptor (no
+dangle). Removed the now-dead m->skin_desc[], vk_sprite_frame_t.descriptor and
+s_sky_desc[] (alloc + free + decls). Net world-3D descriptor usage DROPS (one per
+image vs one per model-skin, duplicates collapsed). The v110/v109 image re-touch
+on cache-hit is kept (still keeps re-registered skins resident this level, avoids
+re-upload) but is no longer load-bearing for crash-safety.
+
+GENERAL PRINCIPLE (now explicit for the 3D path too): a cached VkDescriptorSet
+built from an image view is eviction-safe ONLY if it is freed when that image is
+freed. The robust pattern is to store the descriptor on the image so it shares
+the image's lifetime, rather than caching it in the consumer and relying on the
+consumer being re-registered. This is the 3D analogue of the v111 "re-resolve by
+name" 2D rule.
+
+Audit of all world-3D image-backed descriptors vs eviction (believed complete):
+- model skins, sprite frames, sky: NOW image-owned (VK_ImageWorldDescriptor),
+  freed with the image -> safe by construction (no re-registration dependency).
+- particle/aparticle/reflect: permanent images -> safe.
+- world (pair pool): rebuilt every load (VK_World_Free resets the pool) -> safe.
+- cinematic: standalone texture, not in the image cache -> safe.
+This closes the eviction-safety pass for the 3D descriptor path. If a NEW
+imageView 0x0 appears, look for a consumer-cached VkDescriptorSet not sourced from
+VK_ImageWorldDescriptor / not rebuilt per load.
+
+## v113 - FIX (the real one): world same-map reload eviction; v112 corrected
+CORRECTION TO v112: the v112 image-owned 3D-descriptor change (model/sprite/sky)
+is real, kept hardening of the 3D path, but it was NOT the cause of the reported
+death-reload crash. The crash persisted unchanged after v112 (same VUID-08114
+imageView 0x0 burst + steady pair, same "freed N unused textures (level change)"
+opener). The decisive evidence was in the log: on the failing reload (>kill, then
+load a save into the CURRENT map) there was NO "vk: BSP ... loaded" / "vk: world
+... loaded" line, whereas a changelevel INTO that same map earlier printed all
+three. So the world was being REUSED, not reloaded.
+
+REAL ROOT CAUSE: VK_World_LoadMap (vk_world.c) has a same-map early-out:
+    if (s_loaded && strcasecmp(s_loaded_name, name) == 0) return true;
+On a reload into the current level this keeps the existing world geometry,
+textures and pair descriptors and returns immediately. But R_BeginRegistration
+has already bumped the registration sequence, and the early-out did NOT re-stamp
+the world texture images. So every world texture kept its old reg_seq, and
+R_EndRegistration's VK_FreeUnusedImages then evicted them (destroying their image
+views) while the persistent world PAIR descriptors (wt->descriptor, built from
+wt->image's view + the lightmap view) still referenced those destroyed views ->
+imageView 0x0 -> device-lost. The steady per-frame pair = always-visible world
+surfaces; the burst = surfaces visible as the PVS settles over the first frames.
+This is the EXACT bug class as the v109 sky same-name re-touch - the sky early-out
+re-touched its images, the world early-out did not.
+
+FIX (vk_world.c VK_World_LoadMap same-map early-out): before returning, re-stamp
+every world texture as used in the new registration sequence:
+    for (int i = 0; i < s_num_world_textures; i++)
+        if (s_world_textures[i].image) VK_Image_Touch(s_world_textures[i].image);
+    return true;
+VK_FreeUnusedImages now spares them, so the reused pair descriptors stay valid.
+R_BeginRegistration bumps the seq before VK_World_LoadMap, so the touch stamps the
+current seq. The lightmap (s_lm_tex) is a standalone texture created directly via
+VK_CreateTextureRGBA, NOT in the image cache, so it is not subject to eviction and
+needs no touch.
+
+Why ref_gl1 survives the identical same-map reuse: binding a GL texture id whose
+backing was freed is benign (renders garbage/nothing); Vulkan treats a destroyed
+view in a bound descriptor as fatal. So, as always in this port, the fix is not to
+change the eviction (it is GL-faithful) but to keep live descriptors' images
+resident.
+
+EVICTION-SAFETY AUDIT - now complete across BOTH the reload-reuse paths and the
+descriptor caches:
+- Reuse-without-reload paths MUST re-touch their images: sky (v109, done),
+  world (v113, done). These are the only two reuse early-outs.
+- Cached descriptors built from an image view are eviction-safe if image-owned
+  (model/sprite/sky 3D via VK_ImageWorldDescriptor, v112) or rebuilt per load
+  (world pair pool) or sourced from permanent images (particles) or re-resolved
+  by name each draw (all 2D, v111).
+If another imageView 0x0 appears, the two questions are: (1) is there a new
+reuse-without-reload path that skips re-touching its images? (2) is there a new
+cached descriptor that is neither image-owned, rebuilt per load, nor from a
+permanent image?
+
+## v114 - FEATURE: gamma / brightness / contrast sliders (were no-ops under VK)
+User: the contrast, gamma and brightness sliders in the Video menu do nothing
+under Vulkan. ROOT CAUSE: ref_vk never registered or consumed vid_gamma /
+vid_brightness / vid_contrast. The menu moved the cvars but nothing applied them.
+
+H2's GL renderer does NOT use a hardware gamma ramp - it bakes these three cvars
+into texture albedo at load time through a 256-entry byte LUT (gl1_Image.c
+R_InitGammaTable builds it; GrabPalette applies it to .m8 palettes, R_ApplyGamma32
+to .m32 RGB), i.e. gamma is applied to albedo BEFORE lighting and blending. On a
+slider change RI_BeginFrame rebuilds the LUT and R_GammaAffect re-loads each image
+from disk and re-uploads it (so repeated changes never accumulate error). The
+lightmap is built separately and is intentionally left ungamma'd.
+
+FIX (vk_image.c, mirroring GL exactly):
+- VK_InitGammaTable(): identical LUT math to R_InitGammaTable; registers the three
+  cvars (defaults 0.5, CVAR_ARCHIVE) on first call. Built in VK_InitImages before
+  any texture loads.
+- ApplyGammaRGBA(): runs RGB (alpha preserved) of an RGBA run through the LUT.
+- LoadM32 bakes the LUT into a writable copy before upload; LoadM8 bakes it into
+  the expanded RGBA buffer in place. So every disk-loaded texture is gamma'd at
+  load, like GL. (The 1x1 "*white" utility texture is created from a hardcoded
+  pixel and is deliberately NOT gamma'd - it backs Draw_Fill's coloured quads, so
+  gamma'ing it would tint solid fills.)
+- DecodeImageRGBA(): shared file->gamma'd-RGBA decoder (dispatches on the stored
+  name's .m32/.m8 extension) used by both load and refresh so they can't diverge.
+- VK_GammaRefreshIfNeeded(): called at the top of VK_BeginFrame_impl. If a slider
+  moved (cvar ->modified) or vid_textures_refresh_required==1 (set by the video
+  menu on close), rebuild the LUT and re-bake every disk-loaded texture in place
+  via VK_UpdateTextureRGBA. In-place update keeps each image's VkImageView and
+  descriptor, so it is eviction-safe (no dangling-descriptor risk). A
+  vkDeviceWaitIdle guards frames-in-flight; it only runs on an actual change, so
+  the stall is a one-off per slider notch.
+
+Differences from GL, both deliberate:
+- GL has an it_pic/it_sky-only live-refresh path while the menu is open (perf); the
+  VK image_t has no type field, so VK refreshes ALL disk-loaded textures on a
+  change. VK single-mip textures + fast staging make the full re-bake cheap enough
+  for a per-notch one-shot, and it means the world updates live behind the menu
+  rather than only on close. Correctness is identical.
+- VK textures are single-mip (mipLevels=1), so unlike R_ApplyGamma32 there are no
+  mip levels to walk; the base level is the only data.
+
+Faithfulness note: because the LUT is baked into albedo (not applied as a
+post-process to the final frame), the result matches GL pixel-for-pixel - lighting,
+fog and blending all operate on already-gamma'd albedo exactly as in ref_gl1. A
+final-frame post-process would have been simpler but WRONG (it would gamma the
+composited result including lightmaps/fog/additive blends).
+
+## v115 - FEATURE: gl_minlight (minimum light floor); + settings audit
+Follow-up to the v114 gamma work: audited every cvar ref_gl1 acts on vs what VK
+honors, to find any other menu/render settings silently ignored under Vulkan.
+
+AUDIT RESULT - one genuine user-facing miss (gl_minlight, fixed here). Everything
+else accounted for:
+- Screen flashes (damage/pickup/powerup/underwater) are NOT missed: H2 does not
+  use the classic refdef.blend / gl_polyblend path (cl.refdef.blend is cleared and
+  never populated; GL's R_PolyBlend is vestigial). The real flashes go through H2's
+  ri.Is_Screen_Flashing() callback, which VK already implements in R_RenderFrame.
+- gl_modulate, the r_fog_* family, r_underwater_color: already honored by VK.
+- Debug / GL-API-specific cvars meaningless under Vulkan: gl_showtris, gl_lightmap,
+  gl_drawflat, gl_cull, gl_clear, gl_lockpvs, gl_nobind, gl_reporthash, gl_finish,
+  gl_ztrick, gl_drawbuffer, r_speeds, r_norefresh, r_drawworld, r_drawentities,
+  flushmap, r_frameswap.
+- Client/platform cvars the renderer never owned: vid_ref, vid_fullscreen,
+  vid_maxfps, vid_mode, menus_active. r_detail is ignored by ref_gl1 too (detail
+  textures unimplemented in this engine), so VK matches GL.
+- Console-only toggles where VK already does the default behavior (only matter if
+  flipped by hand): gl_dynamic (VK dlights always on), r_lerpmodels (VK always
+  interpolates), gl_texturemode (VK samplers fixed to linear), gl_flashblend,
+  gl_saturatelighting, gl_bookalpha. r_fog_lightmap_adjust (world-pass fog distance
+  scale, 5.0) is not read by VK, but VK fog was validated as visually correct, so
+  its fog model compensates; left as-is.
+
+gl_minlight FIX (port of ref_gl1 R_InitMinlight + its two apply sites):
+- vk_lightpoint.c: VK_InitMinlight() builds the 256-entry LUT with identical math
+  ( inf = (255-ml)*i/255 + ml ), registers gl_minlight ("0", CVAR_ARCHIVE). Shared
+  via vk_minlight[256] / vk_minlight_set (extern in vk_lightpoint.h) so both the
+  world bake and entity shade index it directly. VK_Minlight_CheckModified()
+  rebuilds + reports change for the live re-bake.
+- World lightmaps (vk_world.c BakeSurfaceLightmap): luxel RGB run through the LUT
+  after the desaturating peak clamp, exactly where ref_gl1 R_BuildLightMap applies
+  minlight[]. Built at load (VK_InitMinlight before the bake loop) so static
+  lightmaps honor the floor immediately, like GL.
+- Entity/model shade (vk_model.c): shade run through the LUT before entity-color
+  modulation, on the lit paths only (absLight, sampled world light) - not
+  fullbright/glow/additive - matching gl1_FlexModel.c's apply_minlight gate.
+- LIVE updates (better UX than GL, which only rebuilds animated surfaces per frame
+  and needs a reload for static ones): every lit surface is now retained in
+  s_anim_surfs with an 'animated' flag (previously only animated surfaces were
+  kept). VK_World_UpdateLightstyles re-bakes only animated surfaces per frame as
+  before; on a gl_minlight change it re-bakes ALL retained surfaces once and
+  uploads them via the existing batched region path. Entity shade is per-frame so
+  it tracks the slider with no extra work. Eviction-safe: re-baking writes the CPU
+  atlas + re-uploads regions into the existing s_lm_tex (no view/descriptor churn).

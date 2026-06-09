@@ -6,6 +6,7 @@
 
 #include "vk_local.h"
 #include "vk_draw.h"
+#include "vk_image.h"
 #include <string.h>
 
 // Two attachments: clear colour and clear depth. The colour pick survives
@@ -19,6 +20,10 @@ void VK_BeginFrame_impl(float camera_separation)
 {
     (void)camera_separation;
     if (!vk_state.initialized) return;
+
+    // Re-bake textures if the gamma/brightness/contrast sliders changed. Runs
+    // before any frame work; only does anything on an actual change.
+    VK_GammaRefreshIfNeeded();
 
     const uint32_t frame = vk_state.current_frame;
 

@@ -76,6 +76,7 @@ struct vk_model_s {
     char       name[256];
     qboolean   used;
     qboolean   valid;
+    int        reg_seq;       // registration sequence last used in (for eviction)
 
     fmheader_t header;
 
@@ -87,7 +88,6 @@ struct vk_model_s {
     int        num_mesh_nodes;
 
     image_t*        skins[VKM_MAX_SKINS];
-    VkDescriptorSet skin_desc[VKM_MAX_SKINS];
     int             num_skins;
 
     // Skeletal/reference data (players, monsters with bend/refs). Parsed from
@@ -100,6 +100,11 @@ typedef struct { float x,y,z; float u,v; float nx,ny,nz; } vkm_vert_t;
 
 static struct vk_model_s s_models[VKM_MAX_MODELS];
 static int               s_num_models = 0;
+
+// Registration sequence: bumped each map load. Models touched during a level's
+// registration are stamped current; VK_Model_FreeUnused evicts the rest.
+static int               s_model_reg_seq = 1;
+void VK_Model_SetRegSeq(int seq) { s_model_reg_seq = seq; }
 
 // Pre-lerped vertex scratch for the skeletal path. GL1 lerps all verts into
 // s_lerped[], optionally rotates cluster verts by joint angles, then the glcmd
@@ -222,8 +227,10 @@ static qboolean EnsureModelVBO(void)
 static struct vk_model_s* FindCached(const char* name)
 {
     for (int i = 0; i < s_num_models; i++)
-        if (s_models[i].used && strcasecmp(s_models[i].name, name) == 0)
+        if (s_models[i].used && strcasecmp(s_models[i].name, name) == 0) {
+            s_models[i].reg_seq = s_model_reg_seq;   // touched this level: keep
             return &s_models[i];
+        }
     return NULL;
 }
 
@@ -234,6 +241,7 @@ static struct vk_model_s* AllocSlot(void)
             if (i >= s_num_models) s_num_models = i + 1;
             memset(&s_models[i], 0, sizeof(s_models[i]));
             s_models[i].used = true;
+            s_models[i].reg_seq = s_model_reg_seq;
             return &s_models[i];
         }
     return NULL;
@@ -243,7 +251,16 @@ vk_model_t* VK_Model_Register(const char* name)
 {
     if (!name || !*name) return NULL;
     struct vk_model_s* hit = FindCached(name);
-    if (hit) return hit;
+    if (hit) {
+        // Re-stamp this cached model's skin images as used in the current
+        // registration sequence so VK_FreeUnusedImages keeps them resident for
+        // this level (avoids a reload/re-upload). The skin's world descriptor
+        // now lives on the image and is freed with it, so even an un-re-stamped
+        // skin can no longer leave a dangling set - it just isn't drawn.
+        for (int i = 0; i < hit->num_skins; i++)
+            if (hit->skins[i]) VK_Image_Touch(hit->skins[i]);
+        return hit;
+    }
 
     byte* buffer = NULL;
     int length = ri.FS_LoadFile(name, (void**)&buffer);
@@ -286,8 +303,8 @@ vk_model_t* VK_Model_Register(const char* name)
             const char* sn = (const char*)data;
             for (int i = 0; i < n && i < VKM_MAX_SKINS; i++, sn += MAX_FRAMENAME) {
                 m->skins[i] = VK_FindImage(sn);
-                if (m->skins[i])
-                    m->skin_desc[i] = VK_AllocWorldDescriptor(VK_ImageView(m->skins[i]));
+                // Descriptor is fetched from the image at draw time
+                // (VK_ImageWorldDescriptor), so it shares the image lifetime.
             }
             m->num_skins = (n < VKM_MAX_SKINS) ? n : VKM_MAX_SKINS;
         } else if (strcasecmp(bh->ident, FM_FRAME_NAME) == 0) {
@@ -341,7 +358,7 @@ vk_model_t* VK_Model_Register(const char* name)
         m->skel.num_xyz_render = m->header.num_xyz;
         if (m->skel.num_xyz_full == 0) m->skel.num_xyz_full = m->header.num_xyz;
         m->skel.num_frames = m->header.num_frames;
-        ri.Con_Printf(PRINT_ALL,
+        ri.Con_Printf(PRINT_DEVELOPER,
             "vk: model '%s' skeletal: skelType=%d refType=%d haveSkel=%d haveRefs=%d xyz %d->%d\n",
             name, m->skel.skeletalType, m->skel.referenceType,
             m->skel.haveSkeleton, m->skel.haveRefs,
@@ -363,7 +380,7 @@ vk_model_t* VK_Model_Register(const char* name)
     }
 
     m->valid = true;
-    ri.Con_Printf(PRINT_ALL, "vk: flex model '%s': %d frames, %d xyz, %d glcmds, %d skins\n",
+    ri.Con_Printf(PRINT_DEVELOPER, "vk: flex model '%s': %d frames, %d xyz, %d glcmds, %d skins\n",
                   name, m->header.num_frames, m->header.num_xyz, m->num_glcmds, m->num_skins);
     return m;
 }
@@ -385,6 +402,37 @@ void VK_Model_FreeAll(void)
             VK_DestroyBuffer(&s_model_vbo[i]);
         s_model_vbo_ready = false;
     }
+}
+
+// Evict cached flex models not touched during the current registration
+// sequence (loaded for a level we've left). Frees the CPU frame/glcmd blocks,
+// the per-skin world descriptor sets, and skeletal data, and marks the slot
+// reusable. MUST be called with the GPU idle (level load, behind
+// vkDeviceWaitIdle) since the skin descriptors may have been referenced by
+// prior frames. The skin image_t's themselves are owned by the image cache and
+// reclaimed separately by VK_FreeUnusedImages.
+void VK_Model_FreeUnused(void)
+{
+    int freed = 0;
+    for (int i = 0; i < s_num_models; i++) {
+        struct vk_model_s* m = &s_models[i];
+        if (!m->used) continue;
+        if (m->reg_seq == s_model_reg_seq) continue;   // used this level: keep
+
+        // Skin descriptors are no longer owned here: they live on the image
+        // (VK_ImageWorldDescriptor) and are freed by VK_FreeUnusedImages along
+        // with the texture, so a freed skin can never leave a dangling set.
+        free(m->frames);
+        free(m->glcmds);
+        if (m->has_skel)
+            VK_Skel_FreeModel(&m->skel);
+        memset(m, 0, sizeof(*m));   // used = false
+        freed++;
+    }
+    while (s_num_models > 0 && !s_models[s_num_models - 1].used)
+        s_num_models--;
+    if (freed)
+        ri.Con_Printf(PRINT_ALL, "vk: freed %d unused flex models (level change)\n", freed);
 }
 
 int VK_Model_ReferenceType(const vk_model_t* m)
@@ -527,7 +575,10 @@ static VkDescriptorSet GetReflectDescriptor(void)
     if (s_tried) return VK_NULL_HANDLE;       // don't retry every frame on failure
     s_tried = true;
     image_t* img = VK_FindImage("misc/reflect.m32");
-    if (img) s_reflect_desc = VK_ImageDescriptor(img);
+    if (img) {
+        VK_Image_MarkPermanent(img);   // shared sphere-map, used across all maps
+        s_reflect_desc = VK_ImageDescriptor(img);
+    }
     return s_reflect_desc;
 }
 
@@ -553,6 +604,37 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
     entity_xform_t xform;
     BuildEntityXform(e, &xform);
     const float scale = (e->scale > 0.001f) ? e->scale : 1.0f;
+
+    // Frustum cull: skip the whole skin+upload+draw if the model's bounding box
+    // is entirely off-screen. ref_gl1 R_CullFlexModel does this before drawing;
+    // we were skinning and uploading off-screen models every frame. Compute the
+    // local AABB from the current+old frame translate/scale (verts are
+    // byte*scale+translate), transform the 8 corners with the SAME entity
+    // transform used to draw (so the cull box exactly matches on-screen
+    // geometry), then test against the view frustum. Skip for viewmodels
+    // (RF_DEPTHHACK). Guarded so a missing frame never wrongly culls.
+    if (cur && old && !(e->flags & RF_DEPTHHACK)) {
+        float lmins[3], lmaxs[3];
+        for (int i = 0; i < 3; i++) {
+            const float cmin = cur->translate[i];
+            const float cmax = cmin + cur->scale[i] * 255.0f;
+            const float omin = old->translate[i];
+            const float omax = omin + old->scale[i] * 255.0f;
+            lmins[i] = (cmin < omin ? cmin : omin);
+            lmaxs[i] = (cmax > omax ? cmax : omax);
+        }
+        float corners[8][3];
+        for (int i = 0; i < 8; i++) {
+            float local[3] = {
+                (i & 1) ? lmins[0] : lmaxs[0],
+                (i & 2) ? lmins[1] : lmaxs[1],
+                (i & 4) ? lmins[2] : lmaxs[2],
+            };
+            XformPoint(&xform, scale, local, corners[i]);
+        }
+        if (VK_World_CullWorldCorners(corners))
+            return;
+    }
 
     // Skeletal path: pre-lerp all verts into s_lerped[], optionally rotate the
     // upper-body cluster by joint angles, and compute reference placements for
@@ -610,8 +692,8 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
         int skin_idx = e->skinnum;
         if (skin_idx < 0 || skin_idx >= m->num_skins) skin_idx = 0;
         if (m->num_skins > 0) {
-            default_desc = m->skin_desc[skin_idx];
             skin_img = m->skins[skin_idx];
+            default_desc = VK_ImageWorldDescriptor(m->skins[skin_idx]);
         }
     }
 
@@ -629,24 +711,6 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
     else if (want_trans)
         pipe = vk_pipeline_3d.pipeline_translucent;
 
-    // One-time diagnostic for translucent/alpha-textured models (e.g. shadow),
-    // to confirm they reach the renderer and with what color/alpha.
-    {
-        static int s_md = 0;
-        // Skip the fx/shadow blob models (they spam the log); focus on actual
-        // translucent entity models like the cloaking enemy.
-        const qboolean is_shadow = (strstr(m->name, "fx/shadow") != NULL);
-        if (s_md < 40 && !is_shadow &&
-            (e->flags & (RF_TRANS_ANY | RF_ALPHA_TEXTURE))) {
-            ri.Con_Printf(PRINT_ALL,
-                "vk: model '%s' flags=0x%x color=(%d,%d,%d,%d) scale=%.2f skins=%d pipe=%s\n",
-                m->name, e->flags, e->color.r, e->color.g, e->color.b, e->color.a,
-                scale, m->num_skins,
-                (e->flags & (RF_TRANS_ADD|RF_TRANS_ADD_ALPHA)) ? "add" :
-                (e->flags & RF_TRANS_ANY) ? "trans" : "opaque");
-            s_md++;
-        }
-    }
     float pc[32];
     memcpy(pc, mvp, 64);
 
@@ -661,6 +725,7 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
     // never sampled the world light, so models (e.g. the player) stayed full-
     // bright in shadowed areas.
     float shade[3];
+    qboolean apply_minlight = false;   // gl_minlight: only for lit paths (not fullbright/glow/add)
     if (e->flags & RF_TRANS_ADD_ALPHA) {
         // ref_gl1: additive-alpha models use a grey shade = entity alpha, so the
         // additive contribution scales with alpha.
@@ -672,11 +737,13 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
         shade[0] = (float)e->absLight.r / 255.0f;
         shade[1] = (float)e->absLight.g / 255.0f;
         shade[2] = (float)e->absLight.b / 255.0f;
+        apply_minlight = true;
     } else if (e->flags & RF_GLOW) {
         shade[0] = shade[1] = shade[2] = 1.0f;   // overwritten by pulse below
     } else {
         float sl[3];
         if (VK_LightPoint_SampleRGB(e->origin, sl)) {
+            apply_minlight = true;
             // The world surfaces are drawn at lm * 2.0 (our effective modulate),
             // so scale the model's sampled light by the same factor; otherwise
             // the player would render at half the brightness of the floor it
@@ -694,6 +761,18 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
             }
         } else {
             shade[0] = shade[1] = shade[2] = 1.0f;  // no light data -> fullbright
+        }
+    }
+
+    // gl_minlight floor on the entity shade (ref_gl1 R_DrawFlexModel), applied
+    // before entity-color modulation, only on the lit paths (absLight / sampled
+    // world light) - not fullbright, glow or additive.
+    if (apply_minlight && vk_minlight_set) {
+        for (int i = 0; i < 3; i++) {
+            int v = (int)(shade[i] * 255.0f);
+            if (v < 0)   v = 0;
+            if (v > 255) v = 255;
+            shade[i] = (float)vk_minlight[v] / 255.0f;
         }
     }
 
@@ -801,7 +880,8 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
                 VkDescriptorSet d = VK_ImageDescriptor(sk);
                 if (d != VK_NULL_HANDLE) node_desc = d;
             } else if (si >= 0 && si < m->num_skins) {
-                if (m->skin_desc[si] != VK_NULL_HANDLE) node_desc = m->skin_desc[si];
+                VkDescriptorSet d = VK_ImageWorldDescriptor(m->skins[si]);
+                if (d != VK_NULL_HANDLE) node_desc = d;
             }
         }
 
@@ -868,15 +948,20 @@ void VK_Model_DrawEntity(const struct entity_s* e, const float* mvp)
                 tmp_pos[c][0]=world[0]; tmp_pos[c][1]=world[1]; tmp_pos[c][2]=world[2];
 
                 // World-space normal (for env-map reflection). Decoded from the
-                // anorms table and rotated by the entity transform.
-                float nlocal[3], nworld[3];
-                if (vi >= 0) {
+                // anorms table and rotated by the entity transform. Only the
+                // reflect shaders (entity_reflect.*) consume the normal; the base
+                // entity shader ignores it. So for the common case (every non-
+                // reflective model: monsters, player, items) we skip the per-
+                // vertex normal decode + transform entirely - it was pure wasted
+                // CPU work whose result the shader discarded.
+                if (node_reflect && vi >= 0) {
+                    float nlocal[3], nworld[3];
                     DecodeLerpNormal(cur, old, vi, backlerp, nlocal);
                     XformNormal(&xform, nlocal, nworld);
+                    tmp_nrm[c][0]=nworld[0]; tmp_nrm[c][1]=nworld[1]; tmp_nrm[c][2]=nworld[2];
                 } else {
-                    nworld[0]=0.0f; nworld[1]=0.0f; nworld[2]=1.0f;
+                    tmp_nrm[c][0]=0.0f; tmp_nrm[c][1]=0.0f; tmp_nrm[c][2]=1.0f;
                 }
-                tmp_nrm[c][0]=nworld[0]; tmp_nrm[c][1]=nworld[1]; tmp_nrm[c][2]=nworld[2];
             }
 
             for (int c = 2; c < nprim; c++) {

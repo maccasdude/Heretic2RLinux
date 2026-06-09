@@ -323,6 +323,7 @@ typedef struct {
     byte  styles[LM_MAXSTYLES];       // style indices (255 = unused)
     int   num_styles;                 // how many styles (>=2 means animated-capable)
     const byte* samples;              // -> into s_lightsamples, num_styles*w*h*3 bytes
+    qboolean animated;                // has an animated style -> re-bake per frame
 } lm_anim_surf_t;
 
 static lm_anim_surf_t* s_anim_surfs   = NULL;  // surfaces with >1 style (animated)
@@ -399,8 +400,18 @@ qboolean VK_World_IsLoaded(void) { return s_loaded; }
 
 void VK_World_Free(void)
 {
-    if (s_vbo.buffer) {
+    // Ensure the GPU is idle before tearing down level resources (buffers,
+    // textures, and the per-level world-pair descriptor sets we reset below).
+    if (vk_state.device != VK_NULL_HANDLE)
         vkDeviceWaitIdle(vk_state.device);
+
+    // Free all per-level world-texture (diffuse+lightmap) descriptors. They are
+    // entirely per-level and were previously leaked on each map load (the table
+    // count was reset to 0 without freeing the sets), creeping toward the pool
+    // cap. The whole pool is reset since none of these are permanent.
+    VK_ResetWorldPairDescriptors();
+
+    if (s_vbo.buffer) {
         VK_DestroyBuffer(&s_vbo);
     }
     if (s_sub_vbo.buffer) {
@@ -770,6 +781,13 @@ static void BakeSurfaceLightmap(int lm_x, int lm_y, int w, int h,
                 const float ts = 255.0f / (float)mx;
                 r = (int)(r * ts); g = (int)(g * ts); bb = (int)(bb * ts);
             }
+            // gl_minlight floor (ref_gl1 R_BuildLightMap): lift dark luxels so
+            // nothing renders below the minimum. r/g/bb are now in [0,255].
+            if (vk_minlight_set) {
+                r  = vk_minlight[r];
+                g  = vk_minlight[g];
+                bb = vk_minlight[bb];
+            }
             dst[0] = (byte)r; dst[1] = (byte)g; dst[2] = (byte)bb; dst[3] = 255;
         }
     }
@@ -1007,6 +1025,33 @@ static qboolean VK_Frustum_CullBox(const float mins[3], const float maxs[3])
     return false;
 }
 
+// Frustum-cull a flex model given the 8 world-space corners of its (rotated,
+// translated) bounding box. The caller transforms the corners with the exact
+// same transform used to draw the model, so the cull box matches on-screen
+// geometry precisely. Returns true if all 8 corners are outside the same
+// frustum plane (model entirely off-screen -> skip). Mirrors the aggregate-mask
+// test in ref_gl1 R_CullFlexModel.
+qboolean VK_World_CullWorldCorners(const float corners[8][3])
+{
+    if (!s_frustum_valid) return false;
+    if (!s_r_nocull) s_r_nocull = ri.Cvar_Get("r_nocull", "0", 0);
+    if (s_r_nocull && s_r_nocull->value != 0.0f) return false;
+
+    int aggregate = ~0;
+    for (int p = 0; p < 8; p++) {
+        int mask = 0;
+        for (int f = 0; f < 4; f++) {
+            const float dp = s_frustum[f].normal[0]*corners[p][0] +
+                             s_frustum[f].normal[1]*corners[p][1] +
+                             s_frustum[f].normal[2]*corners[p][2];
+            if (dp - s_frustum[f].dist < 0.0f) mask |= (1 << f);
+        }
+        aggregate &= mask;
+        if (aggregate == 0) return false;   // early out: some corner inside all planes
+    }
+    return aggregate != 0;
+}
+
 // Mark the faces in all leaves whose cluster is in the view cluster's PVS.
 // Called once per frame before drawing. Sets s_pvs_faces[].visframe.
 static void VK_PVS_Mark(const float vieworg[3])
@@ -1072,8 +1117,21 @@ static void VK_PVS_Mark(const float vieworg[3])
 
 qboolean VK_World_LoadMap(const char* name)
 {
-    if (s_loaded && strcasecmp(s_loaded_name, name) == 0)
+    if (s_loaded && strcasecmp(s_loaded_name, name) == 0) {
+        // Same map reused (e.g. reloading a save into the current level). We keep
+        // the existing world geometry, textures and pair descriptors and skip the
+        // reload. But R_BeginRegistration has already bumped the registration
+        // sequence, so we MUST re-stamp every world texture image as used now -
+        // otherwise R_EndRegistration's VK_FreeUnusedImages sees them as stale,
+        // destroys their image views, and the persistent world pair descriptors
+        // (which still reference those views) cause imageView 0x0 -> device-lost.
+        // Same bug class as the sky same-name re-touch (VK_Sky_Set). The lightmap
+        // (s_lm_tex) is a standalone texture, not in the image cache, so it is not
+        // subject to eviction and needs no touch.
+        for (int i = 0; i < s_num_world_textures; i++)
+            if (s_world_textures[i].image) VK_Image_Touch(s_world_textures[i].image);
         return true;
+    }
 
     VK_World_Free();
     s_num_world_textures = 0;
@@ -1152,6 +1210,11 @@ qboolean VK_World_LoadMap(const char* name)
     // Worst case every face is animated; allocated lazily below.
     s_anim_surfs = (lm_anim_surf_t*)calloc(num_faces, sizeof(lm_anim_surf_t));
     s_num_anim = 0;
+
+    // Build the gl_minlight LUT before baking so the initial (static) lightmaps
+    // honor the configured floor, exactly like ref_gl1 (R_InitMinlight runs at
+    // init, before lightmaps are built).
+    VK_InitMinlight();
 
     // Load the BSP tree + visibility for PVS culling. This allocates s_pvs_faces
     // (indexed by face) which the emit loop fills with per-face vertex ranges.
@@ -1251,19 +1314,20 @@ qboolean VK_World_LoadMap(const char* name)
                                 f->styles, num_styles, lighting + f->lightofs,
                                 def_intens, modulate);
 
-            // Register for per-frame animation if it has any animated style.
-            // Style 0 is the constant "normal" map; styles 1+ are animated.
-            // We register surfaces with >1 style OR a single non-zero style.
+            // Retain every lit surface so we can re-bake on demand: animated
+            // ones every frame (lightstyle changes), and ALL of them when
+            // gl_minlight changes. The 'animated' flag gates the per-frame path.
             qboolean animated = (num_styles > 1);
             for (int s = 0; s < num_styles; s++)
                 if (f->styles[s] != 0 && f->styles[s] != 255) animated = true;
-            if (animated && s_lightsamples) {
+            if (s_lightsamples) {
                 lm_anim_surf_t* a = &s_anim_surfs[s_num_anim++];
                 a->lm_x = slm[i].lm_x; a->lm_y = slm[i].lm_y;
                 a->lm_w = sw; a->lm_h = sh;
                 a->num_styles = num_styles;
                 for (int s = 0; s < LM_MAXSTYLES; s++) a->styles[s] = f->styles[s];
                 a->samples = s_lightsamples + f->lightofs;
+                a->animated = animated;
             }
         } else {
             slm[i].lm_x = 0; slm[i].lm_y = 0;
@@ -1538,14 +1602,6 @@ qboolean VK_World_LoadMap(const char* name)
 
                     s_num_sub_batches++;
                     s_submodels[i].num_batches++;
-
-                    // Diagnostic: log translucent/animated submodel batches (e.g.
-                    // the forcefield) so their real flags/anim/alpha can be seen.
-                    if (sub_surf != 0) {
-                        ri.Con_Printf(PRINT_ALL,
-                            "vk: SUBMODEL trans batch tex='%s' surf=0x%x alpha=%.2f frames=%d animspeed=%d\n",
-                            wt->tex_name, sub_surf, sub_alpha, wb->num_frames, wb->anim_speed);
-                    }
                 }
             }
         }
@@ -1743,6 +1799,10 @@ void VK_World_UpdateLightstyles(const refdef_t* fd)
 
     const qboolean first = !s_lightstyles_valid;
 
+    // If gl_minlight changed, the LUT was rebuilt; re-bake every retained
+    // surface (not just animated ones) so the floor updates live.
+    const qboolean minlight_changed = VK_Minlight_CheckModified();
+
     // Collect the surfaces that changed this frame, re-baking them into the CPU
     // atlas, then upload them all in ONE batched transfer (one staging buffer,
     // one command submit, one fence wait) to avoid a GPU round-trip per surface.
@@ -1751,8 +1811,9 @@ void VK_World_UpdateLightstyles(const refdef_t* fd)
 
     for (int i = 0; i < s_num_anim; i++) {
         const lm_anim_surf_t* a = &s_anim_surfs[i];
-        qboolean changed = first;
+        qboolean changed = first || minlight_changed;
         if (!changed) {
+            if (!a->animated) continue;   // static surface: only minlight can change it
             for (int s = 0; s < a->num_styles; s++) {
                 const int st = a->styles[s];
                 if (st < 0 || st >= 256) continue;

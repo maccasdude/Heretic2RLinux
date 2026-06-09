@@ -38,8 +38,10 @@ VkDescriptorSet VK_World_UpdateDlights(int num_dlights, const float* origins,
                                        const float* intensities, const float* colors_rgb,
                                        float modulate);
 VkDescriptorSet VK_World_CurrentDlightSet(void);
+qboolean VK_World_CullWorldCorners(const float corners[8][3]);
 
 // Allocate a descriptor set bound to (diffuse_view, lightmap_view).
 VkDescriptorSet VK_AllocWorldPairDescriptor(VkImageView diffuse, VkImageView lightmap);
+void VK_ResetWorldPairDescriptors(void);
 
 #endif

@@ -123,9 +123,19 @@ static void R_ShutdownContext(void)
 // Stubs for everything else
 // ---------------------------------------------------------------------------
 
+static int s_reg_seq = 1;   // shared registration sequence (images + models)
+
 static void              R_BeginRegistration(const char* map)
 {
     if (!map || !*map) return;
+
+    // Bump the registration sequence so everything (re)touched while this map
+    // loads is stamped current; assets left stale belong to the previous level
+    // and get evicted in R_EndRegistration. Push the new value to the image and
+    // model caches before loading anything.
+    s_reg_seq++;
+    VK_Image_SetRegSeq(s_reg_seq);
+    VK_Model_SetRegSeq(s_reg_seq);
 
     // New map: reset the engine-model wrapper list so handles are rebuilt fresh
     // (submodel indices point into the world we're about to load). Prevents the
@@ -164,7 +174,21 @@ static void              R_SetSky(const char* name, float rotate, const vec3_t a
 {
     VK_Sky_Set(name, rotate, axis);
 }
-static void              R_EndRegistration(void)                                              { }
+static void              R_EndRegistration(void)
+{
+    // All of this map's models/skins/textures have now been registered and
+    // stamped with the current sequence. Evict everything left over from the
+    // previous level. Wait for the GPU to finish any in-flight frames first,
+    // since we're about to destroy textures and free descriptor sets that
+    // earlier frames referenced. A level load is already a stall, so the idle
+    // wait here is not a hot-path cost. Matches ref_gl1 RI_EndRegistration
+    // (Mod_Free unused + R_FreeUnusedImages).
+    if (vk_state.device != VK_NULL_HANDLE)
+        vkDeviceWaitIdle(vk_state.device);
+
+    VK_Model_FreeUnused();
+    VK_FreeUnusedImages();
+}
 static int               R_GetReferencedID(const struct model_s* model)
 {
     if (!model) return -1;

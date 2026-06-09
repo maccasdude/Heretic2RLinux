@@ -29,6 +29,9 @@ typedef struct {
     vk_buffer_t   buf;          // persistently mapped, HOST_VISIBLE | HOST_COHERENT
     vk_vertex2d_t* mapped;      // raw pointer to mapped buffer
     uint32_t      cursor;       // next vertex slot to write
+    uint32_t      capacity;     // current capacity in vertices (grows on demand)
+    vk_buffer_t   retired;      // previous buffer awaiting safe destruction
+    qboolean      has_retired;  // a buffer is pending free for this slice
 } frame_vbo_t;
 
 // One vertex buffer per in-flight frame. Indexed by vk_state.current_frame.
@@ -70,6 +73,61 @@ static void FlushBatch(void)
     s_batch_start = fv->cursor;
 }
 
+// Grow this frame slice's vertex buffer when it runs out of room mid-frame,
+// instead of dropping quads. ref_gl1 has no such limit (immediate mode), so the
+// H2 loading screen (full book background + the entire console scrollback at
+// high res) can legitimately need more than the initial capacity.
+//
+// Safety: draws already recorded this frame referenced the OLD buffer at the
+// time vkCmdDraw was issued, so the old buffer must stay alive until this
+// frame's command buffer has finished executing. We hand it to the slice's
+// "retired" slot; VK_Draw_BeginFrame frees it next time this slice is reused,
+// which only happens after its fence has been waited on (frames-in-flight).
+// The current in-progress (un-flushed) batch [s_batch_start, cursor) is copied
+// into the new buffer at the same indices so the next FlushBatch draws correct
+// data, and absolute vertex indices stay consistent.
+static qboolean GrowFrameVBO(frame_vbo_t* fv, uint32_t need_verts)
+{
+    uint32_t new_cap = fv->capacity ? fv->capacity : VK_VERTS_PER_FRAME;
+    while (new_cap < need_verts) new_cap *= 2;
+
+    vk_buffer_t newbuf;
+    if (!VK_CreateBuffer((VkDeviceSize)sizeof(vk_vertex2d_t) * new_cap,
+                         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                         &newbuf))
+        return false;
+    if (!VK_MapBuffer(&newbuf)) { VK_DestroyBuffer(&newbuf); return false; }
+
+    vk_vertex2d_t* newmap = (vk_vertex2d_t*)newbuf.mapped;
+
+    // Preserve the current un-flushed batch so its absolute indices remain
+    // valid against the new buffer.
+    if (fv->mapped && fv->cursor > s_batch_start) {
+        memcpy(&newmap[s_batch_start], &fv->mapped[s_batch_start],
+               (size_t)(fv->cursor - s_batch_start) * sizeof(vk_vertex2d_t));
+    }
+
+    // Retire the old buffer (free deferred to next reuse of this slice). Only
+    // one growth per frame is expected; if a prior retire is still pending for
+    // this slice it is safe to free now (its frame long since completed).
+    if (fv->has_retired) VK_DestroyBuffer(&fv->retired);
+    fv->retired     = fv->buf;
+    fv->has_retired = true;
+
+    fv->buf      = newbuf;
+    fv->mapped   = newmap;
+    fv->capacity = new_cap;
+
+    // Rebind the new buffer so subsequent draws read from it.
+    const uint32_t frame = vk_state.current_frame;
+    VkCommandBuffer cb = vk_state.command_buffers[frame];
+    VkDeviceSize zero = 0;
+    vkCmdBindVertexBuffers(cb, 0, 1, &fv->buf.buffer, &zero);
+    return true;
+}
+
 static qboolean BeginQuad(VkDescriptorSet desc)
 {
     if (desc == VK_NULL_HANDLE) return false;
@@ -80,9 +138,18 @@ static qboolean BeginQuad(VkDescriptorSet desc)
     const uint32_t frame = vk_state.current_frame;
     frame_vbo_t* fv      = &s_frame_vbos[frame];
 
-    if (fv->cursor + VK_VERTS_PER_QUAD > VK_VERTS_PER_FRAME) {
-        // Out of vertex space for this frame. Drop further quads silently.
-        return false;
+    if (fv->cursor + VK_VERTS_PER_QUAD > fv->capacity) {
+        // Out of room: grow the buffer rather than dropping the quad. Growing
+        // rebinds, which acts as a batch boundary, so flush first.
+        FlushBatch();
+        if (!GrowFrameVBO(fv, fv->cursor + VK_VERTS_PER_QUAD)) {
+            static int warned = 0;
+            if (!warned++)
+                ri.Con_Printf(PRINT_ALL, "vk: 2D vertex buffer grow failed\n");
+            return false;
+        }
+        // After a grow the buffer changed; re-establish the batch descriptor.
+        s_batch_descriptor = VK_NULL_HANDLE;
     }
     if (desc != s_batch_descriptor) {
         FlushBatch();
@@ -117,11 +184,8 @@ static void EmitQuad(float x, float y, float w, float h,
             ri.Con_Printf(PRINT_ALL, "vk: EmitQuad NULL mapped (frame %u, cursor %u)\n", frame, fv->cursor);
         return;
     }
-    if (fv->cursor + VK_VERTS_PER_QUAD > VK_VERTS_PER_FRAME) {
-        static int warned = 0;
-        if (!warned++)
-            ri.Con_Printf(PRINT_ALL, "vk: EmitQuad cursor overflow (cursor %u max %u)\n",
-                          fv->cursor, (unsigned)VK_VERTS_PER_FRAME);
+    if (fv->cursor + VK_VERTS_PER_QUAD > fv->capacity) {
+        // Should not happen: BeginQuad grows the buffer before we get here.
         return;
     }
 
@@ -228,6 +292,7 @@ void VK_Draw_Char(int x, int y, int scale, int c, paletteRGBA_t color, qboolean 
         draw_chars = VK_FindPic("misc/conchars.m32");
         if (!draw_chars) draw_chars = VK_FindPic("misc/conchars");
         if (!draw_chars) return;
+        VK_Image_MarkPermanent(draw_chars);
     }
 
     c &= 255;
@@ -299,6 +364,10 @@ static qboolean BF_Init(void)
 
     bf_atlas1 = VK_FindPic("misc/font1.m32");
     bf_atlas2 = VK_FindPic("misc/font2.m32");
+    // These UI atlases are loaded once and used on every screen across all
+    // maps, so they must survive level-change texture eviction.
+    VK_Image_MarkPermanent(bf_atlas1);
+    VK_Image_MarkPermanent(bf_atlas2);
 
     if (!bf_font1 || !bf_font2 || !bf_atlas1 || !bf_atlas2) {
         ri.Con_Printf(PRINT_ALL,
@@ -475,6 +544,9 @@ static vk_book_t* Book_Load(const char* path)
 {
     vk_book_t* hit = Book_FindCached(path);
     if (hit) return hit;
+    // Note: book segment images are re-resolved by name at draw time
+    // (VK_BookDrawPic), so they self-heal after level-change eviction without
+    // needing a re-stamp here.
 
     book_t* book_in = NULL;
     const int len = ri.FS_LoadFile(path, (void**)&book_in);
@@ -552,8 +624,19 @@ void VK_BookDrawPic(const char* name, float scale, float alpha)
 
     for (int i = 0; i < book->num_segments; i++) {
         const bookframe_t* bf = &book->segments[i];
-        image_t* img = book->skins[i];
+        // Re-resolve the segment image by NAME each draw rather than trusting the
+        // cached book->skins[i] pointer. The level-change eviction can free a
+        // book's segment images (the menu/books are not part of any map's
+        // registration), which would leave skins[i] dangling. VK_FindImage
+        // transparently reloads an evicted image and re-stamps it, so the menu
+        // and in-game books survive map changes. (Caching the image_t* across the
+        // eviction boundary is unsafe; re-resolving by name is how VK_Draw_Pic
+        // already stays correct.)
+        char full[256];
+        snprintf(full, sizeof(full), "Book/%s", bf->name);
+        image_t* img = VK_FindImage(full);
         if (!img) continue;
+        book->skins[i] = img;   // refresh cache for any other readers
 
         const int pic_x = (int)((float)bf->x * vid_w / header_w * scale);
         const int pic_y = (int)((float)bf->y * vid_h / header_h * scale);
@@ -595,12 +678,16 @@ qboolean VK_DrawInit(void)
             return false;
         s_frame_vbos[i].mapped = (vk_vertex2d_t*)s_frame_vbos[i].buf.mapped;
         s_frame_vbos[i].cursor = 0;
+        s_frame_vbos[i].capacity = VK_VERTS_PER_FRAME;
+        s_frame_vbos[i].has_retired = false;
     }
 
     // Preload menu/HUD assets so they don't get created mid-frame.
     draw_chars = VK_FindPic("misc/conchars.m32");
     if (!draw_chars)
         ri.Con_Printf(PRINT_ALL, "vk: WARN couldn't preload conchars\n");
+    else
+        VK_Image_MarkPermanent(draw_chars);
     BF_Init();
 
     // Preload the common menu background book. Loading textures mid-frame
@@ -617,6 +704,7 @@ void VK_DrawShutdown(void)
 {
     for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         VK_DestroyBuffer(&s_frame_vbos[i].buf);
+        if (s_frame_vbos[i].has_retired) VK_DestroyBuffer(&s_frame_vbos[i].retired);
         memset(&s_frame_vbos[i], 0, sizeof(s_frame_vbos[i]));
     }
     if (bf_font1) { ri.FS_FreeFile(bf_font1); bf_font1 = NULL; }
@@ -635,6 +723,14 @@ void VK_Draw_BeginFrame(void)
     s_frame_vbos[frame].cursor = 0;
     s_batch_descriptor         = VK_NULL_HANDLE;
     s_batch_start              = 0;
+
+    // This slice's fence has been waited on before we get here (frames-in-
+    // flight), so any buffer retired during its previous use is now safe to
+    // free.
+    if (s_frame_vbos[frame].has_retired) {
+        VK_DestroyBuffer(&s_frame_vbos[frame].retired);
+        s_frame_vbos[frame].has_retired = false;
+    }
 
     VkCommandBuffer cb = vk_state.command_buffers[frame];
 

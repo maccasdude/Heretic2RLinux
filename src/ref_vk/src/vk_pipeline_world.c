@@ -429,3 +429,14 @@ VkDescriptorSet VK_AllocWorldPairDescriptor(VkImageView diffuse, VkImageView lig
     vkUpdateDescriptorSets(vk_state.device, 2, w, 0, NULL);
     return ds;
 }
+
+// Reset (free) ALL world-pair descriptors at once. Every pair descriptor binds
+// a level's diffuse texture + that level's lightmap atlas, so they are entirely
+// per-level - none are permanent. Rather than free individually (the pool has
+// no FREE bit), we reset the whole pool when the world is torn down. Caller must
+// ensure the GPU is idle (VK_World_Free waits before this).
+void VK_ResetWorldPairDescriptors(void)
+{
+    if (vk_pipeline_world.descriptor_pool)
+        vkResetDescriptorPool(vk_state.device, vk_pipeline_world.descriptor_pool, 0);
+}

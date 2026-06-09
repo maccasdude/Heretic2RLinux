@@ -13,6 +13,14 @@ typedef struct image_s image_t;
 
 qboolean VK_InitImages(void);
 void     VK_ShutdownImages(void);
+void VK_FreeUnusedImages(void);
+void VK_Image_SetRegSeq(int seq);
+void VK_Image_Touch(image_t* img);
+void VK_Image_MarkPermanent(image_t* img);
+
+// Called once per frame: re-bakes textures if vid_gamma/brightness/contrast
+// changed (or a full refresh was requested by the video menu).
+void VK_GammaRefreshIfNeeded(void);
 
 // Used by Draw_Fill / Draw_Char which want a solid colour quad.
 image_t* VK_GetWhiteTexture(void);
@@ -28,6 +36,7 @@ image_t* VK_FindImage(const char* name);
 int             VK_ImageWidth(const image_t* img);
 int             VK_ImageHeight(const image_t* img);
 VkDescriptorSet VK_ImageDescriptor(const image_t* img);
+VkDescriptorSet VK_ImageWorldDescriptor(image_t* img);
 qboolean VK_ImageHasAlpha(const image_t* img);
 VkImageView     VK_ImageView(const image_t* img);
 

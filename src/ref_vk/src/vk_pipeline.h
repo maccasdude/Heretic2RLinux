@@ -29,5 +29,6 @@ qboolean VK_CreatePipeline2D(void);
 void     VK_DestroyPipeline2D(void);
 
 VkDescriptorSet VK_AllocDescriptorSetFor(VkImageView view);
+void VK_FreeDescriptorSet(VkDescriptorSet ds);
 
 #endif
