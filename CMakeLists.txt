@@ -257,6 +257,7 @@ if(Vulkan_FOUND)
         ${H2R_INC_ROOT}/src/ref_vk/src/vk_engine_model.c
         ${H2R_INC_ROOT}/src/ref_vk/src/vk_particles.c
         ${H2R_INC_ROOT}/src/ref_vk/src/vk_sky.c
+        ${H2R_INC_ROOT}/src/ref_vk/src/vk_debug.c
         ${H2R_INC_ROOT}/src/ref_vk/src/vk_shaders.c
         ${H2R_INC_ROOT}/src/qcommon/Skeletons.c
         ${H2R_INC_ROOT}/src/qcommon/Reference.c

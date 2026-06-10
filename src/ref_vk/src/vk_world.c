@@ -1894,11 +1894,15 @@ void VK_World_Render(const refdef_t* fd)
 
     vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_pipeline_world.pipeline);
     {
-        float wpc[28];
+        float wpc[44];
         memcpy(wpc, mvp, sizeof(mvp));        // mat4 [0..15]
         FillFogParams(wpc, fd->vieworg);      // fog tail [16..27]
         wpc[26] = 1.0f;                       // fog_extra.z: enable dynamic lights
         wpc[27] = 0.0f;                       // fog_extra.w: unused (world)
+        // model = identity: static world verts are already in world space, so
+        // v_worldpos = in_pos (correct for the world-space dlight test).
+        for (int k = 0; k < 16; k++) wpc[28 + k] = 0.0f;
+        wpc[28] = wpc[33] = wpc[38] = wpc[43] = 1.0f;
         vkCmdPushConstants(cb, vk_pipeline_world.layout,
                            VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                            0, sizeof(wpc), wpc);
@@ -2289,10 +2293,12 @@ qboolean VK_World_RenderSubmodel(int index, const float* mvp,
                 } else {
                     vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                       vk_pipeline_world.pipeline);
-                    float spc[28];
-                    memcpy(spc, m, sizeof(m));
+                    float spc[44];
+                    memcpy(spc, m, sizeof(m));        // [0..15] model->clip (mvp*M)
                     FillFogParamsAt(spc, 16, cam_local);
-                    spc[26] = 0.0f;   // dlights off (model space)
+                    spc[26] = 1.0f;   // enable dlights (v_worldpos = model * pos)
+                    spc[27] = 0.0f;
+                    memcpy(spc + 28, M, sizeof(M));   // [28..43] model->world (M)
                     vkCmdPushConstants(cb, vk_pipeline_world.layout,
                                        VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                                        0, sizeof(spc), spc);

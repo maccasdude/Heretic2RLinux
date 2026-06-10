@@ -18,6 +18,7 @@
 #include "vk_particles.h"
 #include "vk_sky.h"
 #include "vk_lightpoint.h"
+#include "vk_debug.h"
 #include "client/vid.h"
 #include <math.h>
 #include <string.h>
@@ -116,6 +117,9 @@ static qboolean R_InitContext(void* sdl_window)
 
 static void R_ShutdownContext(void)
 {
+#ifdef _DEBUG
+    VK_Debug_Shutdown();
+#endif
     VK_ShutdownContext();
 }
 
@@ -141,6 +145,13 @@ static void              R_BeginRegistration(const char* map)
     // (submodel indices point into the world we're about to load). Prevents the
     // wrapper list from growing every map load and overflowing.
     VK_EModel_BeginRegistration();
+
+#ifdef _DEBUG
+    // Drop any debug primitives/labels from the previous map - their edict
+    // pointers (entity bboxes/labels) would otherwise dangle. Matches GL's
+    // R_FreeDebugPrimitives on registration.
+    VK_Debug_Free();
+#endif
 
     // map is something like "maps/silverspring.bsp".
     char path[256];
@@ -336,6 +347,9 @@ static int               R_RenderFrame(const refdef_t* fd)
     VK_Model_SetViewOrigin(fd->vieworg);
     VK_Sprite_BeginFrame();
     VK_Particles_BeginFrame();
+#ifdef _DEBUG
+    VK_Debug_SetTime(fd->time);
+#endif
 
     // Animated lightstyles: re-bake + upload any world surfaces whose flicker/
     // pulse styles changed this frame (before the world is drawn).
@@ -370,6 +384,14 @@ static int               R_RenderFrame(const refdef_t* fd)
 
     // Particles after all entities (they're alpha/additive blended).
     VK_Particles_Render(fd, vup, vright, mvp);
+
+#ifdef _DEBUG
+    // Developer debug primitives (depth test off), then 2D labels - matches the
+    // ref_gl1 ordering (R_DrawDebugPrimitives in the 3D pass, R_DrawDebugLabels
+    // after the 2D setup). Labels render under the client HUD, like GL.
+    VK_Debug_DrawPrimitives(fd, mvp);
+    VK_Debug_DrawLabels(fd, mvp);
+#endif
 
     // Full-screen screen-flash overlay (underwater tint, damage flash, item
     // pickup, powerups). Ported from ref_gl1 RI_RenderFrame + R_ScreenFlash:
@@ -588,6 +610,23 @@ REF_DECLSPEC refexport_t GetRefAPI(const refimport_t rimp)
     re.AddDebugAngles       = R_AddDebugAngles;
     re.AddDebugAnglesRad    = R_AddDebugAnglesRad;
     re.AddDebugMarker       = R_AddDebugMarker;
+
+#ifdef _DEBUG
+    // Like ref_gl1, the real developer debug-draw is only wired up in _DEBUG
+    // builds; retail builds keep the no-op stubs above. The game side
+    // (cs_shared/Debug.c) also only calls these under _DEBUG.
+    re.AddDebugBox          = RI_AddDebugBox;
+    re.AddDebugBbox         = RI_AddDebugBbox;
+    re.AddDebugEntityBbox   = RI_AddDebugEntityBbox;
+    re.AddDebugLabel        = RI_AddDebugLabel;
+    re.AddDebugEntityLabel  = RI_AddDebugEntityLabel;
+    re.AddDebugLine         = RI_AddDebugLine;
+    re.AddDebugArrow        = RI_AddDebugArrow;
+    re.AddDebugDirection    = RI_AddDebugDirection;
+    re.AddDebugAngles       = RI_AddDebugAngles;
+    re.AddDebugAnglesRad    = RI_AddDebugAnglesRad;
+    re.AddDebugMarker       = RI_AddDebugMarker;
+#endif
     re.FreeDebugPrimitives  = R_FreeDebugPrimitives;
 #endif
 

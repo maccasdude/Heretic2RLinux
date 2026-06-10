@@ -18,6 +18,8 @@ glslangValidator -V entity_reflect.vert -o entity_reflect.vert.spv
 glslangValidator -V entity_reflect.frag -o entity_reflect.frag.spv
 glslangValidator -V part.vert   -o part.vert.spv
 glslangValidator -V part.frag   -o part.frag.spv
+glslangValidator -V debug.vert  -o debug.vert.spv
+glslangValidator -V debug.frag  -o debug.frag.spv
 
 python3 -c "
 def dump(name, infile, header):
@@ -55,6 +57,8 @@ contents += '\n' + dump('spirv_entity_reflect_vert', 'entity_reflect.vert.spv', 
 contents += '\n' + dump('spirv_entity_reflect_frag', 'entity_reflect.frag.spv', False)
 contents += '\n' + dump('spirv_part_vert',   'part.vert.spv',   False)
 contents += '\n' + dump('spirv_part_frag',   'part.frag.spv',   False)
+contents += '\n' + dump('spirv_debug_vert',  'debug.vert.spv',  False)
+contents += '\n' + dump('spirv_debug_frag',  'debug.frag.spv',  False)
 with open('../src/vk_shaders.c', 'w') as f:
     f.write(contents)
 "

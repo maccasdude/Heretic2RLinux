@@ -178,7 +178,7 @@ qboolean VK_CreatePipelineWorld(void)
     VkPushConstantRange pcr = {0};
     pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
     pcr.offset     = 0;
-    pcr.size       = 64 + 48;     // mat4 mvp + 3 vec4 fog params
+    pcr.size       = 64 + 48 + 64;  // mat4 mvp + 3 vec4 fog + mat4 model
 
     VkPipelineLayoutCreateInfo pl = {0};
     pl.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
