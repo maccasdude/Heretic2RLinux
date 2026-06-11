@@ -18,7 +18,19 @@ vk_pipeline_world_t vk_pipeline_world = {0};
 // world_warp.frag. Each light: xyz = origin, w = intensity; color xyz, w unused.
 // MAX_DLIGHTS (32) matches the engine's refdef cap.
 #define VK_MAX_DLIGHTS 32
+// Per-frame world UBO (set = 1, binding 0). Holds the view-projection matrix and
+// fog parameters - these used to be push constants, but moving the per-frame
+// data here lets the per-draw push constant carry only the model matrix, which
+// keeps push-constant usage within Vulkan's 128-byte guaranteed minimum (so the
+// renderer initializes on any conformant device, not just ones reporting 256).
+// Also holds the active dynamic lights (added per-pixel in the fragment shader).
+// std140: viewproj@0, fog_cam@64, fog_color@80, fog_extra@96, count@112,
+// modulate@116, pads@120/124, pos[]@128, color[]@640.
 typedef struct {
+    float viewproj[16];              // world->clip, per frame
+    float fog_cam[4];                // xyz cam world pos, w density
+    float fog_color[4];              // rgb color, w mode (<0 = off)
+    float fog_extra[4];              // x startdist, y farclip, z dlight-enable, w unused
     int   count;
     float modulate;
     float _pad0, _pad1;
@@ -109,7 +121,7 @@ qboolean VK_CreatePipelineWorld(void)
         ub.binding         = 0;
         ub.descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         ub.descriptorCount = 1;
-        ub.stageFlags      = VK_SHADER_STAGE_FRAGMENT_BIT;
+        ub.stageFlags      = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
         VkDescriptorSetLayoutCreateInfo udsl = {0};
         udsl.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -176,9 +188,9 @@ qboolean VK_CreatePipelineWorld(void)
     };
 
     VkPushConstantRange pcr = {0};
-    pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    pcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pcr.offset     = 0;
-    pcr.size       = 64 + 48 + 64;  // mat4 mvp + 3 vec4 fog + mat4 model
+    pcr.size       = 64;   // mat4 model only; view-projection + fog live in the set-1 UBO
 
     VkPipelineLayoutCreateInfo pl = {0};
     pl.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -284,9 +296,9 @@ qboolean VK_CreatePipelineWorld(void)
     // translucent surfaces sort against opaque depth but don't occlude each
     // other oddly), matching ref_gl1's R_DrawAlphaSurfaces blend setup.
     VkPushConstantRange wpcr = {0};
-    wpcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    wpcr.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     wpcr.offset     = 0;
-    wpcr.size       = 64 + 32 + 48;   // mat4 + 2 vec4 (warp) + 3 vec4 (fog) = 144
+    wpcr.size       = 32 + 64;   // 2 vec4 (warp params) + mat4 model; viewproj + fog in the UBO = 96
 
     VkPipelineLayoutCreateInfo wpl = {0};
     wpl.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -343,10 +355,14 @@ qboolean VK_CreatePipelineWorld(void)
 // world/warp fragment shaders (ref_gl1 does it per lightmap texel).
 VkDescriptorSet VK_World_UpdateDlights(int num_dlights, const float* origins,
                                        const float* intensities, const float* colors_rgb,
-                                       float modulate){
+                                       float modulate, const float viewproj[16],
+                                       const float fog12[12]){
     const uint32_t f = vk_state.current_frame % MAX_FRAMES_IN_FLIGHT;
     dlight_ubo_t* u = (dlight_ubo_t*)vk_pipeline_world.dlight_ubo[f].mapped;
     if (!u) return VK_NULL_HANDLE;
+
+    memcpy(u->viewproj, viewproj, sizeof(u->viewproj));   // mat4
+    memcpy(u->fog_cam,  fog12,    sizeof(float) * 12);     // fog_cam + fog_color + fog_extra
 
     int n = num_dlights;
     if (n < 0) n = 0;

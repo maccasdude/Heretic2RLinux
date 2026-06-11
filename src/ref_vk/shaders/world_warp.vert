@@ -7,23 +7,29 @@ layout(location = 2) in vec2 in_uv_lightmap;
 layout(location = 0) out vec2 v_uv;            // final (warped) UV
 layout(location = 1) out vec2 v_uv_lightmap;
 layout(location = 2) out float v_fogdist;
+layout(location = 3) out float v_alpha;        // params.y, used by the frag
 
+// Per-draw: warp params + model->world matrix. viewproj + fog live in the
+// set-1 UBO (so push stays at 96 bytes, within the 128-byte minimum).
 layout(push_constant) uniform PC {
-    mat4  mvp;
     vec4  params;     // x=time, y=alpha, z=flowing(0/1), w=undulate(0/1)
     vec4  params2;    // x=isWarp(0/1), yzw unused
-    vec4  fog_cam;    // xyz = camera world pos, w = density
-    vec4  fog_color;  // rgb = fog color, w = mode (<0 = off)
-    vec4  fog_extra;  // x = startdist, y = farclip
+    mat4  model;      // model->world (identity for the static world)
 } pc;
 
-// ref_gl1 turbsin warp. The churn/turbulence comes from the SPATIAL term
-// (coord*0.125) varying per-vertex across the subdivided grid, with s offset by
-// turb(ot) and t by turb(os) (cross-coupling). Using the raw coord directly
-// (radians) gives the correct dense churn; the degree-scaled version collapsed
-// the spatial variation so the whole surface slid as one rigid sheet (wrong).
-// We keep the spatial term raw (faithful churn) but slow the TIME phase to a
-// pleasant rate (the old raw version animated correctly but too fast).
+#define MAX_DLIGHTS 32
+layout(set = 1, binding = 0) uniform Frame {
+    mat4  viewproj;
+    vec4  fog_cam;
+    vec4  fog_color;
+    vec4  fog_extra;
+    int   count;
+    float modulate;
+    float _p0, _p1;
+    vec4  pos[MAX_DLIGHTS];
+    vec4  color[MAX_DLIGHTS];
+} fr;
+
 #define TURB_TIME_RATE 0.75
 float turb(float coord, float time) { return 8.0 * sin(coord * 0.125 + time * TURB_TIME_RATE); }
 
@@ -53,7 +59,12 @@ void main() {
         v_uv = in_uv_diffuse;
     }
 
-    gl_Position   = pc.mvp * vec4(pos, 1.0);
+    // Displaced vertex -> clip via the per-frame view-projection; fog distance
+    // uses the UNdisplaced world position (model * in_pos) against the world cam.
+    vec4 wp_disp = pc.model * vec4(pos, 1.0);
+    gl_Position   = fr.viewproj * wp_disp;
     v_uv_lightmap = in_uv_lightmap;
-    v_fogdist     = length(in_pos - pc.fog_cam.xyz);
+    vec3 wp       = (pc.model * vec4(in_pos, 1.0)).xyz;
+    v_fogdist     = length(wp - fr.fog_cam.xyz);
+    v_alpha       = pc.params.y;
 }

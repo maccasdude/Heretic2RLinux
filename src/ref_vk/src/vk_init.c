@@ -79,7 +79,12 @@ static qboolean VK_CreateInstance(void)
     app.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     app.pEngineName        = "H2R";
     app.engineVersion      = VK_MAKE_VERSION(1, 0, 0);
-    app.apiVersion         = VK_API_VERSION_1_2;
+    // The renderer uses only core Vulkan 1.0 plus VK_KHR_swapchain, so declare
+    // 1.0 here: this is the most portable choice and lets a strict 1.0-only
+    // loader/driver accept the instance (requesting 1.2 could make such a driver
+    // reject vkCreateInstance with VK_ERROR_INCOMPATIBLE_DRIVER). On 1.1+ loaders
+    // this is equivalent. No 1.1/1.2 feature, entry point, or SPIR-V is used.
+    app.apiVersion         = VK_API_VERSION_1_0;
 
     // SDL3 tells us what instance extensions we need for surface creation.
     uint32_t sdl_ext_count = 0;

@@ -223,11 +223,6 @@ static void FillFogParamsAt(float* pc, int off, const float cam[3])
     pc[off+10] = 0.0f; pc[off+11] = 0.0f;
 }
 
-static void FillFogParams(float* pc /* >=24 floats */, const float cam[3])
-{
-    FillFogParamsAt(pc, 16, cam);
-}
-
 // Fill the entity-layout fog tail (pc[20..31]: fog_cam@20, fog_color@24,
 // fog_extra@28) for the SKY. ref_gl1 keeps fog enabled while drawing the sky,
 // so in a fogged level the sky blends into the fog colour at the horizon. The
@@ -261,7 +256,7 @@ void VK_World_FillEntityFog(float* pc /* >=32 floats */)
 // bind at set = 1 (or VK_NULL_HANDLE if none). gl_modulate scales intensity to
 // match ref_gl1.
 static cvar_t* s_gl_modulate = NULL;
-static VkDescriptorSet BuildAndBindDlights(const refdef_t* fd)
+static VkDescriptorSet BuildAndBindDlights(const refdef_t* fd, const float viewproj[16])
 {
     if (!s_gl_modulate) s_gl_modulate = ri.Cvar_Get("gl_modulate", "1", 0);
     const float modulate = s_gl_modulate ? s_gl_modulate->value : 1.0f;
@@ -281,7 +276,17 @@ static VkDescriptorSet BuildAndBindDlights(const refdef_t* fd)
         colors[i*3+1]  = (float)d->color.g;
         colors[i*3+2]  = (float)d->color.b;
     }
-    return VK_World_UpdateDlights(n, origins, intens, colors, modulate);
+
+    // Per-frame fog (world-space camera) for the UBO: fog_cam@0, fog_color@4,
+    // fog_extra@8. Dynamic lights enabled for the opaque world (fog_extra.z = 1);
+    // the shaders compute world position as model*pos, so fog/dlights are correct
+    // for both the static world (model = identity) and submodels (model = M).
+    float fog12[12];
+    FillFogParamsAt(fog12, 0, fd->vieworg);
+    fog12[10] = 1.0f;   // fog_extra.z: dlight enable
+    fog12[11] = 0.0f;
+
+    return VK_World_UpdateDlights(n, origins, intens, colors, modulate, viewproj, fog12);
 }
 
 // Inline brush submodels (*1, *2, ... = doors, lifts, etc). Submodel 0 is
@@ -1894,25 +1899,21 @@ void VK_World_Render(const refdef_t* fd)
 
     vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vk_pipeline_world.pipeline);
     {
-        float wpc[44];
-        memcpy(wpc, mvp, sizeof(mvp));        // mat4 [0..15]
-        FillFogParams(wpc, fd->vieworg);      // fog tail [16..27]
-        wpc[26] = 1.0f;                       // fog_extra.z: enable dynamic lights
-        wpc[27] = 0.0f;                       // fog_extra.w: unused (world)
-        // model = identity: static world verts are already in world space, so
-        // v_worldpos = in_pos (correct for the world-space dlight test).
-        for (int k = 0; k < 16; k++) wpc[28 + k] = 0.0f;
-        wpc[28] = wpc[33] = wpc[38] = wpc[43] = 1.0f;
-        vkCmdPushConstants(cb, vk_pipeline_world.layout,
-                           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                           0, sizeof(wpc), wpc);
+        // Static world verts are already in world space, so model = identity:
+        // gl_Position = viewproj * (identity * pos) = viewproj * pos. viewproj +
+        // fog now come from the set-1 UBO (filled by BuildAndBindDlights below).
+        float model[16] = {0};
+        model[0] = model[5] = model[10] = model[15] = 1.0f;
+        vkCmdPushConstants(cb, vk_pipeline_world.layout, VK_SHADER_STAGE_VERTEX_BIT,
+                           0, sizeof(model), model);
     }
 
     VkDeviceSize zero = 0;
     vkCmdBindVertexBuffers(cb, 0, 1, &s_vbo.buffer, &zero);
 
-    // Dynamic lights: fill this frame's UBO and bind it at set = 1.
-    VkDescriptorSet dlset = BuildAndBindDlights(fd);
+    // Dynamic lights + per-frame view-projection/fog: fill this frame's UBO and
+    // bind it at set = 1.
+    VkDescriptorSet dlset = BuildAndBindDlights(fd, mvp);
     if (dlset != VK_NULL_HANDLE)
         vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                 vk_pipeline_world.layout, 1, 1, &dlset, 0, NULL);
@@ -2046,16 +2047,16 @@ void VK_World_RenderWater(const refdef_t* fd,
     VkDeviceSize zero = 0;
     vkCmdBindVertexBuffers(cb, 0, 1, &s_vbo.buffer, &zero);
 
-    float warp_pc[36];
-    memcpy(warp_pc, mvp, sizeof(mvp));   // [0..15]
-    FillFogParamsAt(warp_pc, 24, fd->vieworg);   // fog tail [24..35]
+    float warp_pc[24];   // params(4) + params2(4) + model(16) = 96; viewproj + fog in UBO
+    for (int k = 0; k < 16; k++) warp_pc[8 + k] = 0.0f;          // model = identity
+    warp_pc[8] = warp_pc[13] = warp_pc[18] = warp_pc[23] = 1.0f;
 
     if (!s_gl_trans33) s_gl_trans33 = ri.Cvar_Get("gl_trans33", "0.33", 0);
     if (!s_gl_trans66) s_gl_trans66 = ri.Cvar_Get("gl_trans66", "0.66", 0);
 
     // The warp pipeline layout includes set = 1 (dlight UBO); bind a valid set
     // even though warp surfaces are fullbright and the shader ignores it.
-    VkDescriptorSet dlset = BuildAndBindDlights(fd);
+    VkDescriptorSet dlset = BuildAndBindDlights(fd, mvp);
 
     // Collect translucent FACES and sort back-to-front (farthest first) so
     // overlapping water/glass blend correctly even when they share a texture -
@@ -2150,14 +2151,13 @@ void VK_World_RenderWater(const refdef_t* fd,
         // them per-face). The batch-level OR could otherwise make a still
         // turbulent pool flow just because a sibling inflow face is SURF_FLOWING.
         const int ff = pf->surf_flags ? pf->surf_flags : sf;
-        warp_pc[16] = fd->time;
-        warp_pc[17] = alpha;
-        warp_pc[18] = (ff & SURF_FLOWING)  ? 1.0f : 0.0f;
-        warp_pc[19] = (ff & SURF_UNDULATE) ? 1.0f : 0.0f;
-        warp_pc[20] = (ff & SURF_WARP)     ? 1.0f : 0.0f;
-        warp_pc[21] = warp_pc[22] = warp_pc[23] = 0.0f;
-        vkCmdPushConstants(cb, vk_pipeline_world.warp_layout,
-                           VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+        warp_pc[0] = fd->time;                            // params.x
+        warp_pc[1] = alpha;                               // params.y
+        warp_pc[2] = (ff & SURF_FLOWING)  ? 1.0f : 0.0f;  // params.z
+        warp_pc[3] = (ff & SURF_UNDULATE) ? 1.0f : 0.0f;  // params.w
+        warp_pc[4] = (ff & SURF_WARP)     ? 1.0f : 0.0f;  // params2.x
+        warp_pc[5] = warp_pc[6] = warp_pc[7] = 0.0f;      // params2.yzw
+        vkCmdPushConstants(cb, vk_pipeline_world.warp_layout, VK_SHADER_STAGE_VERTEX_BIT,
                            0, sizeof(warp_pc), warp_pc);
 
         VkDescriptorSet wdesc = WorldBatchFrameDesc(&s_batches[b]);
@@ -2227,27 +2227,10 @@ qboolean VK_World_RenderSubmodel(int index, const float* mvp,
         origin ? origin[0] : 0.0f, origin ? origin[1] : 0.0f, origin ? origin[2] : 0.0f, 1.0f
     };
 
-    mat4_t m;
-    // m = mvp * M
-    for (int c = 0; c < 4; c++)
-        for (int r = 0; r < 4; r++) {
-            float s = 0;
-            for (int k = 0; k < 4; k++) s += mvp[k*4 + r] * M[c*4 + k];
-            m[c*4 + r] = s;
-        }
-
-    // Camera in submodel local space, for correct fog distance (verts are
-    // model-space). R is orthonormal so inverse == transpose.
-    float rel[3] = {
-        s_view_origin_world[0] - (origin ? origin[0] : 0.0f),
-        s_view_origin_world[1] - (origin ? origin[1] : 0.0f),
-        s_view_origin_world[2] - (origin ? origin[2] : 0.0f)
-    };
-    float cam_local[3] = {
-        R[0]*rel[0] + R[1]*rel[1] + R[2]*rel[2],
-        R[3]*rel[0] + R[4]*rel[1] + R[5]*rel[2],
-        R[6]*rel[0] + R[7]*rel[1] + R[8]*rel[2]
-    };
+    // gl_Position = viewproj * (M * pos) and fog use M*pos as the world position,
+    // both via the set-1 UBO (viewproj + world-space fog cam), so the old per-
+    // submodel mvp*M and camera-in-local-space computations are no longer needed.
+    (void)mvp;
 
     VkDeviceSize zero = 0;
     vkCmdBindVertexBuffers(cb, 0, 1, &s_sub_vbo.buffer, &zero);
@@ -2293,14 +2276,9 @@ qboolean VK_World_RenderSubmodel(int index, const float* mvp,
                 } else {
                     vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                       vk_pipeline_world.pipeline);
-                    float spc[44];
-                    memcpy(spc, m, sizeof(m));        // [0..15] model->clip (mvp*M)
-                    FillFogParamsAt(spc, 16, cam_local);
-                    spc[26] = 1.0f;   // enable dlights (v_worldpos = model * pos)
-                    spc[27] = 0.0f;
-                    memcpy(spc + 28, M, sizeof(M));   // [28..43] model->world (M)
-                    vkCmdPushConstants(cb, vk_pipeline_world.layout,
-                                       VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                    float spc[16];
+                    memcpy(spc, M, sizeof(M));   // model->world; viewproj + fog from UBO
+                    vkCmdPushConstants(cb, vk_pipeline_world.layout, VK_SHADER_STAGE_VERTEX_BIT,
                                        0, sizeof(spc), spc);
                 }
                 pipe_bound = true;
@@ -2312,17 +2290,15 @@ qboolean VK_World_RenderSubmodel(int index, const float* mvp,
                 if (sf & SURF_TRANS33) alpha = s_gl_trans33 ? s_gl_trans33->value : 0.33f;
                 else if (sf & SURF_TRANS66) alpha = s_gl_trans66 ? s_gl_trans66->value : 0.66f;
 
-                float wpc[36];
-                memcpy(wpc, m, sizeof(m));   // [0..15] local model->clip
-                FillFogParamsAt(wpc, 24, cam_local);
-                wpc[16] = s_frame_time; // time (warp/flow anim, matches world warp pass)
-                wpc[17] = alpha;
-                wpc[18] = (sf & SURF_FLOWING)  ? 1.0f : 0.0f;
-                wpc[19] = (sf & SURF_UNDULATE) ? 1.0f : 0.0f;
-                wpc[20] = (sf & SURF_WARP)     ? 1.0f : 0.0f;
-                wpc[21] = wpc[22] = wpc[23] = 0.0f;
-                vkCmdPushConstants(cb, vk_pipeline_world.warp_layout,
-                                   VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                float wpc[24];   // params(4) + params2(4) + model(16) = 96 bytes
+                wpc[0] = s_frame_time;                           // params.x = time
+                wpc[1] = alpha;                                  // params.y
+                wpc[2] = (sf & SURF_FLOWING)  ? 1.0f : 0.0f;     // params.z
+                wpc[3] = (sf & SURF_UNDULATE) ? 1.0f : 0.0f;     // params.w
+                wpc[4] = (sf & SURF_WARP)     ? 1.0f : 0.0f;     // params2.x
+                wpc[5] = wpc[6] = wpc[7] = 0.0f;                 // params2.yzw
+                memcpy(wpc + 8, M, sizeof(M));                   // model->world
+                vkCmdPushConstants(cb, vk_pipeline_world.warp_layout, VK_SHADER_STAGE_VERTEX_BIT,
                                    0, sizeof(wpc), wpc);
                 vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         vk_pipeline_world.warp_layout, 0, 1, &desc, 0, NULL);

@@ -1747,3 +1747,42 @@ etc.) with no Linux shim, so this is dormant on Linux by design - it exists for 
 _DEBUG build (Windows backport). Verified: vk_debug.c and vk_main.c both compile
 clean with -D_DEBUG (ref_vk doesn't pull in Debug.c, so the secure-CRT issue
 doesn't affect the renderer).
+
+## v118 - PORTABILITY: push constants moved under the 128-byte minimum (UBO refactor)
+The world (176 B) and warp (144 B) pipelines exceeded Vulkan's guaranteed
+maxPushConstantsSize of 128, so on devices reporting exactly 128 (some AMD,
+many mobile GPUs) vkCreatePipelineLayout would have failed at init. Moved the
+PER-FRAME data (view-projection matrix + fog params) out of push constants into
+the existing set-1 UBO; the per-draw push constant now carries only the model
+matrix.
+- World push: 176 -> 64 bytes (mat4 model). Warp push: 144 -> 96 (2 vec4 params
+  + mat4 model). Entity pipeline already 128. All <= 128, so the renderer now
+  initializes on any conformant Vulkan device.
+- Set-1 UBO (dlight_ubo_t) extended with viewproj + fog_cam/fog_color/fog_extra
+  (std140: viewproj@0, fog@64/80/96, count@112, pos[]@128, color[]@640) and made
+  visible to the vertex stage. Filled once per frame in BuildAndBindDlights.
+- Shaders compute gl_Position = viewproj * (model * pos); world position
+  (model * pos) drives fog distance and the dlight test uniformly for the static
+  world (model = identity) and submodels (model = M). Results are mathematically
+  identical to v117.
+- Removed the now-redundant per-submodel mvp*M and camera-in-local-space
+  computations (fog cam is world-space in the UBO), and the dead FillFogParams
+  wrapper. Also removes the per-draw re-push of the full MVP.
+
+NOTE: this is a core world-render-path refactor. It compiles clean and is
+logic-reviewed (transforms provably identical, std140 layout matched byte-for-
+byte), but it CANNOT be GPU-tested in the build sandbox - it must be validated on
+real hardware. Worth checking specifically: textured+lightmapped world, water/
+warp surfaces, fog, dynamic lights on both the world and on inline submodels
+(doors/lifts), translucent submodels, and the gamma/minlight sliders. The v117
+tarballs remain available as a fallback.
+
+## v119 - PORTABILITY: declare Vulkan 1.0 instead of 1.2
+The renderer used only core Vulkan 1.0 + VK_KHR_swapchain (no 1.1/1.2 entry
+points, no *2 calls, SPIR-V 1.0 shaders, no device apiVersion gate), but
+VkApplicationInfo.apiVersion requested 1.2. A strict 1.0-only loader/driver may
+reject vkCreateInstance with VK_ERROR_INCOMPATIBLE_DRIVER when asked for a higher
+version than it supports. Set apiVersion to VK_API_VERSION_1_0 so the instance is
+accepted on any Vulkan 1.0+ implementation. Equivalent on 1.1+ loaders; no
+functional change (nothing post-1.0 is used). With v118's push-constant fix, the
+renderer now has no artificial barrier to running on any conformant Vulkan device.

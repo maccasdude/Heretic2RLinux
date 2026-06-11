@@ -36,7 +36,8 @@ qboolean VK_CreatePipelineWorld(void);
 void     VK_DestroyPipelineWorld(void);
 VkDescriptorSet VK_World_UpdateDlights(int num_dlights, const float* origins,
                                        const float* intensities, const float* colors_rgb,
-                                       float modulate);
+                                       float modulate, const float viewproj[16],
+                                       const float fog12[12]);
 VkDescriptorSet VK_World_CurrentDlightSet(void);
 qboolean VK_World_CullWorldCorners(const float corners[8][3]);
 

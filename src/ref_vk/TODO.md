@@ -35,3 +35,7 @@ backport), not the Linux retail build.
   same-map reload) MUST re-stamp its images (VK_Image_Touch) so eviction spares
   them. Live re-bakes (gamma, gl_minlight) update images/atlas in place via
   VK_UpdateTextureRGBA / region upload, keeping views + descriptors stable.
+
+Portability: push-constant usage is now within the 128-byte guaranteed minimum
+(world 64, warp 96, entity 128), so the renderer initializes on any conformant
+Vulkan device, not just ones reporting 256. (Resolved v118.)
