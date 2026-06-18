@@ -1,6 +1,6 @@
 # Heretic2R
 
-Heretic2R is Heretic II (1998, Raven Software) reverse-engineered source port.
+Heretic2RLinux is Heretic II (1998, Raven Software) reverse-engineered source port with modifications by Claude.
 
 ## Features
 
@@ -11,6 +11,7 @@ Heretic2R is Heretic II (1998, Raven Software) reverse-engineered source port.
 * Improved map loading times. 
 * Lots of cosmetic improvements (so the game plays as you remember it, not as it actually played). 
 * Many bugfixes.
+* Vulkan renderer
 
 ## Installation
 
@@ -43,12 +44,6 @@ To enable OGG music playback, rip Heretic II CD tracks as **track02.ogg - track1
 * HiDPI support is currently not implemented.
 * Framerates above 60 FPS are not tested.
 * Screen resolutions above FullHD are not tested.
-
-## Planned features
-
-* OpenGL 3 renderer.
-* OpenAL sound backend.
-* Gamepad support.
 
 ## Used libraries
 
